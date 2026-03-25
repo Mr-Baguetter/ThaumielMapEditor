@@ -34,6 +34,12 @@ namespace ThaumielMapEditor.API.Helpers
         public static TextToy? TextToy { get; private set; }
         public static WaypointToy? WaypointToy { get; private set; }
 
+#region Targets
+        public static ShootingTarget? ShootingTargetSport { get; private set; }
+        public static ShootingTarget? ShootingTargetDBoy { get; private set; }
+        public static ShootingTarget? ShootingTargetBinary { get; private set; }
+#endregion
+
         #region Lockers
         public static Locker? LockerLargeGun { get; private set; }
         public static Locker? LockerRifleRack { get; private set; }
@@ -208,11 +214,11 @@ namespace ThaumielMapEditor.API.Helpers
                         case "LczCameraToy":
                             CameraLcz = cameraToy;
                             continue;
-                            
+
                         case "HczCameraToy":
                             CameraHcz = cameraToy;
                             continue;
-                            
+
                         case "SzCameraToy":
                             CameraSz = cameraToy;
                             continue;
@@ -242,7 +248,7 @@ namespace ThaumielMapEditor.API.Helpers
                         case "RifleRackStructure":
                             LockerRifleRack = locker;
                             continue;
-                            
+
                         case "MiscLocker":
                             LockerMisc = locker;
                             continue;
@@ -261,6 +267,22 @@ namespace ThaumielMapEditor.API.Helpers
 
                         case "Experimental Weapon Locker":
                             LockerExperimentalWeapon = locker;
+                            continue;
+                    }
+                }
+
+                if (prefab.TryGetComponent(out ShootingTarget shootingTarget))
+                {
+                    switch (prefab.name)
+                    {
+                        case "sportTargetPrefab":
+                            ShootingTargetSport = shootingTarget;
+                            continue;
+                        case "dboyTargetPrefab":
+                            ShootingTargetDBoy = shootingTarget;
+                            continue;
+                        case "binaryTargetPrefab":
+                            ShootingTargetBinary = shootingTarget;
                             continue;
                     }
                 }
