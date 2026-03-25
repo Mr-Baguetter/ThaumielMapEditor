@@ -9,13 +9,13 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
     public class PickupObject : ServerObject
     {
-        public ItemType ItemToSpawn { get; set; }
+        public ItemType ItemToSpawn { get; private set; }
 
-        public float SpawnPercentage { get; set; }
+        public float SpawnPercentage { get; private set; }
 
-        public uint MaxAmount { get; set; }
+        public uint MaxAmount { get; private set; }
 
-        public bool IsInfinite { get; set; }
+        public bool IsInfinite { get; private set; }
 
         public override ObjectType ObjectType { get; set; } = ObjectType.Pickup;
 

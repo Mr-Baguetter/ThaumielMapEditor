@@ -23,7 +23,7 @@ namespace ThaumielMapEditor.Commands.Admin
 
         public string Description => "Spawns the named Schematic";
 
-        public string[] Aliases => ["sp"];
+        public string[] Aliases => ["sp", "create", "cr"];
 
         public string RequiredPermission => "tme.spawn";
 

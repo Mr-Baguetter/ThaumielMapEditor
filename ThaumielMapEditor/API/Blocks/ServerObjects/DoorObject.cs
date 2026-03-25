@@ -32,6 +32,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         public DoorVariant? Base { get; internal set; }
 
         public DoorType DoorType { get; set; }
+        
         public DoorPermissionFlags Permissions
         {
             get;

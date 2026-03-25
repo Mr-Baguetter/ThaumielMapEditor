@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using System.Text;
 using CommandSystem;
 using LabApi.Features.Wrappers;
 using MEC;
-using Mirror;
 using ThaumielMapEditor.API.Blocks;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Helpers;
@@ -39,13 +37,13 @@ namespace ThaumielMapEditor.Commands.Admin
 
             if (arguments.Count == 0 || !uint.TryParse(arguments[0], out var id))
             {
-                response = "Invalid ID. This should be a non negative number. Run 'tme list' to get all spawned schematics";
+                response = "Invalid ID. This should be a non negative number. Run 'tme spawned' to get all spawned schematics";
                 return false;
             }
 
             if (!SchematicLoader.TryGetSchematicById(id, out var schematic))
             {
-                response = $"Failed to find schematic with the ID {id}. Run 'tme list' to get all spawned schematics";
+                response = $"Failed to find schematic with the ID {id}. Run 'tme spawned' to get all spawned schematics";
                 return false;
             }
 

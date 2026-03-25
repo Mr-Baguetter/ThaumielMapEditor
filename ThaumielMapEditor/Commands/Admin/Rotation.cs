@@ -25,7 +25,7 @@ namespace ThaumielMapEditor.Commands.Admin
 
             if (!SchematicLoader.TryGetSchematicById(id, out var schematic))
             {
-                response = $"Failed to find schematic with the ID {id}. Run 'tme list' to get all spawned schematics";
+                response = $"Failed to find schematic with the ID {id}. Run 'tme spawned' to get all spawned schematics";
                 return false;
             }
 
