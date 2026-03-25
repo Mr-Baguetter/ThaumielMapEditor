@@ -385,6 +385,18 @@ namespace ThaumielMapEditor.API.Helpers
                         pickup.SpawnObject(schematicData, serializable);
                         break;
 
+                    case ObjectType.Target:
+                        TargetDummyObject target = new()
+                        {
+                            Position = serializable.Position,
+                            Rotation = serializable.Rotation,
+                            Scale = serializable.Scale,
+                            IsStatic = serializable.IsStatic
+                        };
+
+                        target.SpawnObject(schematicData, serializable);
+                        break;
+
                     default:
                         LogManager.Warn($"Unhandled ObjectType '{serializable.ObjectType}' on object '{serializable.Name}', skipping.");
                         break;

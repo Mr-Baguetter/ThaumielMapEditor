@@ -14,5 +14,6 @@ namespace ThaumielMapEditor.API.Enums
         Camera = 10,
         Waypoint = 11,
         Locker = 12,
+        Target = 13,
     }
 }
