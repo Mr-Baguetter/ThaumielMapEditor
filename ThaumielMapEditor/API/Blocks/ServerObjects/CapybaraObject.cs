@@ -14,9 +14,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         [YamlIgnore]
         public CapybaraToy? Base { get; private set; }
 
-        
         public override ObjectType ObjectType { get; set; } = ObjectType.Capybara;
-
 
         public bool Collisions
         {

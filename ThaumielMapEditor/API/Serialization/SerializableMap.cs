@@ -9,7 +9,7 @@ namespace ThaumielMapEditor.API.Serialization
         public Vector3 Position { get; set; }
         public string SchematicName { get; set; } = string.Empty;
     }
-    
+
     public class SerializableMap
     {
         public string FileName { get; set; } = string.Empty;

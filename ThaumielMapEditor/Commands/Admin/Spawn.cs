@@ -29,7 +29,7 @@ namespace ThaumielMapEditor.Commands.Admin
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
-            SerializableSchematic? schematic = SchematicLoader.Schematics.FirstOrDefault(s => s.FileName.ToLower() == arguments[0].ToLower());
+            SerializableSchematic? schematic = SchematicLoader.LoadedSchematics.FirstOrDefault(s => s.FileName.ToLower() == arguments[0].ToLower());
             if (schematic is null)
             {
                 response = $"Failed to find schematic with name {arguments[0]}";

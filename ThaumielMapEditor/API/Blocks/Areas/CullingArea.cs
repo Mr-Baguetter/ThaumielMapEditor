@@ -7,33 +7,48 @@ namespace ThaumielMapEditor.API.Blocks.Areas
 {
     public class CullingArea : AreaObject
     {
-        public Vector3 Bounds { get; set; }
+        public Vector3 Bounds
+        {
+            get;
+            set
+            {
+                if (field == value)
+                    return;
 
-        private GameObject? _cullingObject;
+                field = value;
+                if (CullingObject != null)
+                {
+                    BoxCollider collider = CullingObject.GetComponent<BoxCollider>();
+                    collider?.size = value;
+                }
+            }
+        }
+
+        public GameObject? CullingObject;
 
         public void CreateCullingZone()
         {
             if (ParentSchematic == null)
                 return;
 
-            _cullingObject = new GameObject("CullingZone");
-            _cullingObject.transform.position = ParentSchematic.Position;
+            CullingObject = new GameObject("CullingZone");
+            CullingObject.transform.position = ParentSchematic.Position;
 
-            BoxCollider collider = _cullingObject.AddComponent<BoxCollider>();
+            BoxCollider collider = CullingObject.AddComponent<BoxCollider>();
             collider.size = Bounds;
             collider.isTrigger = true;
 
-            CullingTrigger trigger = _cullingObject.AddComponent<CullingTrigger>();
+            CullingTrigger trigger = CullingObject.AddComponent<CullingTrigger>();
             trigger.Init(ParentSchematic);
         }
 
         public void DestroyCullingZone()
         {
-            if (_cullingObject == null)
+            if (CullingObject == null)
                 return;
 
-            Object.Destroy(_cullingObject);
-            _cullingObject = null;
+            Object.Destroy(CullingObject);
+            CullingObject = null;
         }
 
         public override void ParseValues()

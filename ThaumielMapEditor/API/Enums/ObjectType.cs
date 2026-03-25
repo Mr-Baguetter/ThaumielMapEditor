@@ -15,5 +15,6 @@ namespace ThaumielMapEditor.API.Enums
         Waypoint = 11,
         Locker = 12,
         Target = 13,
+        Schematic = 14,
     }
 }

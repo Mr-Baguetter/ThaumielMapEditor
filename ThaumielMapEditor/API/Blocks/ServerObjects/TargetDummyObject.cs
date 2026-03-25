@@ -17,6 +17,8 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 
         public TargetType Type { get; private set; }
 
+        public override ObjectType ObjectType { get; set; } = ObjectType.Target;
+
         public ShootingTarget GetPrefab(TargetType type)
         {
 			ShootingTarget prefab = type switch

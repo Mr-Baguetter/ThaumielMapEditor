@@ -25,7 +25,7 @@ namespace ThaumielMapEditor.Commands.Admin
         {
             StringBuilder sb = new();
             sb.AppendLine();
-            foreach (SerializableSchematic schematic in SchematicLoader.Schematics)
+            foreach (SerializableSchematic schematic in SchematicLoader.LoadedSchematics)
                 sb.AppendLine($"- {schematic.FileName}");
 
             response = sb.ToString();

@@ -27,14 +27,26 @@ namespace ThaumielMapEditor.API.Helpers
     public class SchematicLoader
     {
         public static event Action<SchematicData>? SchematicSpawned;
-        
+
         public static event Action<SchematicData>? SchematicDestroyed;
 
-        public static Dictionary<uint, MapData> MapsById { get; set; } = [];
+        public static Dictionary<Guid, MapData> MapsById { get; set; } = [];
         public static Dictionary<uint, SchematicData> SchematicsById { get; set; } = [];
+
         public static IEnumerable<SchematicData> SpawnedSchematics => SchematicsById.Values;
-        public static List<SerializableSchematic> Schematics = [];
-        public static List<SerializableMap> Maps = [];
+        public static IEnumerable<MapData> SpawnedMaps => MapsById.Values;
+
+        /// <summary>
+        /// This list contains all the schematics loaded by <see cref="LoadSchematics"/>
+        /// Use <see cref="SpawnedSchematics"/> to get the spawned schematics.
+        /// </summary>
+        public static List<SerializableSchematic> LoadedSchematics = [];
+
+        /// <summary>
+        /// This list contains all the maps loaded by <see cref="LoadMaps"/>
+        /// Use <see cref="SpawnedMaps"/> to get the spawned maps.
+        /// </summary>
+        public static List<SerializableMap> LoadedMaps = [];
 
         public static IDeserializer Deserializer { get; } = new DeserializerBuilder()
             .WithNamingConvention(PascalCaseNamingConvention.Instance)
@@ -53,7 +65,7 @@ namespace ThaumielMapEditor.API.Helpers
             .WithTypeConverter(new CustomColor32Converter())
             .WithTypeConverter(new CustomColorConverter())
             .WithTypeConverter(new CustomQuaternionConverter())
-            .Build();        
+            .Build();
 
         public static void Init()
         {
@@ -63,7 +75,7 @@ namespace ThaumielMapEditor.API.Helpers
 
         public static void ReloadSchematics()
         {
-            Schematics.Clear();
+            LoadedSchematics.Clear();
             LoadSchematics();
         }
 
@@ -78,7 +90,7 @@ namespace ThaumielMapEditor.API.Helpers
                 {
                     SerializableSchematic schematic = Deserializer.Deserialize<SerializableSchematic>(File.ReadAllText(filename));
                     schematic.FileName = Path.GetFileNameWithoutExtension(filename);
-                    Schematics.Add(schematic);
+                    LoadedSchematics.Add(schematic);
                     LogManager.Debug($"Loaded schematic {Path.GetFileNameWithoutExtension(filename)}");
                 }
                 catch (YamlException yamlex)
@@ -98,14 +110,14 @@ namespace ThaumielMapEditor.API.Helpers
         {
             string mapsDir = ThaumFileManager.Dir(["Maps"]);
             ThaumFileManager.TryCreateDirectory(mapsDir);
-            
+
             foreach (string filename in ThaumFileManager.GetFilesInDirectory(mapsDir))
             {
                 try
                 {
                     SerializableMap map = Deserializer.Deserialize<SerializableMap>(File.ReadAllText(filename));
                     map.FileName = Path.GetFileNameWithoutExtension(filename);
-                    Maps.Add(map);
+                    LoadedMaps.Add(map);
                     LogManager.Debug($"Loaded map {Path.GetFileNameWithoutExtension(filename)}");
                 }
                 catch (YamlException yamlex)
@@ -151,6 +163,38 @@ namespace ThaumielMapEditor.API.Helpers
             return id;
         }
 
+        private static void SpawnObjectRecursive(int id, SerializableSchematic schematic, SchematicData schematicData)
+        {
+            SerializableObject? obj = schematic.Objects.Find(o => o.ObjectId == id);
+            if (obj != null)
+            {
+                SpawnSerializableObject(obj, schematicData);
+            }
+
+            SerializableArea? areaobj = schematic.Areas.Find(o => o.ObjectId == id);
+            if (areaobj != null)
+            {
+                SpawnSerializableArea(areaobj, schematicData);
+            }
+
+            int[] nestedSchematicIds = schematic.Objects.Where(o => o.ObjectType == ObjectType.Schematic).Select(o => o.ObjectId).ToArray();
+            foreach (SerializableObject objectChild in schematic.Objects.FindAll(o => o.ParentId == id))
+            {
+                if (nestedSchematicIds.Contains(objectChild.ParentId))
+                    continue;
+
+                SpawnObjectRecursive(objectChild.ObjectId, schematic, schematicData);
+            }
+
+            foreach (SerializableArea areaChild in schematic.Areas.FindAll(o => o.ParentId == id))
+            {
+                if (nestedSchematicIds.Contains(areaChild.ParentId))
+                    continue;
+
+                SpawnObjectRecursive(areaChild.ObjectId, schematic, schematicData);
+            }
+        }
+
         public static MapData SpawnMap(SerializableMap map)
         {
             MapData data = new()
@@ -176,13 +220,15 @@ namespace ThaumielMapEditor.API.Helpers
             foreach (MapSchematic ms in map.Schematics)
             {
                 Vector3 offset = data.Room.WorldPosition(ms.Position);
-                SerializableSchematic? schematic = Schematics.FirstOrDefault(s => s.FileName.ToLower() == ms.SchematicName.ToLower());
+                SerializableSchematic? schematic = LoadedSchematics.FirstOrDefault(s => s.FileName.ToLower() == ms.SchematicName.ToLower());
                 if (schematic == null)
                     continue;
 
                 SchematicData schematicData = SpawnSchematic(schematic, offset);
                 data.Schematics.Add((offset, schematicData.FileName));
             }
+
+            MapsById.Add(data.Id, data);
         }
 
         public static SchematicData SpawnSchematic(SerializableSchematic schematic, Vector3 position)
@@ -217,211 +263,209 @@ namespace ThaumielMapEditor.API.Helpers
             schematicData.Scale = schematic.Scale;
             schematicData.Position = position;
             schematicData.Rotation = schematic.Rotation;
+            schematicData.RootObjectId = schematic.RootObjectId;
 
-            int count = 0;
-            foreach (SerializableObject serializable in schematic.Objects)
-            {
-                switch (serializable.ObjectType)
-                {
-                    case ObjectType.Primitive:
-                        PrimitiveObject primitive = new()
-                        {
-                            Name = serializable.Name,
-                            ParentId = baseprimitive.Base.netId,
-                            NetId = NetworkIdentity.GetNextNetworkId(),
-                            Scale = serializable.Scale,
-                            IsStatic = serializable.IsStatic,
-                            Position = serializable.Position,
-                            Rotation = serializable.Rotation,
-                            MovementSmoothing = serializable.MovementSmoothing,
-                            AssetId = PrefabHelper.PrimitiveAssetId,
-                            Schematic = schematicData
-                        };
-
-                        primitive.DeserializeValues(serializable);
-                        schematicData.SpawnedClientObjects.Add(primitive);
-
-                        foreach (Player player in Player.ReadyList)
-                        {
-                            primitive.SpawnForPlayer(player);
-                        }
-
-                        CreateCollisionMesh(primitive);
-                        break;
-
-                    case ObjectType.Light:
-                        LightObject light = new()
-                        {
-                            Scale = serializable.Scale,
-                            IsStatic = serializable.IsStatic,
-                            Position = serializable.Position,
-                            Rotation = serializable.Rotation,
-                            MovementSmoothing = serializable.MovementSmoothing,
-                        };
-
-                        light.SpawnObject(serializable, schematicData);
-                        break;
-
-                    case ObjectType.TextToy:
-                        TextToyObject textToy = new()
-                        {
-                            Position = serializable.Position,
-                            Rotation = serializable.Rotation,
-                            Scale = serializable.Scale,
-                            IsStatic = serializable.IsStatic
-                        };
-
-                        textToy.SpawnObject(serializable, schematicData);
-                        break;
-
-                    case ObjectType.Door:
-                        DoorObject door = new()
-                        {
-                            Position = serializable.Position,
-                            Rotation = serializable.Rotation,
-                            Scale = serializable.Scale,
-                            IsStatic = serializable.IsStatic
-                        };
-
-                        door.ParseValues(serializable);
-                        door.SpawnObject(schematicData, serializable);
-                        break;
-
-                    case ObjectType.Workstation:
-                        WorkstationObject workstation = new()
-                        {
-                            Position = serializable.Position,
-                            Rotation = serializable.Rotation,
-                            Scale = serializable.Scale,
-                            IsStatic = serializable.IsStatic
-                        };
-                        
-                        workstation.SpawnObject(schematicData, serializable);
-                        break;
-
-                    case ObjectType.Capybara:
-                        CapybaraObject capybara = new()
-                        {
-                            Position = serializable.Position,
-                            Rotation = serializable.Rotation,
-                            Scale = serializable.Scale,
-                            IsStatic = serializable.IsStatic
-                        };
-
-                        capybara.Collisions = capybara.GetValue<bool>(serializable, "Collisions");
-                        capybara.SpawnObject(schematicData, serializable);
-                        break;
-
-                    case ObjectType.Clutter:
-                        ClutterObject clutter = new()
-                        {
-                            Position = serializable.Position,
-                            Rotation = serializable.Rotation,
-                            Scale = serializable.Scale,
-                            IsStatic = serializable.IsStatic
-                        };
-
-                        clutter.Type = clutter.GetValue<ClutterType>(serializable, "ClutterType");
-                        clutter.SpawnObject(schematicData, serializable);
-                        break;
-
-                    case ObjectType.Camera:
-                        CameraObject camera = new()
-                        {
-                            Position = serializable.Position,
-                            Rotation = serializable.Rotation,
-                            Scale = serializable.Scale,
-                            IsStatic = serializable.IsStatic
-                        };
-
-                        camera.SpawnObject(schematicData, serializable);
-                        break;
-
-                    case ObjectType.Interactable:
-                        InteractionObject interaction = new()
-                        {
-                            Position = serializable.Position,
-                            Rotation = serializable.Rotation,
-                            Scale = serializable.Scale,
-                            IsStatic = serializable.IsStatic
-                        };
-
-                        interaction.SpawnObject(schematicData, serializable);
-                        break;
-
-                    case ObjectType.Waypoint:
-                        WaypointObject waypoint = new()
-                        {
-                            Position = serializable.Position,
-                            Rotation = serializable.Rotation,
-                            Scale = serializable.Scale,
-                            IsStatic = serializable.IsStatic
-                        };
-
-                        waypoint.SpawnObject(schematicData, serializable);
-                        break;
-
-                    case ObjectType.Locker:
-                        LockerObject locker = new()
-                        {
-                            Position = serializable.Position,
-                            Rotation = serializable.Rotation,
-                            Scale = serializable.Scale,
-                            IsStatic = serializable.IsStatic
-                        };
-
-                        locker.SpawnObject(schematicData, serializable);
-                        break;
-
-                    case ObjectType.Pickup:
-                        PickupObject pickup = new()
-                        {
-                            Position = serializable.Position,
-                            Rotation = serializable.Rotation,
-                            Scale = serializable.Scale,
-                            IsStatic = serializable.IsStatic
-                        };
-
-                        pickup.SpawnObject(schematicData, serializable);
-                        break;
-
-                    case ObjectType.Target:
-                        TargetDummyObject target = new()
-                        {
-                            Position = serializable.Position,
-                            Rotation = serializable.Rotation,
-                            Scale = serializable.Scale,
-                            IsStatic = serializable.IsStatic
-                        };
-
-                        target.SpawnObject(schematicData, serializable);
-                        break;
-
-                    default:
-                        LogManager.Warn($"Unhandled ObjectType '{serializable.ObjectType}' on object '{serializable.Name}', skipping.");
-                        break;
-                }
-            }
-
-            foreach (SerializableArea area in schematic.Areas)
-            {
-                switch (area.AreaType)
-                {
-                    case AreaType.CullingArea:
-                        CullingArea culling = new();
-                        culling.ParentSchematic = schematicData;
-                        culling.ParseValues();
-                        culling.CreateCullingZone();
-                        break;
-                }
-            }
+            SpawnObjectRecursive(schematic.RootObjectId, schematic, schematicData);
 
             SchematicSpawned?.Invoke(schematicData);
             LogManager.Info($"Schematic '{schematic.FileName}' fully spawned.");
             SchematicsById.Add(schematicData.Id, schematicData);
+        }
 
-            if (++count % 50 == 0)
-                yield return Timing.WaitForOneFrame;
+        private static void SpawnSerializableArea(SerializableArea area, SchematicData schematic)
+        {
+            switch (area.AreaType)
+            {
+                case AreaType.CullingArea:
+                    CullingArea culling = new();
+                    culling.ParentSchematic = schematic;
+                    culling.ParseValues();
+                    culling.CreateCullingZone();
+                    schematic.SpawnedAreas.Add(culling);
+                    break;
+            }
+        }
+
+        private static void SpawnSerializableObject(SerializableObject serializable, SchematicData schematicData)
+        {
+            switch (serializable.ObjectType)
+            {
+                case ObjectType.Primitive:
+                    PrimitiveObject primitive = new()
+                    {
+                        Name = serializable.Name,
+                        ParentId = schematicData.Primitive!.Base.netId,
+                        NetId = NetworkIdentity.GetNextNetworkId(),
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic,
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        MovementSmoothing = serializable.MovementSmoothing,
+                        AssetId = PrefabHelper.PrimitiveAssetId,
+                        Schematic = schematicData
+                    };
+
+                    primitive.DeserializeValues(serializable);
+                    schematicData.SpawnedClientObjects.Add(primitive);
+
+                    foreach (Player player in Player.ReadyList)
+                        primitive.SpawnForPlayer(player);
+
+                    CreateCollisionMesh(primitive);
+                    break;
+
+                case ObjectType.Light:
+                    LightObject light = new()
+                    {
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic,
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        MovementSmoothing = serializable.MovementSmoothing,
+                    };
+
+                    light.SpawnObject(serializable, schematicData);
+                    break;
+
+                case ObjectType.TextToy:
+                    TextToyObject textToy = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    textToy.SpawnObject(serializable, schematicData);
+                    break;
+
+                case ObjectType.Door:
+                    DoorObject door = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    door.ParseValues(serializable);
+                    door.SpawnObject(schematicData, serializable);
+                    break;
+
+                case ObjectType.Workstation:
+                    WorkstationObject workstation = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    workstation.SpawnObject(schematicData, serializable);
+                    break;
+
+                case ObjectType.Capybara:
+                    CapybaraObject capybara = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    capybara.Collisions = capybara.GetValue<bool>(serializable, "Collisions");
+                    capybara.SpawnObject(schematicData, serializable);
+                    break;
+
+                case ObjectType.Clutter:
+                    ClutterObject clutter = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    clutter.Type = clutter.GetValue<ClutterType>(serializable, "ClutterType");
+                    clutter.SpawnObject(schematicData, serializable);
+                    break;
+
+                case ObjectType.Camera:
+                    CameraObject camera = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    camera.SpawnObject(schematicData, serializable);
+                    break;
+
+                case ObjectType.Interactable:
+                    InteractionObject interaction = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    interaction.SpawnObject(schematicData, serializable);
+                    break;
+
+                case ObjectType.Waypoint:
+                    WaypointObject waypoint = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    waypoint.SpawnObject(schematicData, serializable);
+                    break;
+
+                case ObjectType.Locker:
+                    LockerObject locker = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    locker.SpawnObject(schematicData, serializable);
+                    break;
+
+                case ObjectType.Pickup:
+                    PickupObject pickup = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    pickup.SpawnObject(schematicData, serializable);
+                    break;
+
+                case ObjectType.Target:
+                    TargetDummyObject target = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    target.SpawnObject(schematicData, serializable);
+                    break;
+
+                default:
+                    LogManager.Warn($"Unhandled ObjectType '{serializable.ObjectType}' on object '{serializable.Name}', skipping.");
+                    break;
+            }
         }
 
         public static void CreateCollisionMesh(PrimitiveObject primitive)
@@ -501,6 +545,6 @@ namespace ThaumielMapEditor.API.Helpers
             ThaumFileManager.TryCreateDirectory(mapsDir);
             File.WriteAllText(Path.Combine(mapsDir, $"{map.FileName}.yml"), Serializer.Serialize(map));
             return map;
-        }        
+        }
     }
 }

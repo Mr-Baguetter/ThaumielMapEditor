@@ -5,6 +5,8 @@ namespace ThaumielMapEditor.API.Serialization
 {
     public class SerializableObject
     {
+        public int ObjectId { get; set; }
+        public int ParentId { get; set; }
         public string Name { get; set; } = string.Empty;
         public Vector3 Position { get; set; }
         public Vector3 Scale { get; set; }
