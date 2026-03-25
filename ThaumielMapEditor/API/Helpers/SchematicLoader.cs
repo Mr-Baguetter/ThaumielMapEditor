@@ -32,7 +32,7 @@ namespace ThaumielMapEditor.API.Helpers
 
         public static Dictionary<uint, MapData> MapsById { get; set; } = [];
         public static Dictionary<uint, SchematicData> SchematicsById { get; set; } = [];
-        public static IEnumerable<SchematicData> SpawnedSchematics = SchematicsById.Values;
+        public static IEnumerable<SchematicData> SpawnedSchematics => SchematicsById.Values;
         public static List<SerializableSchematic> Schematics = [];
         public static List<SerializableMap> Maps = [];
 
@@ -371,6 +371,22 @@ namespace ThaumielMapEditor.API.Helpers
                         };
 
                         locker.SpawnObject(schematicData, serializable);
+                        break;
+
+                    case ObjectType.Pickup:
+                        PickupObject pickup = new()
+                        {
+                            Position = serializable.Position,
+                            Rotation = serializable.Rotation,
+                            Scale = serializable.Scale,
+                            IsStatic = serializable.IsStatic
+                        };
+
+                        pickup.SpawnObject(schematicData, serializable);
+                        break;
+
+                    default:
+                        LogManager.Warn($"Unhandled ObjectType '{serializable.ObjectType}' on object '{serializable.Name}', skipping.");
                         break;
                 }
             }

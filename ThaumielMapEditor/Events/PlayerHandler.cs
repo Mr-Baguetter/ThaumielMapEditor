@@ -47,13 +47,25 @@ namespace ThaumielMapEditor.Events
 
         private static void OnPlayerJoined(PlayerJoinedEventArgs ev)
         {
-            foreach (SchematicData data in SchematicLoader.SpawnedSchematics)
-            {
-                LogManager.Debug($"Spawning {data.FileName} for player {ev.Player.DisplayName}");
-                data.SyncWithPlayer(ev.Player);
-            }
+            if (ev.Player == null)
+                return;
 
-            AddPlayerTrigger(ev.Player);
+            Timing.CallDelayed(0.5f, () =>
+            {
+                if (ev.Player == null || ev.Player.IsDestroyed)
+                {
+                    LogManager.Warn($"Player was null or destroyed before sync could run.");
+                    return;
+                }
+
+                foreach (SchematicData data in SchematicLoader.SchematicsById.Values)
+                {
+                    LogManager.Debug($"Spawning {data.FileName} for player {ev.Player.DisplayName}");
+                    data.SyncWithPlayer(ev.Player);
+                }
+
+                AddPlayerTrigger(ev.Player);
+            });
         }
 
         public static void AddPlayerTrigger(Player player)

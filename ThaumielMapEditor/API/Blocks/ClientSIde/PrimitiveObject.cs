@@ -298,42 +298,6 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             _pendingDirtyBits = 0;
             _pendingWrites.Clear();
         }
-
-/*
-        private void SyncToPlayers(ulong dirtyBits, Action<NetworkWriter> writeValues)
-        {
-            if (SpawnedPlayers.Count == 0 || !Spawned)
-                return;
-
-            using NetworkWriterPooled payloadWriter = NetworkWriterPool.Get();
-
-            int safetyPos = payloadWriter.Position;
-            payloadWriter.WriteByte(0);
-            int dataStart = payloadWriter.Position;
-
-            payloadWriter.WriteULong(dirtyBits);
-            writeValues(payloadWriter);
-
-            int dataEnd = payloadWriter.Position;
-            payloadWriter.Position = safetyPos;
-            payloadWriter.WriteByte((byte)((dataEnd - dataStart) & 0xFF));
-            payloadWriter.Position = dataEnd;
-
-            EntityStateMessage msg = new()
-            {
-                netId = NetId,
-                payload = payloadWriter.ToArraySegment()
-            };
-
-            foreach (Player player in SpawnedPlayers)
-            {
-                if (player.IsHost)
-                    continue;
-
-                player.Connection.Send(msg);                
-            }
-        }
-*/
         public void DeserializeValues(SerializableObject serializable)
         {
             switch (serializable.ObjectType)
