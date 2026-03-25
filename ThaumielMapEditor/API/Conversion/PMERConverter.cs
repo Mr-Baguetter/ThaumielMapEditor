@@ -57,6 +57,7 @@ namespace ThaumielMapEditor.API.Conversion
                 4 => ObjectType.Pickup,
                 5 => ObjectType.Workstation,
                 6 => ObjectType.Interactable,
+                _ => throw new InvalidOperationException(),
             };
         }
 
