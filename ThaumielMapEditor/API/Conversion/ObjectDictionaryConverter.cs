@@ -1,0 +1,46 @@
+using System;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace ThaumielMapEditor.API.Conversion
+{
+    public class ObjectDictionaryConverter : JsonConverter<Dictionary<string, object>>
+    {
+        public override Dictionary<string, object> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            Dictionary<string, object> dict = [];
+
+            if (reader.TokenType != JsonTokenType.StartObject)
+                return dict;
+
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.EndObject)
+                    break;
+
+                string key = reader.GetString();
+
+                reader.Read();
+                JsonElement element = JsonDocument.ParseValue(ref reader).RootElement;
+
+                dict[key] = element.ToObject();
+            }
+
+            return dict;
+        }
+
+        public override void Write(Utf8JsonWriter writer, Dictionary<string, object> value, JsonSerializerOptions options)
+        {
+            writer.WriteStartObject();
+
+            foreach (var kvp in value)
+            {
+                writer.WritePropertyName(kvp.Key);
+                JsonSerializer.Serialize(writer, kvp.Value, options);
+            }
+
+            writer.WriteEndObject();
+        }
+    }
+}

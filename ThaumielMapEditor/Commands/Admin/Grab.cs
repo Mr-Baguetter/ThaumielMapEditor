@@ -1,0 +1,89 @@
+using System.Collections.Generic;
+using System.Text;
+using CommandSystem;
+using LabApi.Features.Wrappers;
+using MEC;
+using Mirror;
+using ThaumielMapEditor.API.Blocks;
+using ThaumielMapEditor.API.Data;
+using ThaumielMapEditor.API.Helpers;
+using ThaumielMapEditor.API.Interfaces;
+
+namespace ThaumielMapEditor.Commands.Admin
+{
+    public class Grab : ISubCommand
+    {
+        public string Name => "grab";
+        public string VisibleArgs => "<Schematic ID>";
+        public int RequiredArgsCount => 0;
+        public string Description => "Grabs the specified schematic";
+        public string[] Aliases => ["gr"];
+        public string RequiredPermission => "tme.grab";
+
+        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        {
+            if (!Player.TryGet(sender, out var player))
+            {
+                response = "You must be a player to run this command!";
+                return false;
+            }
+
+            if (GrabPlayers.ContainsKey(player))
+            {
+                Timing.KillCoroutines(GrabPlayers[player]);
+                GrabPlayers.Remove(player);
+
+                response = $"Ungrabbed";
+                return true;
+            }
+
+            if (arguments.Count == 0 || !uint.TryParse(arguments[0], out var id))
+            {
+                response = "Invalid ID. This should be a non negative number. Run 'tme list' to get all spawned schematics";
+                return false;
+            }
+
+            if (!SchematicLoader.TryGetSchematicById(id, out var schematic))
+            {
+                response = $"Failed to find schematic with the ID {id}. Run 'tme list' to get all spawned schematics";
+                return false;
+            }
+
+    		GrabPlayers.Add(player, Timing.RunCoroutine(GrabCoroutine(player, schematic)));
+            response = $"Grabbed schematic with ID: {id}";
+            return true;
+        }
+
+	    private static readonly Dictionary<Player, CoroutineHandle> GrabPlayers = [];
+
+        public IEnumerator<float> GrabCoroutine(Player player, SchematicData schematic)
+        {
+            Vector3 pos = player.Camera.position;
+            float multiplier = Vector3.Distance(pos, schematic.Position);
+            Vector3 prevPos = pos + (player.Camera.forward * multiplier);
+
+            while (true)
+            {
+                yield return Timing.WaitForSeconds(0.1f);
+
+                if (schematic == null || schematic.Primitive == null || schematic.Primitive.IsDestroyed || !player.IsAlive)
+                    break;
+                
+                Vector3 newPos = schematic.Position = player.Camera.position + (player.Camera.forward * multiplier);
+
+                if (prevPos == newPos)
+				    continue;
+
+                prevPos = newPos;
+                schematic.Primitive.Position = prevPos;
+
+                foreach (ServerObject serverObject in schematic.SpawnedServerObjects)
+                {
+                    serverObject.UpdateObject(schematic, true);
+                }
+            }
+
+    		GrabPlayers.Remove(player);
+        }
+    }
+}

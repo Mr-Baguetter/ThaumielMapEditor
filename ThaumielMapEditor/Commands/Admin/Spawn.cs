@@ -1,0 +1,91 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using CommandSystem;
+using LabApi.Features.Wrappers;
+using ThaumielMapEditor.API.Data;
+using ThaumielMapEditor.API.Helpers;
+using ThaumielMapEditor.API.Interfaces;
+using ThaumielMapEditor.API.Serialization;
+using UnityEngine;
+
+namespace ThaumielMapEditor.Commands.Admin
+{
+    public class Spawn : ISubCommand
+    {
+        public static readonly CachedLayerMask RayMask = new("Default", "Door", "CCTV");
+
+        public string Name => "spawn";
+
+        public string VisibleArgs => "<Schematic name>, <X>, <Y>, <Z>";
+
+        public int RequiredArgsCount => 1;
+
+        public string Description => "Spawns the named Schematic";
+
+        public string[] Aliases => ["sp"];
+
+        public string RequiredPermission => "tme.spawn";
+
+        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        {
+            SerializableSchematic? schematic = SchematicLoader.Schematics.FirstOrDefault(s => s.FileName.ToLower() == arguments[0].ToLower());
+            if (schematic is null)
+            {
+                response = $"Failed to find schematic with name {arguments[0]}";
+                return false;
+            }
+
+            Vector3 position = new();
+
+            if (arguments.Count == 4)
+            {
+                if (!float.TryParse(arguments[1], out var x))
+                {
+                    response = $"Failed to parse X value. Invalid float: {arguments[1]}";
+                    return false;
+                }
+                if (!float.TryParse(arguments[2], out var y))
+                {
+                    response = $"Failed to parse Y value. Invalid float: {arguments[2]}";
+                    return false;
+                }
+                if (!float.TryParse(arguments[3], out var z))
+                {
+                    response = $"Failed to parse Z value. Invalid float: {arguments[3]}";
+                    return false;
+                }
+
+                position = new(x, y, z);
+            }
+            else
+            {
+                if (!Player.TryGet(sender, out var player))
+                {
+                    response = "Failed to get Player.";
+                    return false;
+                }
+
+                if (!Physics.Raycast(player.Position + player.Camera.forward, player.Camera.forward, out var hit, 50, RayMask))
+                {
+                    response = "Failed to get placement position from raycast.";
+                    return false;
+                }
+
+                position = hit.point;
+            }
+
+            SchematicData data = SchematicLoader.SpawnSchematic(schematic, position);
+            StringBuilder sb = new();
+            sb.AppendLine();
+            sb.AppendLine($"Spawning schematic '{schematic.FileName}'...");
+            sb.AppendLine($"- Id: {data.Id}");
+            sb.AppendLine($"- Position: {position}");
+            sb.AppendLine($"- Scale: {schematic.Scale}");
+            sb.AppendLine($"- Objects queued: {schematic.Objects.Count}");
+
+            response = sb.ToString();
+            return true;
+        }
+    }
+}

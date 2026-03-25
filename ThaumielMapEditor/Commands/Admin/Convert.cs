@@ -1,0 +1,76 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using CommandSystem;
+using LabApi.Loader.Features.Paths;
+using ThaumielMapEditor.API.Conversion;
+using ThaumielMapEditor.API.Helpers;
+using ThaumielMapEditor.API.Interfaces;
+using ThaumielMapEditor.API.Serialization;
+
+namespace ThaumielMapEditor.Commands.Admin
+{
+    public class Convert : ISubCommand
+    {
+        public string Name => "convert";
+        public string VisibleArgs => "<Schematic Name>";
+        public int RequiredArgsCount => 1;
+        public string Description => "Converts the PMER schematic with the specified name";
+        public string[] Aliases => ["cv"];
+        public string RequiredPermission => "tme.convert";
+
+        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        {
+            if (arguments == null || arguments.Count == 0)
+            {
+                response = "No schematic name provided.";
+                return false;
+            }
+
+            string merDir = Path.Combine(PathManager.Configs.ToString(), "ProjectMER", "Schematics");
+
+            foreach (string file in Directory.GetFiles(merDir, "*.json", SearchOption.AllDirectories))
+            {
+                string filename = Path.GetFileNameWithoutExtension(file);
+
+                if (filename.Contains("-Rigidbodies"))
+                    continue;
+                if (!filename.Equals(arguments[0], StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string content = File.ReadAllText(file);
+                if (!content.TrimStart().StartsWith("{"))
+                    continue;
+
+                string schematicName = arguments[0];
+
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        PMERRoot root = PMERLoader.Load(file);
+                        SerializableSchematic schematic = await PMERConverter.ConvertSchematicAsync(root);
+                        string yaml = SchematicLoader.Serializer.Serialize(schematic);
+                        string outputPath = ThaumFileManager.Dir(["Schematics", $"{schematicName}.yml"]);
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        File.WriteAllText(outputPath, yaml);
+
+                        LogManager.Info($"Conversion of '{schematicName}' completed successfully.");
+                        SchematicLoader.ReloadSchematics();
+                    }
+                    catch (Exception e)
+                    {
+                        LogManager.Error($"Conversion of '{schematicName}' failed: {e.Message}");
+                    }
+                });
+
+                response = $"Conversion of '{schematicName}' started. Check logs for completion.";
+                return true;
+            }
+
+            response = $"Failed to find file with name {arguments[0]}";
+            return true;
+        }
+    }
+}

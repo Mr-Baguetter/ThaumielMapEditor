@@ -1,0 +1,86 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using CommandSystem;
+using LabApi.Features.Permissions;
+using ThaumielMapEditor.API.Helpers;
+using ThaumielMapEditor.API.Interfaces;
+using ThaumielMapEditor.Commands.Admin;
+namespace ThaumielMapEditor.Commands
+{
+    [CommandHandler(typeof(RemoteAdminCommandHandler))]
+    public class Parent : ParentCommand
+    {
+        public Parent() => LoadGeneratedCommands();
+
+        public override string Command => "thaumielmapeditor";
+
+        public override string[] Aliases => ["tme"];
+
+        public override string Description => "Manage the features of Thaumiel Map Editor";
+
+        public override void LoadGeneratedCommands()
+        {
+            Subcommands.Add(new Save());
+            Subcommands.Add(new Position());
+            Subcommands.Add(new Spawned());
+            Subcommands.Add(new Destroy());
+            Subcommands.Add(new Spawn());
+            Subcommands.Add(new List());
+            Subcommands.Add(new Reload());
+            Subcommands.Add(new Grab());
+            Subcommands.Add(new Rotation());
+            Subcommands.Add(new Admin.Convert());
+        }
+
+        private List<ISubCommand> Subcommands { get; } = [];
+
+        protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
+        {
+            try
+            {
+                if (arguments.Count == 0)
+                {
+                    response = $"Thaumiel Map Editor v{Main.Instance.Version} by Mr. Baguetter\n\nAvailable commands:";
+                    foreach (ISubCommand command in Subcommands)
+                        response += $"\n- tme {command.Name}{(command.VisibleArgs != string.Empty ? $" {command.VisibleArgs}" : "")} - {command.Description}";
+
+                    return true;
+                }
+
+                ISubCommand cmd = Subcommands.FirstOrDefault(cmd => cmd.Name == arguments.At(0));
+                cmd ??= Subcommands.FirstOrDefault(cmd => cmd.Aliases.Contains(arguments.At(0)));
+
+                if (cmd is null)
+                {
+                    response = "Command not found!";
+                    return false;
+                }
+
+                if (!sender.HasPermissions(cmd.RequiredPermission))
+                {
+                    response = "You don't have permission to access that command!";
+                    return false;
+                }
+
+                if (arguments.Count < cmd.RequiredArgsCount)
+                {
+                    response = $"Wrong usage! Correct usage: tme {cmd.Name} {cmd.VisibleArgs}";
+                    return false;
+                }
+
+                List<string> args = [.. arguments];
+                args.RemoveAt(0);
+
+                return cmd.Execute(args, sender, out response);
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"Error when running a command: {ex}");
+            }
+
+            response = "An error has occured please check your console.";
+            return false;
+        }
+    }
+}
