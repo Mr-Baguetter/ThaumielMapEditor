@@ -16,15 +16,8 @@
     <PackageReference Include="System.Text.Json" Version="10.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="ASS-LabAPI" Publicize="true">
-      <HintPath>C:\Users\Superuser\Downloads\ASS-LabAPI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Assembly-CSharp" Publicize="true">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="HintServiceMeow" Publicize="true">
-      <HintPath>..\..\..\..\AppData\Roaming\SCP Secret Laboratory\LabAPI\dependencies\global\HintServiceMeow-LabAPI.dll</HintPath>
     </Reference>
     <Reference Include="0Harmony">
       <HintPath>..\..\..\..\Downloads\0Harmony.dll</HintPath>
@@ -32,14 +25,8 @@
     <Reference Include="Assembly-CSharp-firstpass" Publicize="true">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
-    <Reference Include="AudioPlayerApi" Publicize="true">
-      <HintPath>$(EXILED_REFERENCES)\AudioPlayerApi.dll</HintPath>
-    </Reference>
     <Reference Include="CommandSystem.Core">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\CommandSystem.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="CustomItemsAPI" Publicize="true">
-      <HintPath>..\..\..\..\Downloads\CustomItemsAPI.TestItems\CustomItemsAPI.dll</HintPath>
     </Reference>
     <Reference Include="LabApiExtensions">
       <HintPath>..\..\..\..\Downloads\LabApiExtensions.dll</HintPath>
@@ -55,9 +42,6 @@
     </Reference>
     <Reference Include="NorthwoodLib" Publicize="true">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\NorthwoodLib.dll</HintPath>
-    </Reference>
-    <Reference Include="NVorbis">
-      <HintPath>..\..\..\..\Downloads\dependencies (2)\dependencies\NVorbis.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
