@@ -15,6 +15,14 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
     public class DoorObject : ServerObject
     {
+        /// <summary>
+        /// Returns the <see cref="DoorVariant"/> prefab that corresponds to the given <see cref="DoorType"/>.
+        /// </summary>
+        /// <param name="type">The door type to look up.</param>
+        /// <returns>The matching <see cref="DoorVariant"/> prefab, or <c>null</c> if not found.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown when <paramref name="type"/> does not match any known door type.
+        /// </exception>
         public DoorVariant? GetDoorFromType(DoorType type)
         {
             return type switch
@@ -28,11 +36,21 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             };
         }
 
+        /// <summary>
+        /// Reference to the underlying game <see cref="DoorVariant"/> object.
+        /// </summary>
         [YamlIgnore]
         public DoorVariant? Base { get; internal set; }
 
+        /// <summary>
+        /// The visual and functional type of this door (e.g. LCZ, HCZ, EZ, Gate, Bulkhead).
+        /// </summary>
         public DoorType DoorType { get; set; }
-        
+
+        /// <summary>
+        /// The keycard permission flags required to interact with this door.
+        /// Syncs to the live door object when changed after spawning.
+        /// </summary>
         public DoorPermissionFlags Permissions
         {
             get;
@@ -46,6 +64,10 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// If <c>true</c>, the player must hold <b>all</b> listed permissions rather than just one.
+        /// Syncs to the live door object when changed after spawning.
+        /// </summary>
         public bool RequireAllPermissions
         {
             get;
@@ -59,6 +81,10 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// If <c>true</c>, SCP-2176 (Ghostlight) can bypass this door's permissions.
+        /// Syncs to the live door object when changed after spawning.
+        /// </summary>
         public bool Bypass2176
         {
             get;
@@ -72,6 +98,11 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// The maximum health of this door. Only applies to doors that extend <see cref="BreakableDoor"/>.
+        /// Silently ignored for non-breakable door types.
+        /// Syncs to the live door object when changed after spawning.
+        /// </summary>
         public float MaxHealth
         {
             get;
@@ -85,6 +116,11 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// The current remaining health of this door. Only applies to doors that extend <see cref="BreakableDoor"/>.
+        /// Silently ignored for non-breakable door types.
+        /// Syncs to the live door object when changed after spawning.
+        /// </summary>
         public float Health
         {
             get;
@@ -98,6 +134,11 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// Whether the door is currently open.
+        /// Setting this triggers the proper <see cref="DoorAction.Opened"/> or <see cref="DoorAction.Closed"/> event
+        /// rather than forcing the state directly.
+        /// </summary>
         public bool IsOpen
         {
             get;
@@ -118,8 +159,12 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 field = value;
             }
         }
-        
-        public bool IsLocked 
+
+        /// <summary>
+        /// Whether the door is locked via admin command.
+        /// Syncs to the live door object when changed after spawning.
+        /// </summary>
+        public bool IsLocked
         {
             get;
             set
@@ -132,8 +177,23 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// The object type identifier for this server object. Always <see cref="ObjectType.Door"/>.
+        /// </summary>
         public override ObjectType ObjectType { get; set; } = ObjectType.Door;
 
+        /// <summary>
+        /// Instantiates the door prefab in the game world using the schematic's transform.
+        /// Looks up the correct prefab from <see cref="DoorType"/>, applies all configured properties,
+        /// then registers the door with the network server.
+        /// </summary>
+        /// <param name="schematic">The schematic data that provides transform and file context.</param>
+        /// <param name="serializable">The serializable object containing raw door property values.</param>
+        /// <remarks>
+        /// If the prefab lookup fails, a warning is logged and spawning is aborted.
+        /// HCZ doors automatically have their room connector bitmask set to <c>3</c>
+        /// to ensure correct wall rendering.
+        /// </remarks>
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             Base = GetDoorFromType(DoorType);
@@ -156,11 +216,17 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             base.SpawnObject(schematic, serializable);
         }
 
+        /// <summary>
+        /// Applies all current property values to the given door prefab <see cref="GameObject"/>.
+        /// This includes health, lock state, open state, and permissions.
+        /// Called internally during <see cref="SpawnObject"/>.
+        /// </summary>
+        /// <param name="prefab">The door prefab <see cref="GameObject"/> to apply properties to.</param>
         public void ApplyProperties(GameObject prefab)
         {
             if (!prefab.TryGetComponent<DoorVariant>(out var door))
                 return;
-            
+
             if (door is BreakableDoor breakable)
             {
                 breakable.MaxHealth = MaxHealth;
@@ -176,11 +242,24 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             door.RequiredPermissions = new(Permissions, RequireAllPermissions, Bypass2176);
         }
 
+        /// <summary>
+        /// Returns a string representation of this door object's current state.
+        /// </summary>
+        /// <returns>A formatted string listing all key property values.</returns>
         public override string ToString()
         {
             return $"DoorType: {DoorType}, Permissions: {Permissions}, RequireAllPermissions: {RequireAllPermissions}, Bypass2176: {Bypass2176}, MaxHealth: {MaxHealth}, Health: {Health}, IsOpen: {IsOpen}, IsLocked: {IsLocked}";
         }
 
+        /// <summary>
+        /// Reads and parses all door properties from the provided <see cref="SerializableObject"/>.
+        /// Logs a warning and returns early if the object type is incorrect or any field fails to parse.
+        /// </summary>
+        /// <param name="serializable">
+        /// The serializable object containing a <c>Values</c> dictionary with door property data.
+        /// Expected keys: <c>DoorType</c>, <c>Permissions</c>, <c>RequireAllPermissions</c>,
+        /// <c>Bypass2176</c>, <c>MaxHealth</c>, <c>Health</c>, <c>IsOpen</c>, <c>IsLocked</c>.
+        /// </param>
         public void ParseValues(SerializableObject serializable)
         {
             if (serializable.ObjectType is not ObjectType.Door)

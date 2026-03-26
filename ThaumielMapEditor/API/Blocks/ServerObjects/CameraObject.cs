@@ -18,10 +18,22 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
     public class CameraObject : ServerObject
     {
+        /// <summary>
+        /// The underlying in-game camera toy instance.
+        /// Marked with <see cref="YamlDotNet.Serialization.YamlIgnoreAttribute"/> so the runtime
+        /// </summary>
         [YamlIgnore]
         public Scp079CameraToy Base { get; internal set; }
+
+        /// <summary>
+        /// The camera prefab type (mapped to a specific prefab via <see cref="GetCameraPrefab"/>).
+        /// </summary>
         public CameraType Type { get; internal set; }
 
+        /// <summary>
+        /// Display label for the camera. Setting this property updates the networked label on
+        /// the underlying <see cref="Base"/> when available.
+        /// </summary>
         public string Label
         {
             get;
@@ -33,8 +45,13 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 Base.NetworkLabel = value;
                 field = value;
             }
-        }
+        } = string.Empty;
 
+        /// <summary>
+        /// The <see cref="Room"/> that the camera belongs to.
+        /// Setting this property updates <see cref="Scp079CameraToy.NetworkRoom"/> on <see cref="Base"/>.
+        /// Defaults to the first room returned by <c>Room.Get(RoomName.Outside)</c>.
+        /// </summary>
         public Room Room
         {
             get;
@@ -48,6 +65,10 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         } = Room.Get(RoomName.Outside).First();
 
+        /// <summary>
+        /// Vertical rotation constraint applied to the camera.
+        /// When set, the value is copied to <see cref="Scp079CameraToy.NetworkVerticalConstraint"/>.
+        /// </summary>
         public Vector2 VerticalConstraint
         {
             get;
@@ -61,6 +82,10 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// Horizontal rotation constraint applied to the camera.
+        /// When set, the value is copied to <see cref="Scp079CameraToy.NetworkHorizontalConstraint"/>.
+        /// </summary>
         public Vector2 HorizontalConstraint
         {
             get;
@@ -74,6 +99,10 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
         
+        /// <summary>
+        /// Zoom constraint for the camera (min/max).
+        /// When set, the value is copied to <see cref="Scp079CameraToy.NetworkZoomConstraint"/>.
+        /// </summary>
         public Vector2 ZoomConstraint
         {
             get;
@@ -87,8 +116,15 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Camera;
 
+        /// <summary>
+        /// Returns the corresponding camera prefab instance for the provided <paramref name="type"/>.
+        /// </summary>
+        /// <param name="type">The camera type to resolve to a prefab.</param>
+        /// <returns>The matching <see cref="Scp079CameraToy"/> prefab from <see cref="PrefabHelper"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when an unknown <paramref name="type"/> is provided.</exception>
         public static Scp079CameraToy GetCameraPrefab(CameraType type)
         {
 #pragma warning disable CS8603 // Possible null reference return.
@@ -104,6 +140,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 #pragma warning restore CS8603 // Possible null reference return.
         }
 
+        /// <inheritdoc/>
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             Scp079CameraToy camera = UnityEngine.Object.Instantiate(GetCameraPrefab(GetValue<CameraType>(serializable, "CameraType")));
@@ -115,6 +152,10 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             NetworkServer.Spawn(camera.gameObject);
         }
 
+        /// <summary>
+        /// Parses values from a <see cref="SerializableObject"/> and applies them to this instance.
+        /// </summary>
+        /// <param name="serializable">The serialized camera object to parse.</param>
         public void ParseValues(SerializableObject serializable)
         {
             if (serializable.ObjectType is not ObjectType.Camera)

@@ -10,9 +10,11 @@ using ThaumielMapEditor.API.Helpers;
 using LabApi.Loader.Features.Plugins.Enums;
 using ThaumielMapEditor.Events;
 using HarmonyLib;
+using ThaumielMapEditor.API.Attributes;
 
 namespace ThaumielMapEditor
 {
+    [DoNotParse]
     public class Main : Plugin<Config>
     {
         public override string Name => "Thaumiel Map Editor";

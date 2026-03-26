@@ -12,9 +12,18 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
     public class LightObject : ServerObject
     {
+        /// <summary>
+        /// The underlying networked light toy instance created from the prefab.
+        /// </summary>
+        /// <remarks>
+        /// May be null until <see cref="SpawnObject(SchematicData, SerializableObject)"/> is called.
+        /// </remarks>
         [YamlIgnore]
         public LightSourceToy Base { get; private set; }
 
+        /// <summary>
+        /// The intensity of the light. Setting this updates the <see cref="Base"/> instance if present.
+        /// </summary>
         public float LightIntensity
         {
             get;
@@ -28,6 +37,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// The range of the light. Setting this updates the <see cref="Base"/> instance if present.
+        /// </summary>
         public float LightRange
         {
             get;
@@ -41,6 +53,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// The color of the light. Setting this updates the <see cref="Base"/> instance if present.
+        /// </summary>
         public Color LightColor
         {
             get;
@@ -54,6 +69,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// The shadow type used by the light. Setting this updates the <see cref="Base"/> instance if present.
+        /// </summary>
         public LightShadows ShadowType
         {
             get;
@@ -67,6 +85,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// The strength of shadows produced by the light. Setting this updates the <see cref="Base"/> instance if present.
+        /// </summary>
         public float ShadowStrength
         {
             get;
@@ -80,6 +101,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// The general type of the light (e.g. Point, Spot). Setting this updates the <see cref="Base"/> instance if present.
+        /// </summary>
         public LightType LightType
         {
             get;
@@ -94,6 +118,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         }
 
 #pragma warning disable CS0618 // Type or member is obsolete
+        /// <summary>
+        /// The legacy light shape setting. Setting this updates the <see cref="Base"/> instance if present.
+        /// </summary>
         public LightShape LightShape
 #pragma warning restore CS0618 // Type or member is obsolete
         {
@@ -108,6 +135,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// The outer spot angle for spot lights. Setting this updates the <see cref="Base"/> instance if present.
+        /// </summary>
         public float SpotAngle
         {
             get;
@@ -121,6 +151,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// The inner spot angle for spot lights. Setting this updates the <see cref="Base"/> instance if present.
+        /// </summary>
         public float InnerSpotAngle
         {
             get;
@@ -134,9 +167,11 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Light;
 
-        public void SpawnObject(SerializableObject serializable, SchematicData schematic)
+        /// <inheritdoc/>
+        public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             LightSourceToy light = UnityEngine.Object.Instantiate(PrefabHelper.LightSource);
             Base = light;
@@ -160,6 +195,10 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             base.SpawnObject(schematic, serializable);
         }
 
+        /// <summary>
+        /// Reads expected light properties from the provided <see cref="SerializableObject"/> and sets local properties.
+        /// </summary>
+        /// <param name="serializable">Serialized object that should contain light-specific values.</param>
         public void DeserializeValues(SerializableObject serializable)
         {
             if (serializable.ObjectType is not ObjectType.Light)

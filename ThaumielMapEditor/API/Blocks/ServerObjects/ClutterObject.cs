@@ -35,6 +35,12 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         [YamlIgnore]
         public SpawnableClutterConnector? Base { get; private set; }
 
+        /// <summary>
+        /// Gets the <see cref="GameObject"/> prefab associated with the given <see cref="ClutterType"/>."
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns><see cref="GameObject"/></returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static GameObject GetClutterPrefab(ClutterType type)
         {
 #pragma warning disable CS8603 // Possible null reference return.
@@ -53,6 +59,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 #pragma warning restore CS8603 // Possible null reference return.
         }
 
+        /// <inheritdoc/>
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             GameObject clutterPrefab = UnityEngine.Object.Instantiate(GetClutterPrefab(Type));

@@ -51,11 +51,23 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// </remarks>
         public static event Action<InteractionObject, Player>? OnSearchAborted;
 
+        /// <summary>
+        /// The runtime instance of the underlying <see cref="InvisibleInteractableToy"/>.
+        /// </summary>
         [YamlIgnore]
         public InvisibleInteractableToy Base { get; private set; }
 
+        /// <summary>
+        /// The type of this server object. Always <see cref="ObjectType.Interactable"/>.
+        /// </summary>
         public override ObjectType ObjectType { get; set; } = ObjectType.Interactable;
 
+        /// <summary>
+        /// The collider shape used by the interactable toy.
+        /// </summary>
+        /// <remarks>
+        /// Setting this property updates the underlying <see cref="InvisibleInteractableToy.Shape"/>.
+        /// </remarks>
         public ColliderShape Shape
         {
             get;
@@ -70,6 +82,13 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// How long (in seconds) a player must hold the interaction for held interactions.
+        /// </summary>
+        /// <remarks>
+        /// Setting this property updates the underlying <see cref="InvisibleInteractableToy.InteractionDuration"/>.
+        /// A value of 0 represents an instant interaction and will trigger <see cref="OnInteracted"/>.
+        /// </remarks>
         public float InteractionDuration
         {
             get;
@@ -84,6 +103,12 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// Whether the interactable is locked and cannot be searched by players.
+        /// </summary>
+        /// <remarks>
+        /// Setting this property updates the underlying <see cref="InvisibleInteractableToy.IsLocked"/>.
+        /// </remarks>
         public bool IsLocked
         {
             get;
@@ -98,8 +123,12 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// Returns true if the underlying interactable toy can currently be searched by players.
+        /// </summary>
         public bool CanSearch => Base.CanSearch;
-
+    
+        /// <inheritdoc/>
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             if (PrefabHelper.Interactable == null)
@@ -127,6 +156,15 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             base.SpawnObject(schematic, serializable);
         }
 
+        /// <summary>
+        /// Parses configuration values from a <see cref="SerializableObject"/> into this instance.
+        /// </summary>
+        /// <param name="serializable">Serializable object expected to have ObjectType = <see cref="ObjectType.Interactable"/> and values for "Shape", "Duration", and "Locked".</param>
+        /// <remarks>
+        /// If the <see cref="SerializableObject.ObjectType"/> is not <see cref="ObjectType.Interactable"/>, the method logs a warning.
+        /// Each individual value is parsed via <see cref="DictionaryExtensions.TryConvertValue{T}"/> and will log a warning and abort
+        /// on failure to parse any expected value.
+        /// </remarks>
         public void ParseValues(SerializableObject serializable)
         {
             if (serializable.ObjectType is not ObjectType.Interactable)
@@ -156,6 +194,11 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             IsLocked = locked;
         }
 
+        /// <summary>
+        /// Internal handler that translates the toy's <see cref="InvisibleInteractableToy.OnInteracted"/> callback
+        /// into the static <see cref="OnInteracted"/> event after resolving the <see cref="ReferenceHub"/> to a <see cref="Player"/>.
+        /// </summary>
+        /// <param name="hub">ReferenceHub provided by the toy callback.</param>
         private void HandleInteracted(ReferenceHub hub)
         {
             if (!hub.TryGet(out var player))
@@ -164,6 +207,11 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             OnInteracted?.Invoke(this, player);
         }
 
+        /// <summary>
+        /// Internal handler that translates the toy's <see cref="InvisibleInteractableToy.OnSearching"/> callback
+        /// into the static <see cref="OnSearching"/> event after resolving the <see cref="ReferenceHub"/> to a <see cref="Player"/>.
+        /// </summary>
+        /// <param name="hub">ReferenceHub provided by the toy callback.</param>
         private void HandleSearching(ReferenceHub hub)
         {
             if (!hub.TryGet(out var player))
@@ -172,6 +220,11 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             OnSearching?.Invoke(this, player);
         }
 
+        /// <summary>
+        /// Internal handler that translates the toy's <see cref="InvisibleInteractableToy.OnSearched"/> callback
+        /// into the static <see cref="OnSearched"/> event after resolving the <see cref="ReferenceHub"/> to a <see cref="Player"/>.
+        /// </summary>
+        /// <param name="hub">ReferenceHub provided by the toy callback.</param>
         private void HandleSearched(ReferenceHub hub)
         {
             if (!hub.TryGet(out var player))
@@ -180,6 +233,11 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             OnSearched?.Invoke(this, player);
         }
 
+        /// <summary>
+        /// Internal handler that translates the toy's <see cref="InvisibleInteractableToy.OnSearchAborted"/> callback
+        /// into the static <see cref="OnSearchAborted"/> event after resolving the <see cref="ReferenceHub"/> to a <see cref="Player"/>.
+        /// </summary>
+        /// <param name="hub">ReferenceHub provided by the toy callback.</param>
         private void HandleSearchAborted(ReferenceHub hub)
         {
             if (!hub.TryGet(out var player))

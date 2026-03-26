@@ -11,11 +11,18 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
     public class CapybaraObject : ServerObject, ICullableObject
     {
+        /// <summary>
+        /// The base <see cref="CapybaraToy"/> instance of this object.
+        /// </summary>
         [YamlIgnore]
         public CapybaraToy? Base { get; private set; }
 
+        /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Capybara;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether collision detection is enabled.
+        /// </summary>
         public bool Collisions
         {
             get;
@@ -30,6 +37,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <inheritdoc/>
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             if (PrefabHelper.Capybara == null)

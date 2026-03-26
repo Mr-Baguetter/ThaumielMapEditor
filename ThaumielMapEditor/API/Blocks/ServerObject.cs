@@ -38,6 +38,9 @@ namespace ThaumielMapEditor.API.Blocks
         /// </remarks>
         public static event Action<ServerObject, bool>? OnObjectUpdated;
 
+        /// <summary>
+        /// Gets or sets the Position of the ServerObject
+        /// </summary>
         public Vector3 Position
         {
             get;
@@ -51,6 +54,9 @@ namespace ThaumielMapEditor.API.Blocks
             }
         }
 
+        /// <summary>
+        /// Gets or sets the Scale of the ServerObject
+        /// </summary>
         public Vector3 Scale
         {
             get;
@@ -64,6 +70,9 @@ namespace ThaumielMapEditor.API.Blocks
             }
         }
 
+        /// <summary>
+        /// Gets or sets the Rotation of the ServerObject
+        /// </summary>
         public Quaternion Rotation
         {
             get;
@@ -77,14 +86,37 @@ namespace ThaumielMapEditor.API.Blocks
             }
         }
 
+        /// <summary>
+        /// Gets or Sets whether or not the ServerObject is static
+        /// </summary>
         public bool IsStatic { get; set; }
+
+        /// <summary>
+        /// The ticks between the server sending a update to the client about this object's position. 0 means no delay, 1 means the server will send an update every tick, 2 means every other tick, and so on.
+        /// </summary>
         public byte MovementSmoothing { get; set; }
+
+        /// <summary>
+        /// The NetId of the spawned ServerObject.
+        /// </summary>
         public uint NetId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the associated game object instance.
+        /// </summary>
         public virtual GameObject? Object { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type of the object represented by this instance.
+        /// </summary>
         public virtual ObjectType ObjectType { get; set; }
 
         private StructurePositionSync? PositionSync { get; set; }
 
+        /// <summary>
+        /// Applies the specified schematic's transformation to the current object's world position, rotation, and scale.
+        /// </summary>
+        /// <param name="schematic">The schematic data containing the position, rotation, and scale to apply to the current object.</param>
         public void SetWorldTransform(SchematicData schematic)
         {
             Position = schematic.Position + (schematic.Rotation * Vector3.Scale(Position, schematic.Scale));
@@ -92,12 +124,25 @@ namespace ThaumielMapEditor.API.Blocks
             Scale = Vector3.Scale(Scale, schematic.Scale);
         }
 
+        /// <summary>
+        /// Spawns the specified <see cref="ServerObject"/> into the server and adds it to the provided <see cref="SchematicData"/>'s <see cref="SchematicData.SpawnedServerObjects"/> list.
+        /// </summary>
+        /// <param name="schematic"></param>
+        /// <param name="serializable"></param>
         public virtual void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             OnObjectCreated?.Invoke(this);
             schematic.SpawnedServerObjects.Add(this);
         }
 
+        /// <summary>
+        /// Updates the object's world transform and network state based on the specified schematic data, optionally respawning the object on the network.
+        /// </summary>
+        /// <remarks>
+        /// If the object is not currently spawned, this method will not perform any update. The method also updates the object's network synchronization component if present.
+        /// </remarks>
+        /// <param name="schematic">The schematic data used to update the object's position and rotation.</param>
+        /// <param name="respawn">If <see langword="true"/>, the object is respawned on the network after updating. If <see langword="false"/>, the object is not respawned.</param>
         public void UpdateObject(SchematicData schematic, bool respawn = true)
         {
             if (Object == null)
@@ -119,6 +164,11 @@ namespace ThaumielMapEditor.API.Blocks
                 NetworkServer.Spawn(Object);
         }
 
+        /// <summary>
+        /// Destroys the associated networked object and removes it from the specified schematic's collection of spawned
+        /// server objects.
+        /// </summary>
+        /// <param name="schematic">The schematic data instance from which the object will be removed.</param>
         public void DestroyObject(SchematicData schematic)
         {
             if (Object == null)

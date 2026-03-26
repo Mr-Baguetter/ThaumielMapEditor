@@ -12,13 +12,28 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
     public class TargetDummyObject : ServerObject
     {
+        /// <summary>
+        /// The instantiated <see cref="ShootingTarget"/> component for the spawned object.
+        /// This value is null until <see cref="SpawnObject(SchematicData, SerializableObject)"/> is called.
+        /// </summary>
         [YamlIgnore]
         public ShootingTarget Base { get; private set; }
 
+        /// <summary>
+        /// The configured <see cref="TargetType"/> for this target.
+        /// Determined by parsing serialized data before spawning.
+        /// </summary>
         public TargetType Type { get; private set; }
 
+        /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Target;
 
+        /// <summary>
+        /// Returns the prefab <see cref="ShootingTarget"/> that corresponds to the provided <paramref name="type"/>.
+        /// </summary>
+        /// <param name="type">The target variant to resolve a prefab for.</param>
+        /// <returns>The matching <see cref="ShootingTarget"/> prefab.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when an unsupported <paramref name="type"/> is provided.</exception>
         public ShootingTarget GetPrefab(TargetType type)
         {
 			ShootingTarget prefab = type switch
@@ -32,6 +47,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             return prefab;
         }
 
+        /// <inheritdoc/>
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             ParseValues(serializable);
@@ -46,6 +62,12 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             base.SpawnObject(schematic, serializable);
         }
 
+        /// <summary>
+        /// Parses and applies values from a <see cref="SerializableObject"/> to this instance.
+        /// Validates that the serializable represents a target and extracts the <see cref="TargetType"/>.
+        /// Logs warnings when parsing fails or the object type does not match.
+        /// </summary>
+        /// <param name="serializable">The serialized object data to parse.</param>
         public void ParseValues(SerializableObject serializable)
         {
             if (serializable.ObjectType != ObjectType.Target)

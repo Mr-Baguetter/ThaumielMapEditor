@@ -11,12 +11,27 @@ using YamlDotNet.Serialization;
 
 namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
+    /// <summary>
+    /// Represents a server-side waypoint object used by the map editor.
+    /// Wraps an underlying <see cref="WaypointToy"/> instance and exposes
+    /// serializable properties such as bounds visualization, priority and bounds size.
+    /// </summary>
     public class WaypointObject : ServerObject
     {
+        /// <summary>
+        /// Reference to the instantiated <see cref="WaypointToy"/> on the server.
+        /// </summary>
         [YamlIgnore]
         public WaypointToy Base { get; private set; }
+
+        /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Waypoint;
 
+        /// <summary>
+        /// Whether the waypoint's bounds are visualized in the editor/runtime.
+        /// Setting this property updates the underlying <see cref="WaypointToy.VisualizeBounds"/>
+        /// when the toy instance is available.
+        /// </summary>
         public bool VisualizeBounds
         {
             get;
@@ -31,6 +46,12 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// Priority value for the waypoint. Higher values can be used to influence
+        /// ordering or selection logic that consumes waypoint priorities.
+        /// Setting this property updates the underlying <see cref="WaypointToy.Priority"/>
+        /// when the toy instance is available.
+        /// </summary>
         public float Priority
         {
             get;
@@ -45,6 +66,11 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// Size of the waypoint bounds as a <see cref="Vector3"/>
+        /// Setting this property updates the underlying <see cref="WaypointToy.BoundsSize"/>
+        /// when the toy instance is available.
+        /// </summary>
         public Vector3 BoundsSize
         {
             get;
@@ -59,8 +85,12 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        /// <summary>
+        /// Identifier assigned to this waypoint instance.
+        /// </summary>
         public byte WaypointId { get; private set; }
 
+        /// <inheritdoc/>
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             if (PrefabHelper.WaypointToy == null)
@@ -83,6 +113,10 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             base.SpawnObject(schematic, serializable);
         }
 
+        /// <summary>
+        /// Parses values from a <see cref="SerializableObject"/> and applies them to this <see cref="WaypointObject"/> instance.
+        /// </summary>
+        /// <param name="serializable">The serialized object containing values to parse.</param>
         public void ParseValues(SerializableObject serializable)
         {
             if (serializable.ObjectType != ObjectType.Waypoint)

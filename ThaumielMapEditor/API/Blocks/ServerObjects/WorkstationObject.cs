@@ -10,10 +10,17 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
     public class WorkstationObject : ServerObject
     {
+        /// <summary>
+        /// The instantiated <c>WorkstationController</c> that backs this server object.
+        /// It will be null until <see cref="SpawnObject"/> successfully instantiates the prefab.
+        /// </summary>
         [YamlIgnore]
         public WorkstationController? Base { get; private set; }
+
+        /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Workstation;
 
+        /// <inheritdoc/>
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             if (PrefabHelper.Workstation == null)

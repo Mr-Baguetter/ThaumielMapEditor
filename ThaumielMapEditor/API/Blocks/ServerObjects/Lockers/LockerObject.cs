@@ -15,15 +15,31 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
 {
     public class LockerObject : ServerObject
     {
+        /// <summary>
+        /// The instantiated <see cref="Locker"/> component in the scene.
+        /// </summary>
         [YamlIgnore]
         public Locker Base { get; private set; }
 
+        /// <summary>
+        /// Serialized chamber definitions that describe what items and permissions each chamber should have.
+        /// </summary>
         public List<LockerChamber> Chambers { get; private set; }
 
+        /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Locker;
 
+        /// <summary>
+        /// The <see cref="LockerType"/> variant for this locker (e.g., Medkit, RifleRack, Misc).
+        /// </summary>
         public LockerType Type { get; private set; }
 
+        /// <summary>
+        /// Maps a <see cref="LockerType"/> value to the corresponding locker prefab from <see cref="PrefabHelper"/>.
+        /// </summary>
+        /// <param name="type">The locker type to get a prefab for.</param>
+        /// <returns>The matching <see cref="Locker"/> prefab, or throws for unknown types.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when an unsupported <see cref="LockerType"/> is supplied.</exception>
         public Locker? GetPrefabFromType(LockerType type)
         {
             return type switch
@@ -39,6 +55,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
             };
         }
 
+        /// <inheritdoc/>
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             ParseValues(serializable);
@@ -75,6 +92,11 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
             base.SpawnObject(schematic, serializable);
         }
 
+        /// <summary>
+        /// Parses values from a <see cref="SerializableObject"/> to populate this object's <see cref="Type"/> and <see cref="Chambers"/>.
+        /// Validates that the supplied <paramref name="serializable"/> is of <see cref="ObjectType.Locker"/> and logs warnings on failure.
+        /// </summary>
+        /// <param name="serializable">The serializable data read from a schematic or saved map.</param>
         public void ParseValues(SerializableObject serializable)
         {
             if (serializable.ObjectType != ObjectType.Locker)
@@ -99,6 +121,10 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
             Chambers = chambers;
         }
 
+        /// <summary>
+        /// Clears any existing loot and scheduled spawns from the instantiated <see cref="Base"/> locker.
+        /// Destroys spawned item pickups and clears internal lists so the locker can be repopulated.
+        /// </summary>
         public void ClearChambers()
         {
             Base.Loot = [];
@@ -116,6 +142,14 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
 
         }
 
+        /// <summary>
+        /// Populates the runtime locker chambers based on the serialized <see cref="Chambers"/> data.
+        /// For each serialized chamber:
+        /// - Matches it to the corresponding runtime chamber by index.
+        /// - Applies required permissions.
+        /// - Iterates configured <see cref="ChamberData"/> entries and spawns items based on their spawn chance and amounts.
+        /// Ensures each serialized chamber only spawns once per population pass.
+        /// </summary>
         public void PopulateChambers()
         {
             List<LockerChamber> Spawned = [];

@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThaumielMapEditor.API.Attributes;
 
 namespace ThaumielMapEditor
 {
+    [DoNotParse]
     public class Config
     {
         public bool Debug { get; set; }

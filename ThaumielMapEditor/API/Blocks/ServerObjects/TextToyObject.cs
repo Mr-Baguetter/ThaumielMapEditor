@@ -14,9 +14,22 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
     public class TextToyObject : ServerObject
     {
+        /// <summary>
+        /// The instantiated runtime <see cref="TextToy"/> associated with this server object.
+        /// </summary>
+        /// <remarks>
+        /// It will be null until <see cref="SpawnObject(SchematicData, SerializableObject)"/> successfully instantiates the prefab.
+        /// </remarks>
         [YamlIgnore]
         public TextToy Base { get; private set; }
 
+        /// <summary>
+        /// The text format string used by the <see cref="TextToy"/> for rendering text.
+        /// </summary>
+        /// <remarks>
+        /// Setting this property updates the underlying <see cref="Base"/> instance's <c>TextFormat</c> if the
+        /// runtime object has already been created.
+        /// </remarks>
         public string TextFormat
         {
             get;
@@ -28,7 +41,15 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 field = value;
                 Base?.TextFormat = value;
             }
-        }
+        } = string.Empty;
+
+        /// <summary>
+        /// The display size (width, height) used by the <see cref="TextToy"/> when rendering text.
+        /// </summary>
+        /// <remarks>
+        /// Setting this property updates the underlying <see cref="Base"/> instance's <c>DisplaySize</c> if the
+        /// runtime object has already been created.
+        /// </remarks>
         public Vector2 DisplaySize
         {
             get;
@@ -41,9 +62,12 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 Base?.DisplaySize = value;
             }
         }
+
+        /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.TextToy;
 
-        public void SpawnObject(SerializableObject serializable, SchematicData schematic)
+        /// <inheritdoc/>
+        public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             if (PrefabHelper.TextToy == null)
             {
@@ -65,6 +89,10 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             base.SpawnObject(schematic, serializable);
         }
 
+        /// <summary>
+        /// Parses values from the provided <see cref="SerializableObject"/> and applies them to this instance.
+        /// </summary>
+        /// <param name="serializable">The serialized object containing keys such as "TextFormat" and "DisplaySize".</param>
         public void ParseValues(SerializableObject serializable)
         {
             if (serializable.ObjectType != ObjectType.TextToy)

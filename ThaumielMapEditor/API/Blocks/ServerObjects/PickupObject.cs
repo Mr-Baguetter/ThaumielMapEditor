@@ -9,16 +9,30 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
     public class PickupObject : ServerObject
     {
+        /// <summary>
+        /// The type of item that this pickup will spawn.
+        /// </summary>
         public ItemType ItemToSpawn { get; private set; }
 
+        /// <summary>
+        /// Chance (0-100) that this pickup will actually spawn when processed.
+        /// </summary>
         public float SpawnPercentage { get; private set; }
 
+        /// <summary>
+        /// Maximum stack/amount that the spawned pickup can contain.
+        /// </summary>
         public uint MaxAmount { get; private set; }
 
+        /// <summary>
+        /// Whether this pickup should be treated as infinite (no depletion).
+        /// </summary>
         public bool IsInfinite { get; private set; }
 
+        /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Pickup;
 
+        /// <inheritdoc/>
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             SetWorldTransform(schematic);
@@ -48,6 +62,12 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             base.SpawnObject(schematic, serializable);
         }
 
+        /// <summary>
+        /// Parse pickup-specific values from a <see cref="SerializableObject"/>.
+        /// Validates that the serializable is a pickup and extracts
+        /// </summary>
+        /// <param name="serializable">The serialized object to read values from.</param>
+        /// <returns>True if all required values were parsed successfully; otherwise false.</returns>
         public bool ParseValues(SerializableObject serializable)
         {
             if (serializable.ObjectType != ObjectType.Pickup)

@@ -324,7 +324,7 @@ namespace ThaumielMapEditor.API.Helpers
                         MovementSmoothing = serializable.MovementSmoothing,
                     };
 
-                    light.SpawnObject(serializable, schematicData);
+                    light.SpawnObject(schematicData, serializable);
                     break;
 
                 case ObjectType.TextToy:
@@ -336,7 +336,7 @@ namespace ThaumielMapEditor.API.Helpers
                         IsStatic = serializable.IsStatic
                     };
 
-                    textToy.SpawnObject(serializable, schematicData);
+                    textToy.SpawnObject(schematicData, serializable);
                     break;
 
                 case ObjectType.Door:
