@@ -5,7 +5,7 @@ using ThaumielMapEditor.API.Serialization;
 
 namespace ThaumielMapEditor.Events
 {
-    public class ServerHandler
+    internal class ServerHandler
     {
         public static void Register()
         {

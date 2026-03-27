@@ -6,7 +6,7 @@ using ThaumielMapEditor.API.Helpers;
 
 namespace ThaumielMapEditor.Events
 {
-    public class PrimitiveHandler
+    internal class PrimitiveHandler
     {
         public static void Register()
         {

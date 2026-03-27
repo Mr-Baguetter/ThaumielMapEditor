@@ -1,11 +1,14 @@
 using System.Collections.Generic;
 using CommandSystem;
+using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Blocks;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Interfaces;
 
 namespace ThaumielMapEditor.Commands.Admin
 {
+#pragma warning disable CS1591
+    [DoNotParse]
     public class Rotation : ISubCommand
     {
         public string Name => "rotate";

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using CommandSystem;
 using LabApi.Features.Wrappers;
 using MEC;
+using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Blocks;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Helpers;
@@ -9,6 +10,8 @@ using ThaumielMapEditor.API.Interfaces;
 
 namespace ThaumielMapEditor.Commands.Admin
 {
+#pragma warning disable CS1591
+    [DoNotParse]
     public class Grab : ISubCommand
     {
         public string Name => "grab";

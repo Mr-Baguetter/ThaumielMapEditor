@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CommandSystem;
+using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Interfaces;
@@ -10,6 +11,8 @@ using LabPrimitive = LabApi.Features.Wrappers.PrimitiveObjectToy;
 
 namespace ThaumielMapEditor.Commands.Admin
 {
+#pragma warning disable CS1591
+    [DoNotParse]
     public class Spawned : ISubCommand
     {
         public string Name => "spawned";

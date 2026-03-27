@@ -1,10 +1,13 @@
 ﻿using CommandSystem;
 using System.Collections.Generic;
+using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Interfaces;
 
 namespace ThaumielMapEditor.Commands.Admin
 {
+#pragma warning disable CS1591
+    [DoNotParse]
     public class Reload : ISubCommand
     {
         public string Name => "reload";

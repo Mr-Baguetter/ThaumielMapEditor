@@ -11,7 +11,7 @@ using LabPrimitive = LabApi.Features.Wrappers.PrimitiveObjectToy;
 
 namespace ThaumielMapEditor.Events
 {
-    public class PlayerHandler
+    internal class PlayerHandler
     {
         public static void Register()
         {

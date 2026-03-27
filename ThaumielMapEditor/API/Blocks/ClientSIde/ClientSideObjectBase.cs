@@ -1,7 +1,11 @@
 using System.Collections.Generic;
+using AdminToys;
 using LabApi.Features.Wrappers;
 using Mirror;
 using ThaumielMapEditor.API.Enums;
+using ThaumielMapEditor.API.Extensions;
+using ThaumielMapEditor.API.Helpers;
+using ThaumielMapEditor.API.Serialization;
 using UnityEngine;
 
 namespace ThaumielMapEditor.API.Blocks.ClientSide
@@ -54,6 +58,16 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         public virtual Collider[] ServerColliders { get; set; } = [];
 
         /// <summary>
+        /// Gets or sets the <see cref="GameObject"/> the <see cref="ClientSideObjectBase"/> is parented to on the client.
+        /// </summary>
+        public GameObject? Parent { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets the netId of the <see cref="GameObject"/> this <see cref="ClientSideObjectBase"/> is parented to.
+        /// </summary>
+        public uint ParentId { get; internal set; }
+
+        /// <summary>
         /// Gets or sets the netid of the <see cref="ClientSideObjectBase"/> instance.
         /// </summary>
         public abstract uint NetId { get; set; }
@@ -96,6 +110,67 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 
                 DestroyForPlayer(player);
             }
+        }
+
+        /// <summary>
+        /// Sets the parent of the 
+        /// </summary>
+        /// <param name="player">The <see cref="Player"/> that will recive the parent message=</param>
+        /// <param name="parentId">The <see cref="NetworkBehaviour.netId"/> of the parent</param>
+        public void SetParent(Player player, uint parentId)
+        {
+            player.SendFakeRPC(NetId, typeof(AdminToyBase), nameof(AdminToyBase.RpcChangeParent), 0, parentId);
+
+            GameObject? go = NetworkServer.spawned.TryGetValue(ParentId, out NetworkIdentity identity) ? identity.gameObject : null;
+            if (go != null)
+            {
+                Parent = go;
+            }
+            else
+                LogManager.Warn($"Failed to find GameObject with NetId {ParentId}!");
+        }
+
+        public T GetValue<T>(SerializableObject serializable, string key) =>
+            serializable.Values.GetConvertValue<T>(key);
+
+        public void HideForPlayer(Player player)
+        {
+            if (player.IsHost)
+                return;
+
+            player.Connection.Send(new ObjectHideMessage { netId = NetId });
+        }
+
+        public void ShowForPlayer(Player player)
+        {
+            if (player.IsHost)
+                return;
+
+            player.Connection.Send(new SpawnMessage { netId = NetId });
+        }
+
+        public void DespawnForPlayer(Player player)
+        {
+            if (player.IsHost)
+                return;
+
+            player.Connection.Send(new ObjectDestroyMessage { netId = NetId });
+            SpawnedPlayers.Remove(player);
+        }
+
+        public uint DespawnForAllPlayers()
+        {
+            uint count = 0;
+            foreach (Player player in Player.ReadyList)
+            {
+                if (player.IsHost)
+                    continue;
+
+                count++;
+                DespawnForPlayer(player);
+            }
+            
+            return count;
         }
     }
 }

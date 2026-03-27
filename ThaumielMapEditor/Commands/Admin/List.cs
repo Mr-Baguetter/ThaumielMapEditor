@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using System.Text;
 using CommandSystem;
+using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Interfaces;
 using ThaumielMapEditor.API.Serialization;
 
 namespace ThaumielMapEditor.Commands.Admin
 {
+#pragma warning disable CS1591
+    [DoNotParse]
     public class List : ISubCommand
     {
         public string Name => "list";

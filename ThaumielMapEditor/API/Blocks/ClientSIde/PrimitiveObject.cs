@@ -146,10 +146,6 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Primitive; 
 
-        public GameObject? Parent { get; set; }
-
-        public uint ParentId { get; set; }
-
         /// <inheritdoc/>
         public override void SpawnForPlayer(Player player)
         {
@@ -196,59 +192,6 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 
             SpawnedPlayers.Add(player);
             Spawned = true;
-        }
-
-        public void HideForPlayer(Player player)
-        {
-            if (player.IsHost)
-                return;
-
-            player.Connection.Send(new ObjectHideMessage { netId = NetId });
-        }
-
-        public void ShowForPlayer(Player player)
-        {
-            if (player.IsHost)
-                return;
-
-            player.Connection.Send(new SpawnMessage { netId = NetId });
-        }
-
-        public void DespawnForPlayer(Player player)
-        {
-            if (player.IsHost)
-                return;
-
-            player.Connection.Send(new ObjectDestroyMessage { netId = NetId });
-            SpawnedPlayers.Remove(player);
-        }
-
-        public uint DespawnForAllPlayers()
-        {
-            uint count = 0;
-            foreach (Player player in Player.ReadyList)
-            {
-                if (player.IsHost)
-                    continue;
-
-                count++;
-                DespawnForPlayer(player);
-            }
-            
-            return count;
-        }
-
-        public void SetParent(Player player, uint parentId)
-        {
-            player.SendFakeRPC(NetId, typeof(AdminToyBase), nameof(AdminToyBase.RpcChangeParent), 0, parentId);
-
-            GameObject? go = NetworkServer.spawned.TryGetValue(ParentId, out NetworkIdentity identity) ? identity.gameObject : null;
-            if (go != null)
-            {
-                Parent = go;
-            }
-            else
-                LogManager.Warn($"Failed to find GameObject with NetId {ParentId}!");
         }
 
         private ulong _pendingDirtyBits = 0;

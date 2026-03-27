@@ -113,6 +113,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
         } = true;
 
+        /// <summary>
+        /// Gets or sets the <see cref="SchematicData"/> this <see cref="CapybaraObject"/> is spawned from.
+        /// </summary>
         public SchematicData? Schematic { get; set; }
 
         /// <inheritdoc/>
@@ -120,10 +123,6 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 
         /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Capybara;
-
-        public GameObject? Parent { get; set; }
-
-        public uint ParentId { get; set; }
 
         /// <inheritdoc/>
         public override void SpawnForPlayer(Player player)
@@ -170,22 +169,6 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             SpawnedPlayers.Add(player);
             Spawned = true;
         }
-
-        public void SetParent(Player player, uint parentId)
-        {
-            player.SendFakeRPC(NetId, typeof(AdminToyBase), nameof(AdminToyBase.RpcChangeParent), 0, parentId);
-
-            GameObject? go = NetworkServer.spawned.TryGetValue(ParentId, out NetworkIdentity identity) ? identity.gameObject : null;
-            if (go != null)
-            {
-                Parent = go;
-            }
-            else
-                LogManager.Warn($"Failed to find GameObject with NetId {ParentId}!");
-        }
-
-        public T GetValue<T>(SerializableObject serializable, string key) =>
-            serializable.Values.GetConvertValue<T>(key);
 
         private ulong _pendingDirtyBits = 0;
         private readonly SortedDictionary<ulong, Action<NetworkWriter>> _pendingWrites = [];

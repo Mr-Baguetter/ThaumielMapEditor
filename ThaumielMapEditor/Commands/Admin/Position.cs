@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using System.Text;
 using CommandSystem;
+using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Interfaces;
 
 namespace ThaumielMapEditor.Commands.Admin
 {
+#pragma warning disable CS1591
+    [DoNotParse]
     public class Position : ISubCommand
     {
         public string Name => "position";
@@ -24,7 +27,7 @@ namespace ThaumielMapEditor.Commands.Admin
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
             StringBuilder sb = new();
-            if (!SchematicLoader.SchematicsById.TryGetValue(uint.Parse(arguments[0]), out var data))
+            if (!SchematicLoader.SchematicsById.TryGetValue(uint.Parse(arguments[0]), out var data) || data.Primitive == null)
             {
                 sb.AppendLine();
                 sb.AppendLine($"No schematic with id {arguments[0]} was found.");

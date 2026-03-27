@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using CommandSystem;
 using LabApi.Loader.Features.Paths;
+using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Conversion;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Interfaces;
@@ -11,6 +12,8 @@ using ThaumielMapEditor.API.Serialization;
 
 namespace ThaumielMapEditor.Commands.Admin
 {
+#pragma warning disable CS1591
+    [DoNotParse]
     public class Convert : ISubCommand
     {
         public string Name => "convert";

@@ -7,6 +7,7 @@ using ThaumielMapEditor.API.Attributes;
 
 namespace ThaumielMapEditor
 {
+#pragma warning disable CS1591
     [DoNotParse]
     public class Config
     {

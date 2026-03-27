@@ -9,7 +9,7 @@ namespace ThaumielMapEditor.Events
     /// <summary>
     /// This is a example of how to setup animations to run after spawning a schematic.
     /// </summary>
-    public class SchematicHandler
+    internal class SchematicHandler
     {
         public static void Register()
         {

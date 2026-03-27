@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using CommandSystem;
 using LabApi.Features.Permissions;
+using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Interfaces;
 using ThaumielMapEditor.Commands.Admin;
 namespace ThaumielMapEditor.Commands
 {
+#pragma warning disable CS1591
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
+    [DoNotParse]
     public class Parent : ParentCommand
     {
         public Parent() => LoadGeneratedCommands();
