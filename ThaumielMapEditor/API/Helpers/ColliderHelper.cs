@@ -7,10 +7,6 @@ namespace ThaumielMapEditor.API.Helpers
 {
     public class ColliderHelper
     {
-        /// <summary>
-        /// Creates server-side collider GameObjects mirroring the prefab's collider hierarchy
-        /// for the given client-side object.
-        /// </summary>
         public static void CreateClientObjectColliders(ClientSideObjectBase clientObject, SchematicData schematic)
         {
             GameObject? prefab = GetPrefabForClientObject(clientObject);
@@ -43,9 +39,7 @@ namespace ThaumielMapEditor.API.Helpers
                 colGo.transform.rotation = clientObject.Rotation * localRotation;
                 colGo.transform.localScale = Vector3.Scale(clientObject.Scale, localScale);
 
-                bool added = TryCopyCollider(col, colGo);
-
-                if (added)
+                if (TryCopyCollider(col, colGo))
                 {
                     colGo.transform.SetParent(schematic.Primitive.Transform, worldPositionStays: true);
                     LogManager.Debug($"Created {col.GetType().Name} for '{clientObject.ObjectType}' at {colGo.transform.position}.");
