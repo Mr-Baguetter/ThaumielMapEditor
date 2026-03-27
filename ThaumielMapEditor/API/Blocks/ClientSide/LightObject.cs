@@ -139,12 +139,16 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 
         public uint ParentId { get; set; }
 
+        /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Light;
 
+        /// <inheritdoc/>
         public override uint NetId { get; set; }
 
+        /// <inheritdoc/>
         public override uint AssetId { get; set; }
 
+        /// <inheritdoc/>
         public override void SpawnForPlayer(Player player)
         {
             if (player.IsHost)
@@ -222,7 +226,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 
         public void DeserializeValues(SerializableObject serializable)
         {
-            if (serializable.ObjectType is not ObjectType.Light)
+            if (serializable.ObjectType != ObjectType.Light)
                 return;
 
             if (!serializable.Values.TryConvertValue<float>("LightIntensity", out var intensity))

@@ -11,7 +11,7 @@ using UnityEngine.Networking;
 
 namespace ThaumielMapEditor.API.Helpers
 {
-    public class LogManager
+    internal class LogManager
     {
         public class Log
         {

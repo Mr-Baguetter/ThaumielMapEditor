@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ThaumielMapEditor.API.Extensions
 {
-    public static class DictionaryExtensions
+    internal static class DictionaryExtensions
     {
         public static bool TryConvertValue<TKey, TValue, T>(this Dictionary<TKey, TValue> dict, TKey key, out T result)
         {
@@ -139,7 +139,7 @@ namespace ThaumielMapEditor.API.Extensions
             Dictionary<string, object>? colorDict = value switch
             {
                 Dictionary<string, object> typed => typed,
-                Dictionary<object, object> untyped => untyped.Where(kvp => kvp.Key is not null).ToDictionary(kvp => kvp.Key.ToString()!, kvp => kvp.Value),
+                Dictionary<object, object> untyped => untyped.Where(kvp => kvp.Key != null).ToDictionary(kvp => kvp.Key.ToString()!, kvp => kvp.Value),
                 _ => null
             };
 
@@ -198,7 +198,7 @@ namespace ThaumielMapEditor.API.Extensions
             }
 
             if (item is Dictionary<object, object> untyped)
-                item = untyped.Where(k => k.Key is not null).ToDictionary(k => k.Key.ToString()!, k => k.Value);
+                item = untyped.Where(k => k.Key != null).ToDictionary(k => k.Key.ToString()!, k => k.Value);
 
             if (item is Dictionary<string, object> dictItem)
             {

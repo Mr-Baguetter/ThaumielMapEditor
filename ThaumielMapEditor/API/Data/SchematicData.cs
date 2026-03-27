@@ -7,19 +7,46 @@ using ThaumielMapEditor.API.Blocks.ClientSide;
 using LabPrimitive = LabApi.Features.Wrappers.PrimitiveObjectToy;
 using System;
 using ThaumielMapEditor.API.Blocks.Areas;
+using Mirror;
+using ThaumielMapEditor.API.Helpers;
 
 namespace ThaumielMapEditor.API.Data
 {
     public class SchematicData
     {
+        /// <summary>
+        /// Fired when the <see cref="Position"/> is set;
+        /// </summary>
         public static event Action<SchematicData>? SchematicPositionUpdated;
+
+        /// <summary>
+        /// Fired when the <see cref="Rotation"/> is set;
+        /// </summary>
         public static event Action<SchematicData>? SchematicRotationUpdated;
 
+        /// <summary>
+        /// Gets or sets whether or not this <see cref="SchematicData"/> has a animator in it when built from unity.
+        /// </summary>
         public bool ContainsAnimator { get; set; }
-        public string FileName = string.Empty;
-        public int RootObjectId { get; internal set; }
-        public uint Id;
 
+        /// <summary>
+        /// Gets or sets the file name.
+        /// </summary>
+        public string FileName { get; internal set; }= string.Empty;
+
+        /// <summary>
+        /// Gets the root object id.
+        /// </summary>
+        public int RootObjectId { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets the id
+        /// </summary>
+        public uint Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the position of this <see cref="SchematicData"/> instance.
+        /// </summary>
         public Vector3 Position
         {
             get;
@@ -30,6 +57,9 @@ namespace ThaumielMapEditor.API.Data
             }
         }
 
+        /// <summary>
+        /// Gets or sets the rotation of this <see cref="SchematicData"/> instance.
+        /// </summary>
         public Quaternion Rotation
         {
             get;
@@ -40,14 +70,29 @@ namespace ThaumielMapEditor.API.Data
             }
         }
 
+        /// <summary>
+        /// Gets or sets the scale of this <see cref="SchematicData"/> instance.
+        /// </summary>
         public Vector3 Scale { get; set; }
 
-        public LabPrimitive? Primitive;
+        /// <summary>
+        /// Gets the base <see cref="LabPrimitive"/> that all client primtives will be parented to.
+        /// </summary>
+        public LabPrimitive? Primitive { get; internal set; }
 
+        /// <summary>
+        /// A list of all spawned <see cref="ClientSideObjectBase"/> instances.
+        /// </summary>
         public List<ClientSideObjectBase> SpawnedClientObjects = [];
 
+        /// <summary>
+        /// A list of all spawned <see cref="ServerObject"/> instances.
+        /// </summary>
         public List<ServerObject> SpawnedServerObjects = [];
         
+        /// <summary>
+        /// A list of all spawned <see cref="AreaObject"/> instances.
+        /// </summary>
         public List<AreaObject> SpawnedAreas = [];
 
 #region ClientObjects
@@ -126,11 +171,37 @@ namespace ThaumielMapEditor.API.Data
         public IEnumerable<WorkstationObject> Workstations =>
             SpawnedServerObjects.OfType<WorkstationObject>();
 #endregion
+
+        /// <summary>
+        /// Syncs the <see cref="ClientSideObjectBase"/> of this <see cref="SchematicData"/> with the specified <see cref="Player"/>.
+        /// </summary>
+        /// <param name="player">The <see cref="Player"/> to sync with.</param>
         public void SyncWithPlayer(Player player)
         {
             foreach (ClientSideObjectBase objects in SpawnedClientObjects)
             {
                 objects.SpawnForPlayer(player);
+            }
+        }
+
+        internal void Destroy()
+        {
+            foreach (ClientSideObjectBase clientobj in SpawnedClientObjects.ToArray())
+            {
+                clientobj.DestroyForAllPlayers();
+                SpawnedClientObjects.Remove(clientobj);
+            }
+
+            foreach (ServerObject serverobj in SpawnedServerObjects.ToArray())
+            {
+                if (serverobj.Object == null)
+                {
+                    LogManager.Warn($"Failed to destroy server object {serverobj.GetType()} - {serverobj.NetId} - {serverobj.ObjectType}");
+                    continue;
+                }
+
+                NetworkServer.Destroy(serverobj.Object);
+                SpawnedServerObjects.Remove(serverobj);
             }
         }
     }

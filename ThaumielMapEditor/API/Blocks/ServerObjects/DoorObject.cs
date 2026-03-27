@@ -251,7 +251,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// </param>
         public void ParseValues(SerializableObject serializable)
         {
-            if (serializable.ObjectType is not ObjectType.Door)
+            if (serializable.ObjectType != ObjectType.Door)
                 return;
 
             if (!serializable.Values.TryConvertValue<DoorType>("DoorType", out var doorType))

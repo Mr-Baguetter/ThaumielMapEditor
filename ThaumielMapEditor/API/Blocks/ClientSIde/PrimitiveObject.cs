@@ -21,6 +21,8 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         public static event Action<Quaternion, PrimitiveObject>? RotationUpdated;
 
         public bool Spawned = false;
+
+        /// <inheritdoc/>
         public override Quaternion Rotation
         {
             get;
@@ -35,6 +37,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
         }
 
+        /// <inheritdoc/>
         public override Vector3 Scale
         {
             get;
@@ -49,6 +52,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
         }
 
+        /// <inheritdoc/>
         public override Vector3 Position
         {
             get;
@@ -102,8 +106,10 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
         }
 
+        /// <inheritdoc/>
         public override uint NetId { get; set; }
 
+        /// <inheritdoc/>
         public override bool IsStatic
         {
             get;
@@ -117,6 +123,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
         }
 
+        /// <inheritdoc/>
         public override byte MovementSmoothing
         {
             get;
@@ -133,14 +140,17 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         public MeshCollider? ServerCollider { get; set; }
         public SchematicData? Schematic { get; set; }
 
+        /// <inheritdoc/>
         public override uint AssetId { get; set; }
 
+        /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Primitive; 
 
         public GameObject? Parent { get; set; }
 
         public uint ParentId { get; set; }
 
+        /// <inheritdoc/>
         public override void SpawnForPlayer(Player player)
         {
             if (player.IsHost)
@@ -233,7 +243,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             player.SendFakeRPC(NetId, typeof(AdminToyBase), nameof(AdminToyBase.RpcChangeParent), 0, parentId);
 
             GameObject? go = NetworkServer.spawned.TryGetValue(ParentId, out NetworkIdentity identity) ? identity.gameObject : null;
-            if (go is not null)
+            if (go != null)
             {
                 Parent = go;
             }

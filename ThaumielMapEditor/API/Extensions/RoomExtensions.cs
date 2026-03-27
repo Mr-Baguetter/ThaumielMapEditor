@@ -5,6 +5,11 @@ namespace ThaumielMapEditor.API.Extensions
 {
     public static class RoomExtensions
     {
+        /// <summary>
+        /// Gets the closest room to the <see cref="Vector3"/> <paramref name="pos"/>
+        /// </summary>
+        /// <param name="pos">The position to get the closest room from</param>
+        /// <returns><see cref="RoomIdentifier"/> if a room was found else returns <see langword="null"/> if no room was found</returns>
         public static RoomIdentifier GetClosestRoomToPosition(Vector3 pos)
         {
             if (Room.List == null || Room.List.Count == 0)

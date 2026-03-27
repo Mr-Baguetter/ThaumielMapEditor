@@ -38,11 +38,7 @@ namespace ThaumielMapEditor.Commands.Admin
                 return false;
             }
 
-            foreach (PrimitiveObject primitive in data.Primitives)
-            {
-                count = primitive.DespawnForAllPlayers();
-            }
-
+            SchematicLoader.DestroySchematic(data);
             response = $"Destroyed schematic {arguments[0]} for {count} players";
             return true;
         }

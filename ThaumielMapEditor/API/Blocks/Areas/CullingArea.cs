@@ -7,6 +7,9 @@ namespace ThaumielMapEditor.API.Blocks.Areas
 {
     public class CullingArea : AreaObject
     {
+        /// <summary>
+        /// Gets or sets the bounds of the <see cref="CullingArea"/> instance.
+        /// </summary>
         public Vector3 Bounds
         {
             get;
@@ -24,14 +27,20 @@ namespace ThaumielMapEditor.API.Blocks.Areas
             }
         }
 
+        /// <summary>
+        /// The <see cref="GameObject"/> instance tied to this <see cref="CullingArea"/> instance.
+        /// </summary>
         public GameObject? CullingObject;
 
+        /// <summary>
+        /// Creates the CullingArea <see cref="GameObject"/> and adds the <see cref="CullingTrigger"/> component.
+        /// </summary>
         public void CreateCullingZone()
         {
             if (ParentSchematic == null)
                 return;
 
-            CullingObject = new GameObject("CullingZone");
+            CullingObject = new GameObject("CullingArea");
             CullingObject.transform.position = ParentSchematic.Position;
 
             BoxCollider collider = CullingObject.AddComponent<BoxCollider>();
@@ -42,7 +51,10 @@ namespace ThaumielMapEditor.API.Blocks.Areas
             trigger.Init(ParentSchematic);
         }
 
-        public void DestroyCullingZone()
+        /// <summary>
+        /// Destroys this <see cref="CullingArea"/> instance.
+        /// </summary>
+        public void DestroyCullingArea()
         {
             if (CullingObject == null)
                 return;
@@ -51,6 +63,7 @@ namespace ThaumielMapEditor.API.Blocks.Areas
             CullingObject = null;
         }
 
+        /// <inheritdoc/>
         public override void ParseValues()
         {
             if (!Values.TryConvertValue<Vector3>("Bounds", out var bounds))

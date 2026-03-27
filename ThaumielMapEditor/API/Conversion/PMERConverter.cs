@@ -11,6 +11,11 @@ namespace ThaumielMapEditor.API.Conversion
 {
     public static class PMERConverter
     {
+        /// <summary>
+        /// Converts a PMER schematic into a TME schematic
+        /// </summary>
+        /// <param name="root">The PMER schematic root</param>
+        /// <returns></returns>
         public static async Task<SerializableSchematic> ConvertSchematicAsync(PMERRoot root)
         {
             return await Task.Run(() =>

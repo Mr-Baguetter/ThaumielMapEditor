@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ThaumielMapEditor.API.Blocks.ClientSide;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
@@ -7,8 +8,14 @@ namespace ThaumielMapEditor.API.Helpers
 {
     public class ColliderHelper
     {
+        /// <summary>
+        /// Creates the colliders on the server for the client side objects.
+        /// </summary>
+        /// <param name="clientObject">The <see cref="ClientSideObjectBase"/> to create colliders for.</param>
+        /// <param name="schematic">The <see cref="SchematicData"/> that the colliders will be parented to.</param>
         public static void CreateClientObjectColliders(ClientSideObjectBase clientObject, SchematicData schematic)
         {
+            List<Collider> colliders = [];
             GameObject? prefab = GetPrefabForClientObject(clientObject);
 
             if (prefab == null)
@@ -41,14 +48,74 @@ namespace ThaumielMapEditor.API.Helpers
 
                 if (TryCopyCollider(col, colGo))
                 {
+                    colliders.Add(colGo.GetComponent<Collider>());
                     colGo.transform.SetParent(schematic.Primitive.Transform, worldPositionStays: true);
                     LogManager.Debug($"Created {col.GetType().Name} for '{clientObject.ObjectType}' at {colGo.transform.position}.");
                 }
                 else
                 {
                     LogManager.Warn($"Unhandled collider type '{col.GetType().Name}' on prefab '{prefab.name}', skipping.");
-                    UnityEngine.Object.Destroy(colGo);
+                    Object.Destroy(colGo);
                 }
+
+                clientObject.ServerColliders = colliders.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Disables all the colliders on the specified <see cref="ClientSideObjectBase"/>.
+        /// </summary>
+        /// <param name="clientObject">The client side object to disable the server side colliders on.</param>
+        public static void DisableColliders(ClientSideObjectBase clientObject)
+        {
+            if (clientObject.ServerColliders.IsEmpty())
+            {
+                LogManager.Warn($"Failed to disable colliders for object {clientObject.AssetId} - {clientObject.ObjectType} there are no colliders");
+                return;
+            }
+
+            foreach (Collider collider in clientObject.ServerColliders)
+            {
+                if (!collider.enabled)
+                    continue;
+
+                collider.enabled = false;
+            }
+        }
+
+        /// <summary>
+        /// If <paramref name="enabled"/> is <see langword="true"/> colliders will be enabled else if <paramref name="enabled"/> is <see langword="false"/> colliders will be disabled. 
+        /// </summary>
+        /// <param name="clientObject"></param>
+        /// <param name="enabled"></param>
+        public static void SetColliders(ClientSideObjectBase clientObject, bool enabled)
+        {
+            if (enabled)
+            {
+                EnableColliders(clientObject);
+            }
+            else
+                DisableColliders(clientObject);
+        }
+
+        /// <summary>
+        /// Enables all the colliders on the specified <see cref="ClientSideObjectBase"/>.
+        /// </summary>
+        /// <param name="clientObject">The client side object to enable the server side colliders on.</param>
+        public static void EnableColliders(ClientSideObjectBase clientObject)
+        {
+            if (clientObject.ServerColliders.IsEmpty())
+            {
+                LogManager.Warn($"Failed to enable colliders for object {clientObject.AssetId} - {clientObject.ObjectType} there are no colliders");
+                return;
+            }
+
+            foreach (Collider collider in clientObject.ServerColliders)
+            {
+                if (collider.enabled)
+                    continue;
+
+                collider.enabled = true;
             }
         }
 

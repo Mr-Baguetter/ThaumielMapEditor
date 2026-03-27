@@ -34,7 +34,6 @@ namespace ThaumielMapEditor
             harmony = new(HarmonyId);
             harmony.PatchAll();
 
-            SchematicLoader.GenerateExampleSchematic();
             SchematicLoader.Init();
 
             PlayerHandler.Register();

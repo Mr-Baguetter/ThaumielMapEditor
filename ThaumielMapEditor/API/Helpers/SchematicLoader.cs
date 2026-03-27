@@ -26,14 +26,34 @@ namespace ThaumielMapEditor.API.Helpers
 {
     public class SchematicLoader
     {
+        /// <summary>
+        /// Fired when a <see cref="SchematicData"/> is spawned.
+        /// </summary>
         public static event Action<SchematicData>? SchematicSpawned;
 
+        /// <summary>
+        /// Fired when a <see cref="SchematicData"/> is destroyed.
+        /// </summary>
         public static event Action<SchematicData>? SchematicDestroyed;
 
+        /// <summary>
+        /// A dictionary of all spawned <see cref="MapData"/> instances, keyed by their <see cref="Guid"/>.
+        /// </summary>
         public static Dictionary<Guid, MapData> MapsById { get; set; } = [];
+
+        /// <summary>
+        /// A dictionary of all spawned <see cref="SchematicData"/> instances, keyed by their ID.
+        /// </summary>
         public static Dictionary<uint, SchematicData> SchematicsById { get; set; } = [];
 
+        /// <summary>
+        /// An enumerable of all currently spawned <see cref="SchematicData"/> instances.
+        /// </summary>
         public static IEnumerable<SchematicData> SpawnedSchematics => SchematicsById.Values;
+
+        /// <summary>
+        /// An enumerable of all currently spawned <see cref="MapData"/> instances.
+        /// </summary>
         public static IEnumerable<MapData> SpawnedMaps => MapsById.Values;
 
         /// <summary>
@@ -48,6 +68,9 @@ namespace ThaumielMapEditor.API.Helpers
         /// </summary>
         public static List<SerializableMap> LoadedMaps = [];
 
+        /// <summary>
+        /// The YAML deserializer used to parse schematic and map files
+        /// </summary>
         public static IDeserializer Deserializer { get; } = new DeserializerBuilder()
             .WithNamingConvention(PascalCaseNamingConvention.Instance)
             .IgnoreUnmatchedProperties()
@@ -58,6 +81,9 @@ namespace ThaumielMapEditor.API.Helpers
             .WithTypeConverter(new CustomQuaternionConverter())
             .Build();
 
+        /// <summary>
+        /// The YAML serializer used to write schematic and map files, configured with Pascal case naming and custom type converters.
+        /// </summary>
         public static ISerializer Serializer { get; } = new SerializerBuilder()
             .WithNamingConvention(PascalCaseNamingConvention.Instance)
             .IgnoreFields()
@@ -67,18 +93,41 @@ namespace ThaumielMapEditor.API.Helpers
             .WithTypeConverter(new CustomQuaternionConverter())
             .Build();
 
+        /// <summary>
+        /// Initializes the <see cref="SchematicLoader"/>
+        /// </summary>
         public static void Init()
         {
             LoadSchematics();
             LoadMaps();
         }
 
+        /// <summary>
+        /// Reloads all loaded schematics
+        /// </summary>
+        /// <remarks>
+        /// This does not automatically respawn schematics
+        /// </remarks>
         public static void ReloadSchematics()
         {
             LoadedSchematics.Clear();
             LoadSchematics();
         }
 
+        /// <summary>
+        /// Destroys the specified <see cref="SchematicData"/>
+        /// </summary>
+        /// <param name="data">The schematic to be destroyed</param>
+        public static void DestroySchematic(SchematicData data)
+        {
+            SchematicDestroyed?.Invoke(data);
+            SchematicsById.Remove(data.Id);
+            data.Destroy();
+        }
+
+        /// <summary>
+        /// Loads the schematics
+        /// </summary>
         public static void LoadSchematics()
         {
             string schematicDir = ThaumFileManager.Dir(["Schematics"]);
@@ -106,6 +155,9 @@ namespace ThaumielMapEditor.API.Helpers
             }
         }
 
+        /// <summary>
+        /// Loads the maps
+        /// </summary>
         public static void LoadMaps()
         {
             string mapsDir = ThaumFileManager.Dir(["Maps"]);
@@ -133,6 +185,12 @@ namespace ThaumielMapEditor.API.Helpers
             }
         }
 
+        /// <summary>
+        /// Tries to get the <see cref="SchematicData"/> by its Id.
+        /// </summary>
+        /// <param name="id">The id to get</param>
+        /// <param name="schematic">The <see cref="SchematicData"/> if found</param>
+        /// <returns><see langword="true"/> if found else returns <see langword="false"/> if not</returns>
         public static bool TryGetSchematicById(uint id, out SchematicData schematic)
         {
             SchematicData? data = GetSchematicById(id);
@@ -146,6 +204,11 @@ namespace ThaumielMapEditor.API.Helpers
             return true;
         }
 
+        /// <summary>
+        /// Gets the <see cref="SchematicData"/> by its id.
+        /// </summary>
+        /// <param name="id">The id to get</param>
+        /// <returns><see cref="SchematicData"/> if found else returns <see langword="null"/></returns>
         public static SchematicData? GetSchematicById(uint id)
         {
             if (SchematicsById.TryGetValue(id, out var schem))
@@ -154,6 +217,10 @@ namespace ThaumielMapEditor.API.Helpers
             return null;
         }
 
+        /// <summary>
+        /// Gets a unique id for all <see cref="SchematicData"/>
+        /// </summary>
+        /// <returns><see cref="uint"/> id</returns>
         public static uint GetId()
         {
             uint id = 0;
@@ -200,6 +267,11 @@ namespace ThaumielMapEditor.API.Helpers
             }
         }
 
+        /// <summary>
+        /// Spawns a map
+        /// </summary>
+        /// <param name="map">The serialized map to spawn</param>
+        /// <returns><see cref="MapData"/></returns>
         public static MapData SpawnMap(SerializableMap map)
         {
             MapData data = new()
@@ -230,12 +302,18 @@ namespace ThaumielMapEditor.API.Helpers
                     continue;
 
                 SchematicData schematicData = SpawnSchematic(schematic, offset);
-                data.Schematics.Add((offset, schematicData.FileName));
+                data.Schematics.Add(new() { LocalPosition = offset, SchematicName = schematicData.FileName});
             }
 
             MapsById.Add(data.Id, data);
         }
 
+        /// <summary>
+        /// Spawns a schematic
+        /// </summary>
+        /// <param name="schematic">The serialized schematic to spawn</param>
+        /// <param name="position">The position to place the schematic at</param>
+        /// <returns><see cref="SchematicData"/></returns>
         public static SchematicData SpawnSchematic(SerializableSchematic schematic, Vector3 position)
         {
             SchematicData schematicData = new()
@@ -339,7 +417,9 @@ namespace ThaumielMapEditor.API.Helpers
                     foreach (Player player in Player.ReadyList)
                         capybara.SpawnForPlayer(player);
 
-                    ColliderHelper.CreateClientObjectColliders(capybara, schematicData);
+                    if (capybara.CollisionsEnabled)
+                        ColliderHelper.CreateClientObjectColliders(capybara, schematicData);
+                        
                     break;
 
                 case ObjectType.Light:
@@ -494,6 +574,10 @@ namespace ThaumielMapEditor.API.Helpers
             }
         }
 
+        /// <summary>
+        /// Creates the colliders for primitives
+        /// </summary>
+        /// <param name="primitive"></param>
         public static void CreateCollisionMesh(PrimitiveObject primitive)
         {
             if (!primitive.PrimitiveFlags.HasFlag(PrimitiveFlags.Collidable))
@@ -519,49 +603,23 @@ namespace ThaumielMapEditor.API.Helpers
             }
         }
 
-        public static void GenerateExampleSchematic()
-        {
-            SerializableObject primitive = new()
-            {
-                Name = "Test",
-                Scale = new(10, 10, 10),
-                IsStatic = true,
-                Position = new(0, 4, 0),
-                Rotation = Quaternion.Euler(Vector3.zero),
-                MovementSmoothing = 30,
-                Values =
-                {
-                    ["Color"] = Color.red,
-                    ["PrimitiveType"] = PrimitiveType.Cube,
-                    ["PrimitiveFlags"] = PrimitiveFlags.Visible | PrimitiveFlags.Collidable
-                },
-            };
-
-            SerializableSchematic schematic = new()
-            {
-                FileName = "example"
-            };
-
-            schematic.Objects.Add(primitive);
-            string dir = ThaumFileManager.Dir(["Schematics"]);
-            ThaumFileManager.TryCreateDirectory(dir);
-            string path = Path.Combine(dir, "example.yml");
-            if (!File.Exists(path))
-                File.WriteAllText(path, Serializer.Serialize(schematic));
-        }
-
+        /// <summary>
+        /// Saves a map
+        /// </summary>
+        /// <param name="data">The <see cref="MapData"/> to save</param>
+        /// <returns><see cref="SerializableMap"/></returns>
         public static SerializableMap SaveMap(MapData data)
         {
             SerializableMap map = new();
             map.FileName = data.FileName;
             map.Room = data.Room.Name;
             map.Id = Guid.NewGuid();
-            foreach ((Vector3, string) val in data.Schematics)
+            foreach (MapSchematicData msdata in data.Schematics)
             {
                 MapSchematic mapSchematic = new()
                 {
-                    Position = val.Item1,
-                    SchematicName = val.Item2
+                    Position = msdata.LocalPosition,
+                    SchematicName = msdata.SchematicName
                 };
 
                 map.Schematics.Add(mapSchematic);

@@ -47,7 +47,7 @@ namespace ThaumielMapEditor.Commands.Admin
             foreach (SchematicData schematic in SchematicLoader.SpawnedSchematics)
             {
                 Vector3 pos = player.Room.LocalPosition(schematic.Position);
-                map.Schematics.Add((pos, schematic.FileName));
+                map.Schematics.Add(new() { LocalPosition = pos, SchematicName = schematic.FileName});
             }
 
             SchematicLoader.SaveMap(map);

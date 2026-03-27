@@ -7,6 +7,13 @@ namespace ThaumielMapEditor.API.Conversion
 {
     public class ObjectDictionaryConverter : JsonConverter<Dictionary<string, object>>
     {
+        /// <summary>
+        /// Reads the Properties area of a PMER schematic and parses it into a <see cref="Dictionary{TKey, TValue}"/>
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="typeToConvert"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         public override Dictionary<string, object> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             Dictionary<string, object> dict = [];
@@ -29,7 +36,7 @@ namespace ThaumielMapEditor.API.Conversion
 
             return dict;
         }
-
+        
         public override void Write(Utf8JsonWriter writer, Dictionary<string, object> value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();

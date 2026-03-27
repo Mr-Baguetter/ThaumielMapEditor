@@ -167,7 +167,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// </remarks>
         public void ParseValues(SerializableObject serializable)
         {
-            if (serializable.ObjectType is not ObjectType.Interactable)
+            if (serializable.ObjectType != ObjectType.Interactable)
             {
                 LogManager.Warn($"Tried to parse {serializable.ObjectType} as Interactable.");                
                 return;

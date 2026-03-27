@@ -7,7 +7,14 @@ namespace ThaumielMapEditor.API.Components
 {
     public class TriggerHandler : MonoBehaviour
     {
+        /// <summary>
+        /// Fired when a <see cref="Player"/> enters the bounds of the <see cref="TriggerHandler"/>
+        /// </summary>
         public event Action<Player>? OnPlayerEntered;
+
+        /// <summary>
+        /// Fired when a <see cref="Player"/> leaves the bounds of the <see cref="TriggerHandler"/>
+        /// </summary>
         public event Action<Player>? OnPlayerExited;
 
         private void OnTriggerEnter(Collider other)

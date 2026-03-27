@@ -6,11 +6,29 @@ namespace ThaumielMapEditor.API.Data
 {
     public class MapData
     {
+        /// <summary>
+        /// Gets or sets the file name of this <see cref="MapData"/> instance.
+        /// </summary>
         public string FileName = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the <see cref="Guid"/> id of this <see cref="MapData"/> instance.
+        /// </summary>
         public Guid Id;
 
+        /// <summary>
+        /// Gets or sets the position of this <see cref="MapData"/> instance.
+        /// </summary>
         public Vector3 Position { get; set; }
+
+        /// <summary>
+        /// Gets or sets the room of this <see cref="MapData"/> instance.
+        /// </summary>
         public Room? Room { get; set; }
-        public List<(Vector3, string)> Schematics { get; set; } = [];
+
+        /// <summary>
+        /// Gets or sets the file name of this <see cref="MapData"/> instance.
+        /// </summary>
+        public List<MapSchematicData> Schematics { get; set; } = [];
     }
 }

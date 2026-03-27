@@ -3,7 +3,7 @@ using CommandSystem;
 
 namespace ThaumielMapEditor.API.Interfaces
 {
-    public interface ISubCommand
+    internal interface ISubCommand
     {
         public string Name { get; }
 

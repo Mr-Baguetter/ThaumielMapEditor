@@ -9,60 +9,38 @@ namespace ThaumielMapEditor.API.Helpers
 {
     public class FileManager
     {
+        /// <summary>
+        /// Gets the Thaumiel directory
+        /// </summary>
+        /// <returns>Directory path to the Thaumiel directory</returns>
         public static string Dir() => Path.Combine(PathManager.Configs.ToString(), "Thaumiel");
+
+        /// <summary>
+        /// Gets the Thaumiel directory plus the inputed directories
+        /// </summary>
+        /// <param name="path">The path of directories</param>
+        /// <returns>Directory path to the Thaumiel directory plus the inputed directories</returns>
         public static string Dir(string[] path) => Path.Combine([Dir(), .. path]);
 
+        /// <summary>
+        /// Tries to create a directory with the inputted name
+        /// </summary>
+        /// <param name="name">The name of the directory</param>
         public static void TryCreateDirectory(string name) => Directory.CreateDirectory(Dir([name]));
+
+        /// <summary>
+        /// Tries to create a directory at the path
+        /// </summary>
+        /// <param name="path">The directory path to make</param>
         public static void TryCreateDirectory(string[] path) => Directory.CreateDirectory(Dir(path));
 
+        /// <summary>
+        /// Gets all the file paths in the Thaumiel directory combined with the specified directory path.
+        /// </summary>
+        /// <param name="name">The directory path relative to the Thaumiel directory.</param>
+        /// <param name="filter">The search pattern to filter files by. Defaults to <c>*</c> which returns all files.</param>
+        /// <returns>An array of file paths matching the <paramref name="filter"/> in the resolved directory.</returns>
         public static string[] GetFilesInDirectory(string name, string filter = "*") =>
             Directory.GetFiles(Dir([name]), filter);
-
-        public static void ParseYamlFiles<T>(string name, Action<T> onParsed)
-        {
-            TryCreateDirectory(name);
-            IDeserializer deserializer = new DeserializerBuilder().WithNamingConvention(PascalCaseNamingConvention.Instance).Build();
-            int count = 0;
-
-            foreach (string file in GetFilesInDirectory(name, "*.yml"))
-            {
-                try
-                {
-                    string yaml = File.ReadAllText(file);
-                    T result = deserializer.Deserialize<T>(yaml);
-                    onParsed(result);
-                    count++;
-                    LogManager.Debug($"Loaded {typeof(T).Name} from {Path.GetFileName(file)}");
-                }
-                catch (Exception ex)
-                {
-                    LogManager.Error($"Failed to parse {Path.GetFileName(file)} as {typeof(T).Name}: {ex.Message}");
-                }
-            }
-
-            LogManager.Info($"Loaded {count} {typeof(T).Name}(s) from {name}");
-        }
-
-        public static void CreateDefaultFile<T>(string name, string fileName) where T : new()
-        {
-            if (Directory.Exists(Dir([name])))
-                return;
-
-            TryCreateDirectory(name);
-            ISerializer serializer = new SerializerBuilder().WithNamingConvention(PascalCaseNamingConvention.Instance).Build();
-            File.WriteAllText(Path.Combine(PathManager.Configs.ToString(), "Thaumiel", name, fileName), serializer.Serialize(new T()));
-        }
-
-        public static void CreateDefaultFiles<T>(string name, List<(string fileName, T item)> items) where T : new()
-        {
-            if (Directory.Exists(Dir([name])))
-                return;
-
-            TryCreateDirectory(name);
-            ISerializer serializer = new SerializerBuilder().WithNamingConvention(PascalCaseNamingConvention.Instance).Build();
-
-            foreach ((string fileName, T item) in items)
-                File.WriteAllText(Path.Combine(PathManager.Configs.ToString(), "Thaumiel", name, fileName), serializer.Serialize(item));
-        }
     }
 }

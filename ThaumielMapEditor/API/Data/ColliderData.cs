@@ -51,6 +51,12 @@ namespace ThaumielMapEditor.API.Data
             };
         }
 
+        /// <summary>
+        /// Parses all of the <see cref="Collider"/>s from a <see cref="GameObject"/> into <see cref="ColliderData"/>s
+        /// </summary>
+        /// <param name="gameObject">The <see cref="GameObject"/> to parse.</param>
+        /// <returns>A enumerable containing all of the <see cref="Collider"/>s</returns>
+        /// <exception cref="NotSupportedException">Throws when a unsupported collider is parsed by <see cref="GetTypeFromCollider"/></exception>
         public static IEnumerable<ColliderData> ParseObjectColliders(GameObject gameObject)
         {
             List<ColliderData> colliders = [];

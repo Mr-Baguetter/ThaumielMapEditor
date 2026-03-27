@@ -8,6 +8,10 @@ namespace ThaumielMapEditor.API.Components
     {
         private SchematicData? Schematic;
 
+        /// <summary>
+        /// Initializes the <see cref="CullingTrigger"/> component
+        /// </summary>
+        /// <param name="schematic">The schematic tied to this <see cref="CullingTrigger"/> instance.</param>
         public void Init(SchematicData schematic)
         {
             OnPlayerEntered += OnTriggerEnter;
