@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using AdminToys;
 using Interactables.Interobjects.DoorUtils;
@@ -5,19 +6,20 @@ using InventorySystem.Items.Firearms.Attachments;
 using MapGeneration.Distributors;
 using MapGeneration.RoomConnectors;
 using Mirror;
+using ThaumielMapEditor.API.Data;
+using ThaumielMapEditor.Commands.Admin;
 using UnityEngine;
 
 namespace ThaumielMapEditor.API.Helpers
 {
     public class PrefabHelper
     {
+        public static List<PrefabCollidersData> PrefabColliders = [];
+
         public static bool RanRegister = false;
 
         #region AssetIds
         public static uint PrimitiveAssetId { get; private set; }
-        public static uint LightAssetId { get; private set; }
-        public static uint CullingParentAssetId { get; private set; }
-        public static uint TextToyAssetId { get; private set; }
         #endregion
 
         public static PrimitiveObjectToy? PrimitiveObject { get; private set; }
@@ -91,13 +93,6 @@ namespace ThaumielMapEditor.API.Helpers
                 if (prefab.TryGetComponent<LightSourceToy>(out var lightSource))
                 {
                     LightSource = lightSource;
-                    LightAssetId = prefab.GetComponent<NetworkIdentity>().assetId;
-                    if (LightAssetId == 0)
-                    {
-                        LogManager.Warn($"Failed to get AssetId for Lights.");
-                    }
-                    else
-                        LogManager.Debug($"Got AssetId {LightAssetId} for Lights");
 
                     continue;
                 }
@@ -139,13 +134,6 @@ namespace ThaumielMapEditor.API.Helpers
                 if (prefab.TryGetComponent<SpawnableCullingParent>(out var cullingParent))
                 {
                     CullingParent = cullingParent;
-                    CullingParentAssetId = prefab.GetComponent<NetworkIdentity>().assetId;
-                    if (CullingParentAssetId == 0)
-                    {
-                        LogManager.Warn($"Failed to get AssetId for CullingParent.");
-                    }
-                    else
-                        LogManager.Debug($"Got AssetId {CullingParentAssetId} for CullingParent");
 
                     continue;
                 }
@@ -157,13 +145,6 @@ namespace ThaumielMapEditor.API.Helpers
                 if (prefab.TryGetComponent<TextToy>(out var texttoy))
                 {
                     TextToy = texttoy;
-                    TextToyAssetId = prefab.GetComponent<NetworkIdentity>().assetId;
-                    if (TextToyAssetId == 0)
-                    {
-                        LogManager.Warn($"Failed to get AssetId for TextToy.");
-                    }
-                    else
-                        LogManager.Debug($"Got AssetId {TextToyAssetId} for TextToy");
 
                     continue;
                 }
@@ -286,6 +267,12 @@ namespace ThaumielMapEditor.API.Helpers
                             continue;
                     }
                 }
+
+                PrefabColliders.Add(new()
+                {
+                    Prefab = prefab,
+                    Colliders = ColliderData.ParseObjectColliders(prefab)
+                });
             }
 
             RanRegister = true;

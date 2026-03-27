@@ -19,8 +19,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
     public class CameraObject : ServerObject
     {
         /// <summary>
-        /// The underlying in-game camera toy instance.
-        /// Marked with <see cref="YamlDotNet.Serialization.YamlIgnoreAttribute"/> so the runtime
+        /// The underlying in game camera toy instance.
         /// </summary>
         [YamlIgnore]
         public Scp079CameraToy Base { get; internal set; }

@@ -182,18 +182,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// </summary>
         public override ObjectType ObjectType { get; set; } = ObjectType.Door;
 
-        /// <summary>
-        /// Instantiates the door prefab in the game world using the schematic's transform.
-        /// Looks up the correct prefab from <see cref="DoorType"/>, applies all configured properties,
-        /// then registers the door with the network server.
-        /// </summary>
-        /// <param name="schematic">The schematic data that provides transform and file context.</param>
-        /// <param name="serializable">The serializable object containing raw door property values.</param>
-        /// <remarks>
-        /// If the prefab lookup fails, a warning is logged and spawning is aborted.
-        /// HCZ doors automatically have their room connector bitmask set to <c>3</c>
-        /// to ensure correct wall rendering.
-        /// </remarks>
+        /// <inheritdoc/>
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             Base = GetDoorFromType(DoorType);

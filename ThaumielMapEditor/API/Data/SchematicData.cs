@@ -50,6 +50,7 @@ namespace ThaumielMapEditor.API.Data
         
         public List<AreaObject> SpawnedAreas = [];
 
+#region ClientObjects
         /// <summary>
         /// Gets all spawned <see cref="PrimitiveObject"/>s belonging to this schematic.
         /// </summary>
@@ -57,22 +58,25 @@ namespace ThaumielMapEditor.API.Data
             SpawnedClientObjects.OfType<PrimitiveObject>();
 
         /// <summary>
+        /// Gets all spawned <see cref="CapybaraObject"/>s belonging to this schematic.
+        /// </summary>
+        public IEnumerable<CapybaraObject> Capybaras =>
+            SpawnedClientObjects.OfType<CapybaraObject>();
+
+        /// <summary>
+        /// Gets all spawned <see cref="LightObject"/>s belonging to this schematic.
+        /// </summary>
+        public IEnumerable<LightObject> Lights =>
+            SpawnedClientObjects.OfType<LightObject>();
+            
+#endregion
+
+#region ServerObjects
+        /// <summary>
         /// Gets all spawned <see cref="CameraObject"/>s belonging to this schematic.
         /// </summary>
         public IEnumerable<CameraObject> Cameras =>
             SpawnedServerObjects.OfType<CameraObject>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="CapybaraObject"/>s belonging to this schematic.
-        /// </summary>
-        public IEnumerable<CapybaraObject> Capybaras =>
-            SpawnedServerObjects.OfType<CapybaraObject>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="ClutterObject"/>s belonging to this schematic.
-        /// </summary>
-        public IEnumerable<ClutterObject> Clutter =>
-            SpawnedServerObjects.OfType<ClutterObject>();
 
         /// <summary>
         /// Gets all spawned <see cref="DoorObject"/>s belonging to this schematic.
@@ -81,17 +85,17 @@ namespace ThaumielMapEditor.API.Data
             SpawnedServerObjects.OfType<DoorObject>();
 
         /// <summary>
+        /// Gets all spawned <see cref="ClutterObject"/>s belonging to this schematic.
+        /// </summary>
+        public IEnumerable<ClutterObject> Clutter =>
+            SpawnedServerObjects.OfType<ClutterObject>();
+
+        /// <summary>
         /// Gets all spawned <see cref="InteractionObject"/>s belonging to this schematic.
         /// </summary>
         public IEnumerable<InteractionObject> Interactables =>
             SpawnedServerObjects.OfType<InteractionObject>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="LightObject"/>s belonging to this schematic.
-        /// </summary>
-        public IEnumerable<LightObject> Lights =>
-            SpawnedServerObjects.OfType<LightObject>();
-
+            
         /// <summary>
         /// Gets all spawned <see cref="PickupObject"/>s belonging to this schematic.
         /// </summary>
@@ -121,7 +125,7 @@ namespace ThaumielMapEditor.API.Data
         /// </summary>
         public IEnumerable<WorkstationObject> Workstations =>
             SpawnedServerObjects.OfType<WorkstationObject>();
-
+#endregion
         public void SyncWithPlayer(Player player)
         {
             foreach (ClientSideObjectBase objects in SpawnedClientObjects)
