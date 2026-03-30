@@ -11,7 +11,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
     public class WorkstationObject : ServerObject
     {
         /// <summary>
-        /// The instantiated <c>WorkstationController</c> that backs this server object.
+        /// The instantiated <see cref="WorkstationController"/> that backs this server object.
         /// It will be null until <see cref="SpawnObject"/> successfully instantiates the prefab.
         /// </summary>
         [YamlIgnore]

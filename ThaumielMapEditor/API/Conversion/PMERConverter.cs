@@ -58,10 +58,13 @@ namespace ThaumielMapEditor.API.Conversion
             {
                 1 => ObjectType.Primitive,
                 2 => ObjectType.Light,
-                3 => ObjectType.TextToy,
-                4 => ObjectType.Pickup,
-                5 => ObjectType.Workstation,
-                6 => ObjectType.Interactable,
+                3 => ObjectType.Pickup,
+                4 => ObjectType.Workstation,
+                5 => ObjectType.Schematic,
+                6 => ObjectType.Teleporter,
+                7 => ObjectType.Locker,
+                8 => ObjectType.TextToy,
+                9 => ObjectType.Interactable,
                 _ => throw new InvalidOperationException(),
             };
         }
