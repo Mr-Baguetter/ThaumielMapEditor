@@ -194,14 +194,7 @@ namespace ThaumielMapEditor.API.Data
 
             foreach (ServerObject serverobj in SpawnedServerObjects.ToArray())
             {
-                if (serverobj.Object == null)
-                {
-                    LogManager.Warn($"Failed to destroy server object {serverobj.GetType()} - {serverobj.NetId} - {serverobj.ObjectType}");
-                    continue;
-                }
-
-                NetworkServer.Destroy(serverobj.Object);
-                SpawnedServerObjects.Remove(serverobj);
+                serverobj.DestroyObject(this);
             }
         }
     }

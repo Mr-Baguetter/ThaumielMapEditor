@@ -1,8 +1,5 @@
 namespace ThaumielMapEditor.API.Enums
 {
-    /// <summary>
-    /// Defines the types of objects that can be loaded.
-    /// </summary>
     public enum ObjectType
     {
         Primitive = 1,

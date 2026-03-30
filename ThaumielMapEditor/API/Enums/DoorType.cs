@@ -2,9 +2,6 @@ using ThaumielMapEditor.API.Blocks.ServerObjects;
 
 namespace ThaumielMapEditor.API.Enums
 {
-    /// <summary>
-    /// Defines the types that <see cref="DoorObject"/> can use.
-    /// </summary>
     public enum DoorType
     {
         /// <summary>

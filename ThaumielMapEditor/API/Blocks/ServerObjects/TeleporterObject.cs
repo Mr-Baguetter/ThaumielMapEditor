@@ -9,6 +9,7 @@ using ThaumielMapEditor.API.Extensions;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Serialization;
 using UnityEngine;
+using YamlDotNet.Serialization;
 
 namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
@@ -42,6 +43,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Teleporter;
 
+        [YamlIgnore]
         public TeleporterHandler TeleporterHandler { get; private set; }
 
         /// <inheritdoc/>
@@ -55,6 +57,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             primitive.Rotation = Rotation;
             primitive.Scale = Scale;
             primitive.Flags = AdminToys.PrimitiveFlags.None;
+            primitive.Base.transform.SetParent(schematic.Primitive?.Transform, true);
             BoxCollider collider = primitive.Base.gameObject.AddComponent<BoxCollider>();
             collider.size = Scale;
             collider.isTrigger = true;
@@ -69,7 +72,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             if (serializable.ObjectType != ObjectType.Teleporter)
             {
                 LogManager.Warn($"Tried to parse {serializable.ObjectType} as Teleporter");
-                return;                
+                return;
             }
 
             if (!serializable.Values.TryConvertValue<Guid>("Id", out var id))
