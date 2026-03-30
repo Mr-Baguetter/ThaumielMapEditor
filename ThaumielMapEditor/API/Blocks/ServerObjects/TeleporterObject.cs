@@ -61,7 +61,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             BoxCollider collider = primitive.Base.gameObject.AddComponent<BoxCollider>();
             collider.size = Scale;
             collider.isTrigger = true;
-            TeleporterHandler = primitive.Base.gameObject.AddComponent<TeleporterHandler>();
+            TeleporterHandler = collider.gameObject.AddComponent<TeleporterHandler>();
             TeleporterHandler.Init(primitive, this);
 
             base.SpawnObject(schematic, serializable);

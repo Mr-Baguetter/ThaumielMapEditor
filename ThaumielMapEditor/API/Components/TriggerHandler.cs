@@ -10,19 +10,19 @@ namespace ThaumielMapEditor.API.Components
         /// <summary>
         /// Fired when a <see cref="Player"/> enters the bounds of the <see cref="TriggerHandler"/>
         /// </summary>
-        public event Action<Player>? OnPlayerEntered;
+        public event Action<Player, Collider>? OnPlayerEntered;
 
         /// <summary>
         /// Fired when a <see cref="Player"/> leaves the bounds of the <see cref="TriggerHandler"/>
         /// </summary>
-        public event Action<Player>? OnPlayerExited;
+        public event Action<Player, Collider>? OnPlayerExited;
 
         private void OnTriggerEnter(Collider other)
         {
             if (other is not BoxCollider || !other.TryGetPlayer(out var player))
                 return;
 
-            OnPlayerEntered?.Invoke(player);
+            OnPlayerEntered?.Invoke(player, other);
         }
 
         private void OnTriggerExit(Collider other)
@@ -30,7 +30,7 @@ namespace ThaumielMapEditor.API.Components
             if (other is not BoxCollider || !other.TryGetPlayer(out var player))
                 return;
 
-            OnPlayerExited?.Invoke(player);
+            OnPlayerExited?.Invoke(player, other);
         }
     }
 }

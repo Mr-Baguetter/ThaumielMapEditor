@@ -54,7 +54,7 @@ namespace ThaumielMapEditor.API.Components
                 PlayerCooldowns.Remove(player);
         }
 
-        private void OnTriggerEnter(Player player)
+        private void OnTriggerEnter(Player player, Collider other)
         {
             if (!_playersInside.Add(player))
                 return;
@@ -79,7 +79,7 @@ namespace ThaumielMapEditor.API.Components
             ApplyCooldown(player);
         }
 
-        private void OnTriggerExit(Player player)
+        private void OnTriggerExit(Player player, Collider other)
         {
             _playersInside.Remove(player);
         }

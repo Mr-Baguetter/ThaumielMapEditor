@@ -7,8 +7,6 @@ using ThaumielMapEditor.API.Blocks.ClientSide;
 using LabPrimitive = LabApi.Features.Wrappers.PrimitiveObjectToy;
 using System;
 using ThaumielMapEditor.API.Blocks.Areas;
-using Mirror;
-using ThaumielMapEditor.API.Helpers;
 
 namespace ThaumielMapEditor.API.Data
 {
@@ -184,7 +182,10 @@ namespace ThaumielMapEditor.API.Data
             }
         }
 
-        internal void Destroy()
+        /// <summary>
+        /// Destroys this <see cref="SchematicData"/> instance.
+        /// </summary>
+        public void Destroy()
         {
             foreach (ClientSideObjectBase clientobj in SpawnedClientObjects.ToArray())
             {

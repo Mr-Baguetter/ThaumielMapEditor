@@ -1,6 +1,7 @@
 using LabApi.Features.Wrappers;
 using ThaumielMapEditor.API.Blocks.ClientSide;
 using ThaumielMapEditor.API.Data;
+using UnityEngine;
 
 namespace ThaumielMapEditor.API.Components
 {
@@ -26,7 +27,7 @@ namespace ThaumielMapEditor.API.Components
             OnPlayerExited -= OnTriggerExit;
         }
 
-        private void OnTriggerEnter(Player player)
+        private void OnTriggerEnter(Player player, Collider other)
         {
             if (Schematic == null || player.IsDestroyed || !player.IsAlive)
                 return;
@@ -35,7 +36,7 @@ namespace ThaumielMapEditor.API.Components
                 primitive.HideForPlayer(player);
         }
 
-        private void OnTriggerExit(Player player)
+        private void OnTriggerExit(Player player, Collider other)
         {
             if (Schematic == null || player.IsDestroyed || !player.IsAlive)
                 return;
