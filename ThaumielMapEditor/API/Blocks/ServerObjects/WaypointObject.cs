@@ -11,11 +11,6 @@ using YamlDotNet.Serialization;
 
 namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
-    /// <summary>
-    /// Represents a server-side waypoint object used by the map editor.
-    /// Wraps an underlying <see cref="WaypointToy"/> instance and exposes
-    /// serializable properties such as bounds visualization, priority and bounds size.
-    /// </summary>
     public class WaypointObject : ServerObject
     {
         /// <summary>

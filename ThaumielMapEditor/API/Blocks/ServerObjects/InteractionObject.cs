@@ -10,6 +10,8 @@ using System;
 using LabApi.Features.Wrappers;
 using static ThaumielMapEditor.API.Extensions.PlayerExtensions;
 using YamlDotNet.Serialization;
+using Interactables.Interobjects.DoorUtils;
+using System.Linq;
 
 namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
@@ -124,6 +126,22 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         }
 
         /// <summary>
+        /// The permissions required to interact with this <see cref="InteractionObject"/> instance.
+        /// </summary>
+        public DoorPermissionFlags Permissions
+        {
+            get;
+
+            set
+            {
+                if (field == value)
+                    return;
+
+                field = value;
+            }
+        }
+
+        /// <summary>
         /// Returns true if the underlying interactable toy can currently be searched by players.
         /// </summary>
         public bool CanSearch => Base.CanSearch;
@@ -188,10 +206,16 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 LogManager.Warn("Failed to parse Locked");
                 return;
             }
+            if (!serializable.Values.TryConvertValue<DoorPermissionFlags>("Permissions", out var perms))
+            {
+                LogManager.Warn("Failed to parse Permissions");
+                return;
+            }
 
             Shape = shape;
             InteractionDuration = duration;
             IsLocked = locked;
+            Permissions = perms;
         }
 
         /// <summary>
@@ -244,6 +268,27 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 return;
 
             OnSearchAborted?.Invoke(this, player);
+        }
+
+        /// <summary>
+        /// Tries to get a <see cref="InteractionObject"/> from a <see cref="InvisibleInteractableToy"/>
+        /// </summary>
+        /// <param name="toy">The <see cref="InvisibleInteractableToy"/> to check for <see cref="InteractionObject"/></param>
+        /// <param name="interactionobj">The <see cref="InteractionObject"/> if found.</param>
+        /// <returns><see langword="true"/> if found else returns <see langword="false"/> if not found</returns>
+        public static bool TryGetInteractionObject(InvisibleInteractableToy toy, out InteractionObject interactionobj)
+        {
+            foreach (InteractionObject interaction in SpawnedObjects.Where(obj => obj is InteractionObject).Cast<InteractionObject>())
+            {
+                if (interaction.NetId != toy.netId)
+                    continue;
+
+                interactionobj = interaction;
+                return true;
+            }
+
+            interactionobj = null!;
+            return false;
         }
     }
 }

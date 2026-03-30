@@ -1,7 +1,10 @@
+using HarmonyLib;
 using LabApi.Features.Wrappers;
 using MapGeneration.Distributors;
 using Mirror;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Extensions;
@@ -13,6 +16,11 @@ namespace ThaumielMapEditor.API.Blocks
 {
     public class ServerObject
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        public static List<ServerObject> SpawnedObjects { get; set; } = [];
+
         /// <summary>
         /// Fired when a <see cref="ServerObject"/> is spawned into the server.
         /// </summary>
@@ -132,6 +140,7 @@ namespace ThaumielMapEditor.API.Blocks
         public virtual void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             OnObjectCreated?.Invoke(this);
+            SpawnedObjects.Add(this);
             schematic.SpawnedServerObjects.Add(this);
         }
 
@@ -179,6 +188,7 @@ namespace ThaumielMapEditor.API.Blocks
 
             OnObjectDestroying?.Invoke(this);
             schematic.SpawnedServerObjects.Remove(this);
+            SpawnedObjects.Remove(this);
             NetworkServer.Destroy(Object);
         }
 

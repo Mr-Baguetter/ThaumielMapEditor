@@ -4,19 +4,25 @@ using MapGeneration;
 
 namespace ThaumielMapEditor.API.Serialization
 {
-    public class MapSchematic
+    /// <summary>
+    /// This class is used to read map schematics from yaml
+    /// </summary>
+    public class SerializedMapSchematic
     {
         /// <summary>
-        /// Gets or sets the position for the <see cref="MapSchematic"/> instance.
+        /// Gets or sets the position for the <see cref="SerializedMapSchematic"/> instance.
         /// </summary>
         public Vector3 Position { get; set; }
 
         /// <summary>
-        /// Gets or sets the schematic name of the parent schematic for the <see cref="MapSchematic"/> instance.
+        /// Gets or sets the schematic name of the parent schematic for the <see cref="SerializedMapSchematic"/> instance.
         /// </summary>
         public string SchematicName { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// This class is used to read map data from yaml
+    /// </summary>
     public class SerializableMap
     {
         /// <summary>
@@ -42,6 +48,6 @@ namespace ThaumielMapEditor.API.Serialization
         /// <summary>
         /// Gets or sets the schematics for the <see cref="SerializableMap"/> instance.
         /// </summary>
-        public List<MapSchematic> Schematics = new();
+        public List<SerializedMapSchematic> Schematics = new();
     }
 }

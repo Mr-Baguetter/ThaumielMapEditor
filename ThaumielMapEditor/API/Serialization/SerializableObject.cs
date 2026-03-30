@@ -3,6 +3,10 @@ using ThaumielMapEditor.API.Enums;
 
 namespace ThaumielMapEditor.API.Serialization
 {
+    /// <summary>
+    /// This class is used to read object data from yaml
+    /// </summary>
+
     public class SerializableObject
     {
         /// <summary>

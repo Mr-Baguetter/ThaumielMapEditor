@@ -294,7 +294,7 @@ namespace ThaumielMapEditor.API.Helpers
                 yield return Timing.WaitUntilTrue(() => PrefabHelper.RanRegister);
             }
 
-            foreach (MapSchematic ms in map.Schematics)
+            foreach (SerializedMapSchematic ms in map.Schematics)
             {
                 Vector3 offset = data.Room.WorldPosition(ms.Position);
                 SerializableSchematic? schematic = LoadedSchematics.FirstOrDefault(s => s.FileName.ToLower() == ms.SchematicName.ToLower());
@@ -616,7 +616,7 @@ namespace ThaumielMapEditor.API.Helpers
             map.Id = Guid.NewGuid();
             foreach (MapSchematicData msdata in data.Schematics)
             {
-                MapSchematic mapSchematic = new()
+                SerializedMapSchematic mapSchematic = new()
                 {
                     Position = msdata.LocalPosition,
                     SchematicName = msdata.SchematicName

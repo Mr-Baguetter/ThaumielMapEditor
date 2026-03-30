@@ -3,6 +3,9 @@ using ThaumielMapEditor.API.Enums;
 
 namespace ThaumielMapEditor.API.Serialization
 {
+    /// <summary>
+    /// This class is used to read areas data from yaml
+    /// </summary>
     public class SerializableArea
     {
         /// <summary>

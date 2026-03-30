@@ -137,8 +137,6 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 
         public SchematicData? Schematic { get; set; }
 
-        public uint ParentId { get; set; }
-
         /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Light;
 
@@ -198,30 +196,6 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 
             SpawnedPlayers.Add(player);
             Spawned = true;
-        }
-
-        public void DespawnForPlayer(Player player)
-        {
-            if (player.IsHost)
-                return;
-
-            player.Connection.Send(new ObjectDestroyMessage { netId = NetId });
-            SpawnedPlayers.Remove(player);
-        }
-
-        public uint DespawnForAllPlayers()
-        {
-            uint count = 0;
-            foreach (Player player in Player.ReadyList)
-            {
-                if (player.IsHost)
-                    continue;
-
-                count++;
-                DespawnForPlayer(player);
-            }
-            
-            return count;
         }
 
         public void DeserializeValues(SerializableObject serializable)
