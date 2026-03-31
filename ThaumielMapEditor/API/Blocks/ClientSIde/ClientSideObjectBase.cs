@@ -17,7 +17,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         /// All the <see cref="Player"/>s that this <see cref="ClientSideObjectBase"/> instance has been spawned for.
         /// </summary>
         public HashSet<Player> SpawnedPlayers { get; internal set; } = [];
-        
+
         /// <summary>
         /// Gets or sets the position of the <see cref="ClientSideObjectBase"/> instance.
         /// </summary>
@@ -130,9 +130,20 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                 LogManager.Warn($"Failed to find GameObject with NetId {ParentId}!");
         }
 
+        /// <summary>
+        /// Gets a value from a <see cref="SerializableObject"/> by key, converting it to the specified type.
+        /// </summary>
+        /// <typeparam name="T">The type to convert the value to.</typeparam>
+        /// <param name="serializable">The serializable object to retrieve the value from.</param>
+        /// <param name="key">The key of the value to retrieve.</param>
+        /// <returns>The value associated with the key, converted to <typeparamref name="T"/>.</returns>
         public T GetValue<T>(SerializableObject serializable, string key) =>
             serializable.Values.GetConvertValue<T>(key);
 
+        /// <summary>
+        /// Hides this object for the specified player.
+        /// </summary>
+        /// <param name="player">The player to hide this object for.</param>
         public void HideForPlayer(Player player)
         {
             if (player.IsHost)
@@ -141,6 +152,10 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             player.Connection.Send(new ObjectHideMessage { netId = NetId });
         }
 
+        /// <summary>
+        /// Shows this object for the specified player.
+        /// </summary>
+        /// <param name="player">The player to show this object for.</param>
         public void ShowForPlayer(Player player)
         {
             if (player.IsHost)
@@ -149,6 +164,10 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             SpawnForPlayer(player);
         }
 
+        /// <summary>
+        /// Destroys this object for the specified player.
+        /// </summary>
+        /// <param name="player">The player to despawn this object for.</param>
         public void DespawnForPlayer(Player player)
         {
             if (player.IsHost)
@@ -158,6 +177,10 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             SpawnedPlayers.Remove(player);
         }
 
+        /// <summary>
+        /// Destroys this object for all ready players.
+        /// </summary>
+        /// <returns>The number of players this object was despawned for.</returns>
         public uint DespawnForAllPlayers()
         {
             uint count = 0;
@@ -169,7 +192,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                 count++;
                 DespawnForPlayer(player);
             }
-            
+
             return count;
         }
     }
