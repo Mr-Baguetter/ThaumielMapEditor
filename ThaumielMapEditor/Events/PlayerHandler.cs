@@ -32,8 +32,10 @@ namespace ThaumielMapEditor.Events
             ReferenceHub.OnBeforePlayerDestroyed -= OnPlayerLeft;
         }
 
-        private static Dictionary<string, CreditTag> Credits = new()
+        // If you contribute and want a CreditTag add yourself to this.
+        private static readonly Dictionary<string, CreditTag> Credits = new()
         {
+            // MrBaguetter
             ["76561199150506472@steam"] = new CreditTag()
             {
                 Name = "TME Lead Developer",
@@ -82,7 +84,7 @@ namespace ThaumielMapEditor.Events
 
                 AddPlayerTrigger(ev.Player);
 
-                if (Credits.TryGetValue(ev.Player.UserId, out var credittag))
+                if (Main.Instance.Config.EnableCreditTags && Credits.TryGetValue(ev.Player.UserId, out var credittag))
                 {
                     ev.Player.GroupColor = credittag.Color;
                     ev.Player.GroupName = credittag.Name;

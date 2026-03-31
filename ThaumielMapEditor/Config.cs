@@ -10,6 +10,7 @@ namespace ThaumielMapEditor
         public bool Debug { get; set; }
         public string LogsWebhook { get; set; } = string.Empty;
         public string APIToken { get; set; } = string.Empty;
+        public bool EnableCreditTags { get; set; } = true;
         public List<string> SchematiclodBlacklist { get; set; } = [];
 
         public List<string> LoadOnWaitingForPlayers { get; set; } = [];
