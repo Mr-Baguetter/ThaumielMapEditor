@@ -1,5 +1,3 @@
-using ThaumielMapEditor.API.Blocks.ServerObjects.Lockers;
-
 namespace ThaumielMapEditor.API.Enums
 {
     public enum LockerType

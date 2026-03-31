@@ -209,14 +209,9 @@ namespace ThaumielMapEditor.API.Helpers
         public static GameObject? BrokenElectricalBox { get; private set; }
 
         /// <summary>
-        /// The registered prismatic cloud clutter <see cref="GameObject"/> prefab.
+        /// The registered generator <see cref="Scp079Generator"/> prefab.
         /// </summary>
-        public static GameObject? PrismaticCloud { get; private set; }
-
-        /// <summary>
-        /// The registered brown candy tantrum clutter <see cref="GameObject"/> prefab.
-        /// </summary>
-        public static GameObject? BrownCandyTantrum { get; private set; }
+        public static Scp079Generator? Generator { get; private set; }
 
         /// <summary>
         /// Iterates over all registered network prefabs and caches them for use by the map editor.
@@ -329,6 +324,11 @@ namespace ThaumielMapEditor.API.Helpers
                             break;
                     }
 
+                    continue;
+                }
+                if (prefab.TryGetComponent<Scp079Generator>(out var generator))
+                {
+                    Generator = generator;
                     continue;
                 }
                 if (prefab.name == "Broken Electrical Box Open Connector")
