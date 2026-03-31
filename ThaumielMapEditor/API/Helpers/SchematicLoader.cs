@@ -309,11 +309,52 @@ namespace ThaumielMapEditor.API.Helpers
         }
 
         /// <summary>
-        /// Spawns a schematic
+        /// Spawns a schematic at the specified position, rotation, and scale.
         /// </summary>
-        /// <param name="schematic">The serialized schematic to spawn</param>
-        /// <param name="position">The position to place the schematic at</param>
-        /// <returns><see cref="SchematicData"/></returns>
+        /// <param name="schematic">The serialized schematic to spawn.</param>
+        /// <param name="position">The world position at which to place the schematic.</param>
+        /// <param name="rotation">The rotation to apply to the schematic.</param>
+        /// <param name="scale">The scale to apply to the schematic.</param>
+        /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
+        public static SchematicData SpawnSchematic(SerializableSchematic schematic, Vector3 position, Quaternion rotation, Vector3 scale)
+        {
+            SchematicData schematicData = new()
+            {
+                FileName = schematic.FileName,
+                Id = GetId(),
+                ContainsAnimator = schematic.ContainsAnimator
+            };
+
+            Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, rotation, scale));
+            return schematicData;
+        }
+
+        /// <summary>
+        /// Spawns a schematic at the specified position and rotation with default scale.
+        /// </summary>
+        /// <param name="schematic">The serialized schematic to spawn.</param>
+        /// <param name="position">The world position at which to place the schematic.</param>
+        /// <param name="rotation">The rotation to apply to the schematic.</param>
+        /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
+        public static SchematicData SpawnSchematic(SerializableSchematic schematic, Vector3 position, Quaternion rotation)
+        {
+            SchematicData schematicData = new()
+            {
+                FileName = schematic.FileName,
+                Id = GetId(),
+                ContainsAnimator = schematic.ContainsAnimator
+            };
+
+            Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, rotation, default));
+            return schematicData;
+        }
+
+        /// <summary>
+        /// Spawns a schematic at the specified position with default rotation and scale.
+        /// </summary>
+        /// <param name="schematic">The serialized schematic to spawn.</param>
+        /// <param name="position">The world position at which to place the schematic.</param>
+        /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
         public static SchematicData SpawnSchematic(SerializableSchematic schematic, Vector3 position)
         {
             SchematicData schematicData = new()
@@ -323,11 +364,74 @@ namespace ThaumielMapEditor.API.Helpers
                 ContainsAnimator = schematic.ContainsAnimator
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position));
+            Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, default, default));
+            return schematicData;
+        }
+        
+        /// <summary>
+        /// Spawns a loaded schematic by name at the specified position with default rotation and scale.
+        /// </summary>
+        /// <param name="schematicname">The file name of the schematic to spawn. Must match a schematic in <see cref="LoadedSchematics"/>.</param>
+        /// <param name="animated">Whether the schematic contains an animator.</param>
+        /// <param name="position">The world position at which to place the schematic.</param>
+        /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
+        public static SchematicData SpawnSchematic(string schematicname, bool animated, Vector3 position)
+        {
+            SchematicData schematicData = new()
+            {
+                FileName = schematicname,
+                Id = GetId(),
+                ContainsAnimator = animated
+            };
+
+            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.FileName == schematicname), schematicData, position, default, default));
             return schematicData;
         }
 
-        private static IEnumerator<float> SpawnSchematicCoroutine(SerializableSchematic schematic, SchematicData schematicData, Vector3 position)
+        /// <summary>
+        /// Spawns a loaded schematic by name at the specified position and rotation with default scale.
+        /// </summary>
+        /// <param name="schematicname">The file name of the schematic to spawn. Must match a schematic in <see cref="LoadedSchematics"/>.</param>
+        /// <param name="animated">Whether the schematic contains an animator.</param>
+        /// <param name="position">The world position at which to place the schematic.</param>
+        /// <param name="rotation">The rotation to apply to the schematic.</param>
+        /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
+        public static SchematicData SpawnSchematic(string schematicname, bool animated, Vector3 position, Quaternion rotation)
+        {
+            SchematicData schematicData = new()
+            {
+                FileName = schematicname,
+                Id = GetId(),
+                ContainsAnimator = animated
+            };
+
+            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.FileName == schematicname), schematicData, position, rotation, default));
+            return schematicData;
+        }
+
+        /// <summary>
+        /// Spawns a loaded schematic by name at the specified position, rotation, and scale.
+        /// </summary>
+        /// <param name="schematicname">The file name of the schematic to spawn. Must match a schematic in <see cref="LoadedSchematics"/>.</param>
+        /// <param name="animated">Whether the schematic contains an animator.</param>
+        /// <param name="position">The world position at which to place the schematic.</param>
+        /// <param name="rotation">The rotation to apply to the schematic.</param>
+        /// <param name="scale">The scale to apply to the schematic.</param>
+        /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
+        public static SchematicData SpawnSchematic(string schematicname, bool animated, Vector3 position, Quaternion rotation, Vector3 scale)
+        {
+            SchematicData schematicData = new()
+            {
+                FileName = schematicname,
+                Id = GetId(),
+                ContainsAnimator = animated
+            };
+
+            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.FileName == schematicname), schematicData, position, rotation, scale));
+            return schematicData;
+        }
+
+        private static IEnumerator<float> SpawnSchematicCoroutine(SerializableSchematic schematic, SchematicData schematicData, Vector3 position, Quaternion rotation, Vector3 scale)
         {
             if (!PrefabHelper.RanRegister)
             {
@@ -340,12 +444,30 @@ namespace ThaumielMapEditor.API.Helpers
             baseprimitive.Flags &= ~PrimitiveFlags.Visible;
             baseprimitive.Flags &= ~PrimitiveFlags.Collidable;
             baseprimitive.Position = position;
-            baseprimitive.Rotation = schematic.Rotation;
-            baseprimitive.Scale = schematic.Scale;
+            if (rotation != default)
+            {
+                baseprimitive.Rotation = rotation;
+                schematicData.Rotation = rotation;
+            }
+            else
+            {
+                baseprimitive.Rotation = schematic.Rotation;
+                schematicData.Rotation = schematic.Rotation;
+            }
+
+            if (scale != default)
+            {
+                baseprimitive.Scale = scale;
+                schematicData.Scale = scale;
+            }
+            else
+            {
+                baseprimitive.Scale = schematic.Scale;
+                schematicData.Scale = schematic.Scale;
+            }
+
             schematicData.Primitive = baseprimitive;
-            schematicData.Scale = schematic.Scale;
             schematicData.Position = position;
-            schematicData.Rotation = schematic.Rotation;
             schematicData.RootObjectId = schematic.RootObjectId;
 
             SpawnObjectRecursive(schematic.RootObjectId, schematic, schematicData);

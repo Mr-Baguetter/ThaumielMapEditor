@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using ThaumielMapEditor.API.Components;
 using ThaumielMapEditor.API.Data;
 using UnityEngine;
