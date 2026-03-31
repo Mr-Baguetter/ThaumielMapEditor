@@ -176,6 +176,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 
             _pendingDirtyBits |= dirtyBits;
             _pendingWrites[dirtyBits] = writeValues;
+            FlushSync();
         }
 
         public void FlushSync()
