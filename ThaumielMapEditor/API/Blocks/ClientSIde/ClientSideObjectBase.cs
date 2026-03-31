@@ -146,7 +146,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             if (player.IsHost)
                 return;
 
-            player.Connection.Send(new SpawnMessage { netId = NetId });
+            SpawnForPlayer(player);
         }
 
         public void DespawnForPlayer(Player player)
