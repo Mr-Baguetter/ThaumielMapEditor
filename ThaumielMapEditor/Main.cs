@@ -32,8 +32,16 @@ namespace ThaumielMapEditor
         public override void Enable()
         {
             Instance = this;
-            harmony = new(HarmonyId);
-            harmony.PatchAll();
+            
+            try
+            {
+                harmony = new(HarmonyId);
+                harmony.PatchAll();
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"Failed to patch {ex}");
+            }
 
             SchematicLoader.Init();
 
