@@ -28,7 +28,7 @@ namespace ThaumielMapEditor.Events
             foreach (string name in Main.Instance.Config.LoadOnWaitingForPlayers)
             {
                 SerializableMap? map = SchematicLoader.LoadedMaps.FirstOrDefault(s => s.FileName.ToLower() == name.ToLower());
-                if (map is null)
+                if (map == null)
                 {
                     LogManager.Warn($"Map name {name} is invalid!");
                     continue;
@@ -44,7 +44,7 @@ namespace ThaumielMapEditor.Events
             foreach (string name in Main.Instance.Config.LoadOnRoundStart)
             {
                 SerializableMap? map = SchematicLoader.LoadedMaps.FirstOrDefault(s => s.FileName.ToLower() == name.ToLower());
-                if (map is null)
+                if (map == null)
                 {
                     LogManager.Warn($"Map name {name} is invalid!");
                     continue;
@@ -60,7 +60,7 @@ namespace ThaumielMapEditor.Events
             foreach (string name in Main.Instance.Config.LoadOnDecom)
             {
                 SerializableMap? map = SchematicLoader.LoadedMaps.FirstOrDefault(s => s.FileName.ToLower() == name.ToLower());
-                if (map is null)
+                if (map == null)
                 {
                     LogManager.Warn($"Map name {name} is invalid!");
                     continue;

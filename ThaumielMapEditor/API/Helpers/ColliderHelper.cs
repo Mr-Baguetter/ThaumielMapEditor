@@ -49,7 +49,7 @@ namespace ThaumielMapEditor.API.Helpers
                 if (TryCopyCollider(col, colGo))
                 {
                     colliders.Add(colGo.GetComponent<Collider>());
-                    colGo.transform.SetParent(schematic.Primitive.Transform, worldPositionStays: true);
+                    colGo.transform.SetParent(schematic.Primitive?.Transform, worldPositionStays: true);
                     LogManager.Debug($"Created {col.GetType().Name} for '{clientObject.ObjectType}' at {colGo.transform.position}.");
                 }
                 else

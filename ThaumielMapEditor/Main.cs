@@ -27,7 +27,7 @@ namespace ThaumielMapEditor
         public string HarmonyId => $"MrBaguetter_{Guid.NewGuid()}";
         public Harmony harmony;
 
-        public static Main Instance { get; set; } = null!;
+        public static Main Instance { get; set; }
 
         public override void Enable()
         {

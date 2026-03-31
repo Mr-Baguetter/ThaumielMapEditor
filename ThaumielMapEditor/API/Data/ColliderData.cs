@@ -8,10 +8,14 @@ namespace ThaumielMapEditor.API.Data
 {
     public class PrefabCollidersData
     {
-        
+        /// <summary>
+        /// 
+        /// </summary>
         public GameObject Prefab { get; set; }
 
-        
+        /// <summary>
+        /// 
+        /// </summary>
         public IEnumerable<ColliderData> Colliders { get; set; }
     }
 
