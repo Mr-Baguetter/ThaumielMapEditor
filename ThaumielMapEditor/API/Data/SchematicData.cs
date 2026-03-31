@@ -79,6 +79,11 @@ namespace ThaumielMapEditor.API.Data
         public LabPrimitive? Primitive { get; internal set; }
 
         /// <summary>
+        /// A list of the spawned <see cref="LODData"/> instances
+        /// </summary>
+        public List<LODData> LODZones { get; internal set; } = [];
+
+        /// <summary>
         /// A list of all spawned <see cref="ClientSideObjectBase"/> instances.
         /// </summary>
         public List<ClientSideObjectBase> SpawnedClientObjects = [];

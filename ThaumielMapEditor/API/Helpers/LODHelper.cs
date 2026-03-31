@@ -1,29 +1,43 @@
+using System.Collections.Generic;
 using ThaumielMapEditor.API.Components;
 using ThaumielMapEditor.API.Data;
+using ThaumielMapEditor.API.Serialization;
 using UnityEngine;
 
 namespace ThaumielMapEditor.API.Helpers
 {
     public class LODHelper
     {
-        public static void GenerateLODZones(SchematicData schematic)
+        public static List<LODData>? GenerateLODZones(SchematicData schematic, SerializableSchematic serializable)
         {
             if (Main.Instance.Config.SchematiclodBlacklist.Contains(schematic.FileName))
-                return;
+                return null;
 
-            BoxCollider lod0collider = schematic.Primitive.GameObject.AddComponent<BoxCollider>();
-            lod0collider.size = schematic.Primitive.Scale*2;
-            lod0collider.name = $"{schematic.FileName}-LOD0-Collider";
-            lod0collider.isTrigger = true;
-            LODZone lod0 = lod0collider.gameObject.AddComponent<LODZone>();
-            lod0.Init(schematic, [PrimitiveType.Capsule, PrimitiveType.Sphere]);
+            List<LODData> lodData = [];
 
-            BoxCollider lod1collider = schematic.Primitive.GameObject.AddComponent<BoxCollider>();
-            lod1collider.size = schematic.Primitive.Scale*2.5f;
-            lod1collider.name = $"{schematic.FileName}-LOD1-Collider";
-            lod1collider.isTrigger = true;
-            LODZone lod1 = lod1collider.gameObject.AddComponent<LODZone>();
-            lod1.Init(schematic, [PrimitiveType.Cylinder]);            
+            uint index = 0;
+            foreach (SerializableLOD lod in serializable.LOD)
+            {
+                LODData data = new()
+                {
+                    Index = ++index,
+                    Bounds = lod.Bounds,
+                    Primitives = lod.Primitives
+                };
+
+                BoxCollider collider = schematic.Primitive.GameObject.AddComponent<BoxCollider>();
+                collider.size = data.Bounds;
+                collider.name = $"{schematic.FileName}-LOD{data.Index}-Collider";
+                collider.isTrigger = true;
+
+                LODZone lodZone = collider.gameObject.AddComponent<LODZone>();
+                lodZone.Init(schematic, data.Primitives);
+
+                lodData.Add(data);
+            }
+
+            schematic.LODZones = lodData;
+            return lodData;
         }
     }
 }

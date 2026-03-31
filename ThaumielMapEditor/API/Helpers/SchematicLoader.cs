@@ -471,9 +471,9 @@ namespace ThaumielMapEditor.API.Helpers
             schematicData.RootObjectId = schematic.RootObjectId;
 
             SpawnObjectRecursive(schematic.RootObjectId, schematic, schematicData);
+            LODHelper.GenerateLODZones(schematicData, schematic);
 
             SchematicSpawned?.Invoke(schematicData);
-            LODHelper.GenerateLODZones(schematicData);
             LogManager.Info($"Schematic '{schematic.FileName}' fully spawned.");
             SchematicsById.Add(schematicData.Id, schematicData);
         }
