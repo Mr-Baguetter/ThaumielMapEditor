@@ -16,8 +16,14 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         private ulong _pendingDirtyBits = 0;
         private readonly SortedDictionary<ulong, Action<NetworkWriter>> _pendingWrites = [];
         
+        /// <summary>
+        /// Gets a value indicating whether this light object has been spawned for any players.
+        /// </summary>
         public bool Spawned { get; private set; }
 
+        /// <summary>
+        /// Gets or sets the intensity of the light.
+        /// </summary>
         public float Intensity
         {
             get;
@@ -31,6 +37,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
         } = 1f;
 
+        /// <summary>
+        /// Gets or sets the range of the light.
+        /// </summary>
         public float Range
         {
             get;
@@ -44,6 +53,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
         } = 10f;
 
+        /// <summary>
+        /// Gets or sets the color of the light.
+        /// </summary>
         public Color Color
         {
             get;
@@ -57,6 +69,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
         } = Color.white;
 
+        /// <summary>
+        /// Gets or sets the shadow type used by the light.
+        /// </summary>
         public LightShadows Shadows
         {
             get;
@@ -70,6 +85,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
         } = LightShadows.None;
 
+        /// <summary>
+        /// Gets or sets the strength of the shadows cast by the light.
+        /// </summary>
         public float ShadowStrength
         {
             get;
@@ -83,6 +101,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
         } = 1f;
 
+        /// <summary>
+        /// Gets or sets the type of the light.
+        /// </summary>
         public LightType Type
         {
             get;
@@ -96,6 +117,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
         } = LightType.Point;
 
+        /// <summary>
+        /// Gets or sets the shape of the light.
+        /// </summary>
         public LightShape Shape
         {
             get;
@@ -109,6 +133,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
         } = LightShape.Cone;
 
+        /// <summary>
+        /// Gets or sets the outer spot angle of the light.
+        /// </summary>
         public float SpotAngle
         {
             get;
@@ -121,7 +148,10 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                 SyncToPlayers(4096uL, w => w.WriteFloat(value));
             }
         } = 30f;
-        
+
+        /// <summary>
+        /// Gets or sets the inner spot angle of the light.
+        /// </summary>
         public float InnerSpotAngle
         {
             get;
@@ -135,6 +165,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
         } = 20f;
 
+        /// <summary>
+        /// Gets or sets the schematic data associated with this light object.
+        /// </summary>
         public SchematicData? Schematic { get; set; }
 
         /// <inheritdoc/>
@@ -198,6 +231,10 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             Spawned = true;
         }
 
+        /// <summary>
+        /// Deserializes and applies light specific values from a <see cref="SerializableObject"/>.
+        /// </summary>
+        /// <param name="serializable">The serialized object containing light data.</param>
         public void DeserializeValues(SerializableObject serializable)
         {
             if (serializable.ObjectType != ObjectType.Light)
@@ -272,6 +309,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             FlushSync();
         }
 
+        /// <summary>
+        /// Flushes all pending synchronization updates to spawned players.
+        /// </summary>
         public void FlushSync()
         {
             if (_pendingDirtyBits == 0 || _pendingWrites.Count == 0)
