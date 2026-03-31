@@ -236,7 +236,6 @@ namespace ThaumielMapEditor.API.Helpers
                 if (prefab.TryGetComponent<LightSourceToy>(out var lightSource))
                 {
                     LightSource = lightSource;
-
                     continue;
                 }
                 if (prefab.TryGetComponent<DoorVariant>(out var doorVariant))
@@ -277,7 +276,6 @@ namespace ThaumielMapEditor.API.Helpers
                 if (prefab.TryGetComponent<SpawnableCullingParent>(out var cullingParent))
                 {
                     CullingParent = cullingParent;
-
                     continue;
                 }
                 if (prefab.TryGetComponent<CapybaraToy>(out var capybara))
@@ -288,7 +286,6 @@ namespace ThaumielMapEditor.API.Helpers
                 if (prefab.TryGetComponent<TextToy>(out var texttoy))
                 {
                     TextToy = texttoy;
-
                     continue;
                 }
                 if (prefab.GetComponent<SpawnableClutterConnector>())
@@ -297,34 +294,32 @@ namespace ThaumielMapEditor.API.Helpers
                     {
                         case "Simple Boxes Open Connector":
                             SimpleBoxes = prefab;
-                            break;
+                            continue;
 
                         case "Pipes Short Open Connector":
                             PipesShort = prefab;
-                            break;
+                            continue;
 
                         case "Boxes Ladder Open Connector":
                             BoxesLadder = prefab;
-                            break;
+                            continue;
 
                         case "Tank-Supported Shelf Open Connector":
                             TankSupportedShelf = prefab;
-                            break;
+                            continue;
 
                         case "Angled Fences Open Connector":
                             AngledFences = prefab;
-                            break;
+                            continue;
 
                         case "Huge Orange Pipes Open Connector":
                             HugeOrangePipes = prefab;
-                            break;
+                            continue;
 
                         case "Pipes Long Open Connector":
                             PipesLong = prefab;
-                            break;
+                            continue;
                     }
-
-                    continue;
                 }
                 if (prefab.TryGetComponent<Scp079Generator>(out var generator))
                 {
@@ -407,9 +402,11 @@ namespace ThaumielMapEditor.API.Helpers
                         case "sportTargetPrefab":
                             ShootingTargetSport = shootingTarget;
                             continue;
+
                         case "dboyTargetPrefab":
                             ShootingTargetDBoy = shootingTarget;
                             continue;
+
                         case "binaryTargetPrefab":
                             ShootingTargetBinary = shootingTarget;
                             continue;
