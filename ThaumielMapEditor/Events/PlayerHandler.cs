@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AdminToys;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
@@ -13,6 +14,12 @@ namespace ThaumielMapEditor.Events
 {
     internal class PlayerHandler
     {
+        public class CreditTag
+        {
+            public string Name { get; set; }
+            public string Color { get; set; }
+        }
+
         public static void Register()
         {
             PlayerEvents.Joined += OnPlayerJoined;
@@ -24,6 +31,15 @@ namespace ThaumielMapEditor.Events
             PlayerEvents.Joined -= OnPlayerJoined;
             ReferenceHub.OnBeforePlayerDestroyed -= OnPlayerLeft;
         }
+
+        private static Dictionary<string, CreditTag> Credits = new()
+        {
+            ["76561199150506472@steam"] = new CreditTag()
+            {
+                Name = "TME Lead Developer",
+                Color = "pumpkin"
+            }
+        };
 
         private static void OnPlayerLeft(ReferenceHub hub)
         {
@@ -65,6 +81,12 @@ namespace ThaumielMapEditor.Events
                 }
 
                 AddPlayerTrigger(ev.Player);
+
+                if (Credits.TryGetValue(ev.Player.UserId, out var credittag))
+                {
+                    ev.Player.GroupColor = credittag.Color;
+                    ev.Player.GroupName = credittag.Name;
+                }
             });
         }
 
