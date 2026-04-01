@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using LabApi.Features.Wrappers;
 using ThaumielMapEditor.API.Components;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Serialization;
@@ -31,13 +33,53 @@ namespace ThaumielMapEditor.API.Helpers
                 collider.isTrigger = true;
 
                 LODZone lodZone = collider.gameObject.AddComponent<LODZone>();
-                lodZone.Init(schematic, data.Primitives);
+                lodZone.Init(schematic, data.Primitives, data.Index, collider);
 
                 lodData.Add(data);
             }
 
             schematic.LODZones = lodData;
             return lodData;
+        }
+
+        /// <summary>
+        /// Gets the players that are inside of the specified <see cref="LODZone"/> index.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="schematic"></param>
+        /// <returns></returns>
+        public static IEnumerable<Player> PlayersInsideZone(uint index, SchematicData schematic)
+        {
+            if (Main.Instance.Config.SchematiclodBlacklist.Contains(schematic.FileName))
+                return [];
+
+            List<Player> players = [];
+            LODZone lod = null!;
+            foreach (BoxCollider collider in schematic.Primitive.GameObject.GetComponents<BoxCollider>())
+            {
+                if (!collider.TryGetComponent<LODZone>(out var lodzone))
+                    continue;
+
+                if (lodzone.Index != index)
+                    continue;
+
+                lod = lodzone;
+                break;
+            }
+
+            foreach (Player player in Player.ReadyList)
+            {
+                if (player.IsHost)
+                    continue;
+                
+                if (lod == null)
+                    return [];
+                
+                if (lod.Collider.bounds.Contains(player.Position))
+                    players.Add(player);
+            }
+
+            return players;
         }
     }
 }
