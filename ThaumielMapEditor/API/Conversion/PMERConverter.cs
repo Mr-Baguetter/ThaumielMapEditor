@@ -6,11 +6,27 @@ using System.Threading.Tasks;
 using UnityEngine;
 using AdminToys;
 using ThaumielMapEditor.API.Helpers;
+using static AdminToys.InvisibleInteractableToy;
+using ThaumielMapEditor.API.Extensions;
 
 namespace ThaumielMapEditor.API.Conversion
 {
     public static class PMERConverter
     {
+        public enum PMERBlockType
+        {
+            Empty = 0,
+            Primitive = 1,
+            Light = 2,
+            Pickup = 3,
+            Workstation = 4,
+            Schematic = 5,
+            Teleport = 6,
+            Locker = 7,
+            Text = 8,
+            Interactable = 9,
+        }
+
         /// <summary>
         /// Converts a PMER schematic into a TME schematic
         /// </summary>
@@ -45,52 +61,124 @@ namespace ThaumielMapEditor.API.Conversion
                 Scale = block.Scale,
                 IsStatic = block.Properties != null && block.Properties.TryGetValue("Static", out object s) && Convert.ToBoolean(s),
                 MovementSmoothing = 60,
-                ObjectType = MapBlockType(block.BlockType),
+                ObjectType = MapBlockType((PMERBlockType)block.BlockType),
                 Values = NormalizeProperties(block)
             };
 
             return obj;
         }
 
-        private static ObjectType MapBlockType(int blockType)
+        private static ObjectType MapBlockType(PMERBlockType blockType)
         {
             return blockType switch
             {
-                1 => ObjectType.Primitive,
-                2 => ObjectType.Light,
-                3 => ObjectType.Pickup,
-                4 => ObjectType.Workstation,
-                5 => ObjectType.Schematic,
-                6 => ObjectType.Teleporter,
-                7 => ObjectType.Locker,
-                8 => ObjectType.TextToy,
-                9 => ObjectType.Interactable,
+                PMERBlockType.Primitive => ObjectType.Primitive,
+                PMERBlockType.Light => ObjectType.Light,
+                PMERBlockType.Pickup => ObjectType.Pickup,
+                PMERBlockType.Workstation => ObjectType.Workstation,
+                PMERBlockType.Schematic => ObjectType.Schematic,
+                PMERBlockType.Teleport => ObjectType.Teleporter,
+                PMERBlockType.Locker => ObjectType.Locker,
+                PMERBlockType.Text => ObjectType.TextToy,
+                PMERBlockType.Interactable => ObjectType.Interactable,
                 _ => throw new InvalidOperationException(),
             };
         }
 
         private static Dictionary<string, object> NormalizeProperties(PMERBlock block)
         {
-            Dictionary<string, object> dict = block.Properties != null ? new Dictionary<string, object>(block.Properties) : [];
+            Dictionary<string, object> dict = block.Properties != null ? new Dictionary<string, object>(block.Properties) : new();
 
-            if (dict.TryGetValue("PrimitiveType", out var pt))
-                dict["PrimitiveType"] = Convert.ToInt32(pt);
-
-            if (dict.TryGetValue("PrimitiveFlags", out var pf))
+            switch ((PMERBlockType)block.BlockType)
             {
-                dict["PrimitiveFlags"] = Convert.ToByte(pf);
-            }
-            else
-                dict["PrimitiveFlags"] = PrimitiveFlags.Visible | PrimitiveFlags.Collidable;
+                case PMERBlockType.Primitive:
+                    if (dict.TryGetValue("PrimitiveType", out var pt))
+                        dict["PrimitiveType"] = Convert.ToInt32(pt);
 
-            if (dict.TryGetValue("Color", out var color))
-            {
-                if (TryParseHexColor(color.ToString(), out Color unityColor))
-                {
-                    dict["Color"] = unityColor;
-                }
-                else
-                    LogManager.Warn($"Failed to parse color value: {color}");
+                    if (dict.TryGetValue("PrimitiveFlags", out var pf))
+                    {
+                        dict["PrimitiveFlags"] = Convert.ToByte(pf);
+                    }
+                    else
+                        dict["PrimitiveFlags"] = PrimitiveFlags.Visible | PrimitiveFlags.Collidable;
+
+                    if (dict.TryGetValue("Color", out var color))
+                    {
+                        if (TryParseHexColor(color.ToString(), out Color unityColor))
+                        {
+                            dict["Color"] = unityColor;
+                        }
+                        else
+                            Debug.LogWarning($"Failed to parse color value: {color}");
+                    }
+                    break;
+
+                case PMERBlockType.Light:
+                    if (dict.TryGetValue("LightType", out var lighttype))
+                        dict["LightType"] = (LightType)Convert.ToInt32(lighttype);
+
+                    if (dict.TryGetValue("Color", out var lightcolor) && TryParseHexColor(lightcolor.ToString(), out Color unitylightColor))
+                        dict["LightColor"] = unitylightColor;
+
+                    if (dict.TryGetValue("Intensity", out var intensity))
+                        dict["LightIntensity"] = Convert.ToSingle(intensity);
+
+                    if (dict.TryGetValue("Range", out var range))
+                        dict["LightRange"] = Convert.ToSingle(range);
+
+                    if (dict.TryGetValue("Shape", out var shape))
+                        dict["LightShape"] = (LightShape)Convert.ToInt32(shape);
+
+                    if (dict.TryGetValue("SpotAngle", out var spotangle))
+                        dict["SpotAngle"] = Convert.ToSingle(spotangle);
+
+                    if (dict.TryGetValue("InnerSpotAngle", out var innerspotangle))
+                        dict["InnerSpotAngle"] = Convert.ToSingle(innerspotangle);
+
+                    if (dict.TryGetValue("ShadowStrength", out var shadowStrength))
+                        dict["ShadowStrength"] = Convert.ToSingle(shadowStrength);
+
+                    if (dict.TryGetValue("ShadowType", out var shadowtype))
+                        dict["ShadowType"] = (LightShadows)Convert.ToInt32(shadowtype);
+                    break;
+    
+                case PMERBlockType.Pickup:
+                    if (dict.TryGetValue("ItemType", out var itemtype))
+                        dict["ItemToSpawn"] = (ItemType)Convert.ToInt32(itemtype);
+
+                    if (dict.TryGetValue("Chance", out var chance))
+                        dict["SpawnPercentage"] = Convert.ToSingle(chance);
+
+                    if (dict.TryGetValue("Uses", out var uses))
+                        dict["MaxAmount"] = Convert.ToInt32(uses);
+                    break;
+
+                case PMERBlockType.Teleport:
+                    if (dict.TryGetValue("Cooldown", out var cooldown))
+                        dict["Cooldown"] = Convert.ToSingle(cooldown);
+
+                    break;
+
+                case PMERBlockType.Interactable:
+                    if (dict.TryGetValue("ColliderShape", out var collidershape))
+                        dict["Shape"] = (ColliderShape)Convert.ToInt32(collidershape);
+
+                    if (dict.TryGetValue("InteractionDuration", out var duration))
+                        dict["Duration"] = Convert.ToSingle(duration);
+
+                    if (dict.TryGetValue("IsLocked", out var locked))
+                        dict["Locked"] = Convert.ToSingle(locked);
+
+                    break;
+
+                case PMERBlockType.Text:
+                    if (dict.TryGetValue("Text", out var text))
+                        dict["TextFormat"] = Convert.ToString(text);
+
+                    if (dict.TryGetValue("DisplaySize", out var displaysize))
+                        dict["DisplaySize"] = ConvertExtensions.ToVector2(displaysize);
+                        
+                    break;
             }
 
             return dict;
