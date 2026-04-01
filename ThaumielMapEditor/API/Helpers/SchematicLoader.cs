@@ -736,10 +736,13 @@ namespace ThaumielMapEditor.API.Helpers
         /// <returns><see cref="SerializableMap"/></returns>
         public static SerializableMap SaveMap(MapData data)
         {
-            SerializableMap map = new();
-            map.FileName = data.FileName;
-            map.Room = data.Room.Name;
-            map.Id = Guid.NewGuid();
+            SerializableMap map = new()
+            {
+                FileName = data.FileName,
+                Room = data.Room.Name,
+                Id = Guid.NewGuid()
+            };
+
             foreach (MapSchematicData msdata in data.Schematics)
             {
                 SerializedMapSchematic mapSchematic = new()

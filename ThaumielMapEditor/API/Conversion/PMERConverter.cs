@@ -8,6 +8,7 @@ using AdminToys;
 using ThaumielMapEditor.API.Helpers;
 using static AdminToys.InvisibleInteractableToy;
 using ThaumielMapEditor.API.Extensions;
+using System.Linq;
 
 namespace ThaumielMapEditor.API.Conversion
 {
@@ -89,7 +90,7 @@ namespace ThaumielMapEditor.API.Conversion
 
         private static Dictionary<string, object> NormalizeProperties(PMERBlock block)
         {
-            Dictionary<string, object> dict = block.Properties != null ? new Dictionary<string, object>(block.Properties) : new();
+            Dictionary<string, object> dict = block.Properties != null ? new Dictionary<string, object>(block.Properties) : [];
 
             switch ((PMERBlockType)block.BlockType)
             {
@@ -158,6 +159,18 @@ namespace ThaumielMapEditor.API.Conversion
                 case PMERBlockType.Teleport:
                     if (dict.TryGetValue("Cooldown", out var cooldown))
                         dict["Cooldown"] = Convert.ToSingle(cooldown);
+
+                    if (dict.TryGetValue("Id", out var id))
+                        dict["Id"] = Guid.Parse(Convert.ToString(id));
+
+                    if (dict.TryGetValue("TargetTeleporters", out var targets))
+                    {
+                        if (targets is object[] array)
+                        {
+                            List<string?> ids = array.Select(t => t.GetType().GetField("Id")?.GetValue(t) as string).Where(id => id != null).ToList();
+                            dict["Target"] = Guid.Parse(ids.First());
+                        }
+                    }
 
                     break;
 
