@@ -4,7 +4,6 @@ using LabApi.Features.Wrappers;
 using LabApiExtensions.Extensions;
 using LabApiExtensions.FakeExtension;
 using Mirror;
-using UnityEngine;
 
 namespace ThaumielMapEditor.API.Extensions
 {

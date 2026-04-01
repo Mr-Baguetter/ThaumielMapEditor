@@ -32,7 +32,7 @@ namespace ThaumielMapEditor.Events
             ReferenceHub.OnBeforePlayerDestroyed -= OnPlayerLeft;
         }
 
-        // If you contribute and want a CreditTag add yourself to this.
+        // If you contribute and want a CreditTag add your own steamid to this.
         private static readonly Dictionary<string, CreditTag> Credits = new()
         {
             // MrBaguetter
@@ -40,6 +40,13 @@ namespace ThaumielMapEditor.Events
             {
                 Name = "TME Lead Developer",
                 Color = "pumpkin"
+            },
+
+            // Example contributor badge
+            ["EXAMPLE99@steam"] = new CreditTag()
+            {
+                Name = "TME Contributor",
+                Color = "red"
             }
         };
 

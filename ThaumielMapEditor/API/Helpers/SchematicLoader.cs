@@ -369,7 +369,6 @@ namespace ThaumielMapEditor.API.Helpers
         /// Spawns a loaded schematic by name at the specified position with default rotation and scale.
         /// </summary>
         /// <param name="schematicname">The file name of the schematic to spawn. Must match a schematic in <see cref="LoadedSchematics"/>.</param>
-        /// <param name="animated">Whether the schematic contains an animator.</param>
         /// <param name="position">The world position at which to place the schematic.</param>
         /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
         public static SchematicData SpawnSchematic(string schematicname, Vector3 position)
@@ -388,7 +387,6 @@ namespace ThaumielMapEditor.API.Helpers
         /// Spawns a loaded schematic by name at the specified position and rotation with default scale.
         /// </summary>
         /// <param name="schematicname">The file name of the schematic to spawn. Must match a schematic in <see cref="LoadedSchematics"/>.</param>
-        /// <param name="animated">Whether the schematic contains an animator.</param>
         /// <param name="position">The world position at which to place the schematic.</param>
         /// <param name="rotation">The rotation to apply to the schematic.</param>
         /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
@@ -408,7 +406,6 @@ namespace ThaumielMapEditor.API.Helpers
         /// Spawns a loaded schematic by name at the specified position, rotation, and scale.
         /// </summary>
         /// <param name="schematicname">The file name of the schematic to spawn. Must match a schematic in <see cref="LoadedSchematics"/>.</param>
-        /// <param name="animated">Whether the schematic contains an animator.</param>
         /// <param name="position">The world position at which to place the schematic.</param>
         /// <param name="rotation">The rotation to apply to the schematic.</param>
         /// <param name="scale">The scale to apply to the schematic.</param>

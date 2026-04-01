@@ -64,7 +64,7 @@ namespace ThaumielMapEditor.Commands.Admin
                     }
                     catch (Exception e)
                     {
-                        LogManager.Error($"Conversion of '{schematicName}' failed: {e.Message}");
+                        LogManager.Error($"Conversion of '{schematicName}' failed: {e}");
                     }
                 });
 

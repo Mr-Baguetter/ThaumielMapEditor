@@ -1,13 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using Discord;
-using MEC;
-using UnityEngine;
-using UnityEngine.Networking;
 
 namespace ThaumielMapEditor.API.Helpers
 {

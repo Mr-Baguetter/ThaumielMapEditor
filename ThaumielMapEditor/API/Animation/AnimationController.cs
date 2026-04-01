@@ -207,7 +207,7 @@ namespace ThaumielMapEditor.API.Animation
                     dummy.Primitive.Scale = new(dummy.Transform.lossyScale.x / schematicRoot.lossyScale.x, dummy.Transform.lossyScale.y / schematicRoot.lossyScale.y, dummy.Transform.lossyScale.z / schematicRoot.lossyScale.z);
                     dummy.Primitive.Color = dummy.Animatable.color;
                     dummy.Primitive.PrimitiveType = (PrimitiveType)dummy.Animatable.primitiveType;
-                    dummy.Primitive.PrimitiveFlags = (PrimitiveFlags)dummy.Animatable.primitiveFlags;
+                    dummy.Primitive.PrimitiveFlags = PrimitiveFlags.None;
 
                     dummy.Primitive.FlushSync();
                 }
