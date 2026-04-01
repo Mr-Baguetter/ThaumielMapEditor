@@ -25,17 +25,7 @@ namespace ThaumielMapEditor.Events
 
         private static void OnSchematicSpawned(SchematicData schematic)
         {
-            if (!schematic.ContainsAnimator)
-                return;
-
-            AnimationController controller = AnimationController.GetOrCreate(schematic);
-
-            RuntimeAnimatorController? runtimecontroller = AssetBundleControllerLoader.LoadController(schematic.FileName, "IdleController");
-            if (runtimecontroller != null)
-            {
-                controller.SetController(runtimecontroller);
-                controller.Play("Idle");
-            }
+            schematic.AnimationController.Play("Idle");
         }
 
         private static void OnSchematicDestroyed(SchematicData schematic)

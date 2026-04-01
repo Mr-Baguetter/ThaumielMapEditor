@@ -7,6 +7,7 @@ using ThaumielMapEditor.API.Blocks.ClientSide;
 using LabPrimitive = LabApi.Features.Wrappers.PrimitiveObjectToy;
 using System;
 using ThaumielMapEditor.API.Blocks.Areas;
+using ThaumielMapEditor.API.Animation;
 
 namespace ThaumielMapEditor.API.Data
 {
@@ -21,11 +22,6 @@ namespace ThaumielMapEditor.API.Data
         /// Fired when the <see cref="Rotation"/> is set;
         /// </summary>
         public static event Action<SchematicData>? SchematicRotationUpdated;
-
-        /// <summary>
-        /// Gets or sets whether or not this <see cref="SchematicData"/> has a animator in it when built from unity.
-        /// </summary>
-        public bool ContainsAnimator { get; set; }
 
         /// <summary>
         /// Gets or sets the file name.
@@ -67,6 +63,8 @@ namespace ThaumielMapEditor.API.Data
                 SchematicRotationUpdated?.Invoke(this);
             }
         }
+
+        public AnimationController AnimationController => AnimationController.GetOrCreate(this);
 
         /// <summary>
         /// Gets or sets the scale of this <see cref="SchematicData"/> instance.

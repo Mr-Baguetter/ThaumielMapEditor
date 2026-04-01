@@ -322,7 +322,6 @@ namespace ThaumielMapEditor.API.Helpers
             {
                 FileName = schematic.FileName,
                 Id = GetId(),
-                ContainsAnimator = schematic.ContainsAnimator
             };
 
             Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, rotation, scale));
@@ -342,7 +341,6 @@ namespace ThaumielMapEditor.API.Helpers
             {
                 FileName = schematic.FileName,
                 Id = GetId(),
-                ContainsAnimator = schematic.ContainsAnimator
             };
 
             Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, rotation, default));
@@ -361,7 +359,6 @@ namespace ThaumielMapEditor.API.Helpers
             {
                 FileName = schematic.FileName,
                 Id = GetId(),
-                ContainsAnimator = schematic.ContainsAnimator
             };
 
             Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, default, default));
@@ -375,13 +372,12 @@ namespace ThaumielMapEditor.API.Helpers
         /// <param name="animated">Whether the schematic contains an animator.</param>
         /// <param name="position">The world position at which to place the schematic.</param>
         /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
-        public static SchematicData SpawnSchematic(string schematicname, bool animated, Vector3 position)
+        public static SchematicData SpawnSchematic(string schematicname, Vector3 position)
         {
             SchematicData schematicData = new()
             {
                 FileName = schematicname,
                 Id = GetId(),
-                ContainsAnimator = animated
             };
 
             Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.FileName == schematicname), schematicData, position, default, default));
@@ -396,13 +392,12 @@ namespace ThaumielMapEditor.API.Helpers
         /// <param name="position">The world position at which to place the schematic.</param>
         /// <param name="rotation">The rotation to apply to the schematic.</param>
         /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
-        public static SchematicData SpawnSchematic(string schematicname, bool animated, Vector3 position, Quaternion rotation)
+        public static SchematicData SpawnSchematic(string schematicname, Vector3 position, Quaternion rotation)
         {
             SchematicData schematicData = new()
             {
                 FileName = schematicname,
                 Id = GetId(),
-                ContainsAnimator = animated
             };
 
             Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.FileName == schematicname), schematicData, position, rotation, default));
@@ -418,13 +413,12 @@ namespace ThaumielMapEditor.API.Helpers
         /// <param name="rotation">The rotation to apply to the schematic.</param>
         /// <param name="scale">The scale to apply to the schematic.</param>
         /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
-        public static SchematicData SpawnSchematic(string schematicname, bool animated, Vector3 position, Quaternion rotation, Vector3 scale)
+        public static SchematicData SpawnSchematic(string schematicname, Vector3 position, Quaternion rotation, Vector3 scale)
         {
             SchematicData schematicData = new()
             {
                 FileName = schematicname,
                 Id = GetId(),
-                ContainsAnimator = animated
             };
 
             Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.FileName == schematicname), schematicData, position, rotation, scale));

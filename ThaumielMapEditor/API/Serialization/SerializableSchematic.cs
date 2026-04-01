@@ -38,10 +38,5 @@ namespace ThaumielMapEditor.API.Serialization
         public List<SerializableArea> Areas { get; set; } = [];
 
         public List<SerializableLOD> LOD { get; set; } = [];
-
-        /// <summary>
-        /// Gets or sets whether the <see cref="SerializableSchematic"/> instance had a animator when built.
-        /// </summary>
-        public bool ContainsAnimator { get; set; }
     }
 }
