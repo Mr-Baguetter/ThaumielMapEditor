@@ -168,7 +168,8 @@ namespace ThaumielMapEditor.API.Conversion
                         if (targets is object[] array)
                         {
                             List<string?> ids = array.Select(t => t.GetType().GetField("Id")?.GetValue(t) as string).Where(id => id != null).ToList();
-                            dict["Target"] = Guid.Parse(ids.First());
+                            if (Guid.TryParse(ids.First(), out var targetid))
+                                dict["Target"] = targetid;
                         }
                     }
 
