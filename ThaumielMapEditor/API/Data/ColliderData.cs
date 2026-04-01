@@ -9,14 +9,14 @@ namespace ThaumielMapEditor.API.Data
     public class PrefabCollidersData
     {
         /// <summary>
-        /// 
+        /// Gets the prefab this collider data belongs to.
         /// </summary>
-        public GameObject Prefab { get; set; }
+        public GameObject Prefab { get; internal set; }
 
         /// <summary>
-        /// 
+        /// Gets the collection of <see cref="ColliderData"/> instances associated with this prefab.
         /// </summary>
-        public IEnumerable<ColliderData> Colliders { get; set; }
+        public IEnumerable<ColliderData> Colliders { get; internal set; }
     }
 
     public class ColliderData

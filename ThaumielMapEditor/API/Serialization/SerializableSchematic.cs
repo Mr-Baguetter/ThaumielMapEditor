@@ -37,6 +37,9 @@ namespace ThaumielMapEditor.API.Serialization
         /// </summary>
         public List<SerializableArea> Areas { get; set; } = [];
 
+        /// <summary>
+        /// Gets or sets the LOD Zones for the <see cref="SerializableSchematic"/> instance.
+        /// </summary>
         public List<SerializableLOD> LOD { get; set; } = [];
     }
 }

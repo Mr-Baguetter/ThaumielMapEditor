@@ -8,11 +8,33 @@ namespace ThaumielMapEditor.API.Components
 {
     public class LODZone : TriggerHandler
     {
-        public List<PrimitiveType> PrimitivestoUnload = [];
-        public SchematicData Schematic;
-        public uint Index;
-        public BoxCollider Collider;
+        /// <summary>
+        /// Gets the list of <see cref="PrimitiveType"/>s that should be spawned and despawned when a <see cref="Player"/> enters or exits this zone.
+        /// </summary>
+        public List<PrimitiveType> PrimitivestoUnload { get; private set; } = [];
 
+        /// <summary>
+        /// Gets the <see cref="SchematicData"/> this zone belongs to.
+        /// </summary>
+        public SchematicData Schematic { get; private set; }
+
+        /// <summary>
+        /// Gets the index of this <see cref="LODZone"/> within its <see cref="SchematicData"/>.
+        /// </summary>
+        public uint Index { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="BoxCollider"/> that defines the bounds of this zone.
+        /// </summary>
+        public BoxCollider Collider { get; private set; }
+
+        /// <summary>
+        /// Initializes this <see cref="LODZone"/> instance and subscribes to the trigger enter and exit events.
+        /// </summary>
+        /// <param name="schematic">The <see cref="SchematicData"/> this zone belongs to.</param>
+        /// <param name="unload">The list of <see cref="PrimitiveType"/>s to spawn and despawn as players enter and exit.</param>
+        /// <param name="index">The index of this zone within the schematic.</param>
+        /// <param name="collider">The <see cref="BoxCollider"/> that defines the bounds of this zone.</param>
         public void Init(SchematicData schematic, List<PrimitiveType> unload, uint index, BoxCollider collider)
         {
             OnPlayerEntered += OnTriggerEnter;

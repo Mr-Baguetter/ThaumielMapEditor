@@ -10,18 +10,35 @@ namespace ThaumielMapEditor.API.Components
 {
     public class TeleporterHandler : TriggerHandler
     {
-        public PrimitiveObjectToy Primitive;
-        public TeleporterObject Teleporter;
+        /// <summary>
+        /// Gets the primitive that this <see cref="TeleporterHandler"/> instance is attached to.
+        /// </summary>
+        public PrimitiveObjectToy Primitive { get; private set; }
 
         /// <summary>
-        /// Tracks perplayer cooldown expiry times.
+        /// Gets the <see cref="TeleporterObject"/> this handler is managing.
         /// </summary>
+        public TeleporterObject Teleporter { get; private set; }
+
+        /// <summary>
+        /// Tracks per-player cooldown expiry times.
+        /// Each entry maps a <see cref="Player"/> to the <see cref="Time.time"/> value at which their cooldown expires.
+        /// </summary>
+        /// <remarks>
+        /// Expired entries are automatically removed each frame.
+        /// </remarks>
         public Dictionary<Player, float> PlayerCooldowns = [];
 
         private float _globalCooldownEnd;
 
         private readonly HashSet<Player> _playersInside = [];
 
+        /// <summary>
+        /// Initializes this <see cref="TeleporterHandler"/> instance with the given primitive and teleporter,
+        /// and subscribes to the trigger enter and exit events.
+        /// </summary>
+        /// <param name="prim">The primitive that represents the teleporter.</param>
+        /// <param name="teleporter">The <see cref="TeleporterObject"/> that defines this teleporter's configuration.</param>
         public void Init(PrimitiveObjectToy prim, TeleporterObject teleporter)
         {
             Primitive = prim;
@@ -66,7 +83,6 @@ namespace ThaumielMapEditor.API.Components
                 return;
 
             TeleporterObject? target = FindTargetTeleporter();
-
             if (target == null)
             {
                 LogManager.Warn($"Teleporter {Teleporter.Id} could not find target teleporter with Id: {Teleporter.Target}");

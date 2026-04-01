@@ -7,10 +7,13 @@ namespace ThaumielMapEditor.API.Components
 {
     public class CullingTrigger : TriggerHandler
     {
-        private SchematicData? Schematic;
+        /// <summary>
+        /// Gets the <see cref="SchematicData"/> this <see cref="CullingTrigger"/> instance belongs to.
+        /// </summary>
+        public SchematicData? Schematic { get; private set; }
 
         /// <summary>
-        /// Initializes the <see cref="CullingTrigger"/> component
+        /// Initializes the <see cref="CullingTrigger"/> component.
         /// </summary>
         /// <param name="schematic">The schematic tied to this <see cref="CullingTrigger"/> instance.</param>
         public void Init(SchematicData schematic)

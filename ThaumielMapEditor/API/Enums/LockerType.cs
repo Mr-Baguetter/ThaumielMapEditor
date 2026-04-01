@@ -1,5 +1,10 @@
+using ThaumielMapEditor.API.Blocks.ServerObjects.Lockers;
+
 namespace ThaumielMapEditor.API.Enums
 {
+    /// <summary>
+    /// Defines the types that <see cref="LockerObject"/> can use.
+    /// </summary>
     public enum LockerType
     {
         Pedestal = 1,
