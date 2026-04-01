@@ -56,6 +56,8 @@ namespace ThaumielMapEditor.API.Conversion
             SerializableObject obj = new()
             {
                 Name = block.Name,
+                ObjectId = block.ObjectId,
+                ParentId = block.ParentId,
                 Position = block.Position,
                 Rotation = Quaternion.Euler(block.Rotation),
                 Scale = block.Scale,
