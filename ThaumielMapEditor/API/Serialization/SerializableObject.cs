@@ -57,6 +57,6 @@ namespace ThaumielMapEditor.API.Serialization
         /// <summary>
         /// Gets or sets the values for the <see cref="SerializableObject"/> instance.
         /// </summary>
-        public Dictionary<string, object> Values { get; set; } = new();
+        public Dictionary<string, object> Values { get; set; } = [];
     }
 }

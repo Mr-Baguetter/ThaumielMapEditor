@@ -555,7 +555,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     foreach (Player player in Player.ReadyList)
                     {
-                        light.SpawnForPlayer(player);                        
+                        light.SpawnForPlayer(player);
                     }
                         
                     break;

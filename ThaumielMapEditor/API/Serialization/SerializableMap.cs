@@ -48,6 +48,6 @@ namespace ThaumielMapEditor.API.Serialization
         /// <summary>
         /// Gets or sets the schematics for the <see cref="SerializableMap"/> instance.
         /// </summary>
-        public List<SerializedMapSchematic> Schematics = new();
+        public List<SerializedMapSchematic> Schematics = [];
     }
 }

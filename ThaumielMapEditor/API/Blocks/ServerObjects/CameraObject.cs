@@ -49,7 +49,6 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// <summary>
         /// The <see cref="Room"/> that the camera belongs to.
         /// Setting this property updates <see cref="Scp079CameraToy.NetworkRoom"/> on <see cref="Base"/>.
-        /// Defaults to the first room returned by <c>Room.Get(RoomName.Outside)</c>.
         /// </summary>
         public Room Room
         {

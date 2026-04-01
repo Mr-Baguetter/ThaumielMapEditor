@@ -43,7 +43,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         public DoorVariant? Base { get; internal set; }
 
         /// <summary>
-        /// The visual and functional type of this door (e.g. LCZ, HCZ, EZ, Gate, Bulkhead).
+        /// The visual and functional type of this door.
         /// </summary>
         public DoorType DoorType { get; set; }
 
@@ -65,7 +65,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         }
 
         /// <summary>
-        /// If <c>true</c>, the player must hold <b>all</b> listed permissions rather than just one.
+        /// If <see langword="true"/>, the player must hold <b>all</b> listed permissions rather than just one.
         /// Syncs to the live door object when changed after spawning.
         /// </summary>
         public bool RequireAllPermissions
@@ -82,7 +82,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         }
 
         /// <summary>
-        /// If <c>true</c>, SCP-2176 (Ghostlight) can bypass this door's permissions.
+        /// If <see langword="true"/>, SCP-2176 can bypass this door's permissions.
         /// Syncs to the live door object when changed after spawning.
         /// </summary>
         public bool Bypass2176
@@ -136,8 +136,6 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 
         /// <summary>
         /// Whether the door is currently open.
-        /// Setting this triggers the proper <see cref="DoorAction.Opened"/> or <see cref="DoorAction.Closed"/> event
-        /// rather than forcing the state directly.
         /// </summary>
         public bool IsOpen
         {
@@ -147,15 +145,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 if (field == value)
                     return;
 
-                if (value)
-                {
-                    DoorEvents.TriggerAction(Base, DoorAction.Opened, null);
-                }
-                else
-                {
-                    DoorEvents.TriggerAction(Base, DoorAction.Closed, null);
-                }
-
+                Base?.NetworkTargetState = value;
                 field = value;
             }
         }
@@ -172,7 +162,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 if (field == value)
                     return;
 
-                Base?.ServerChangeLock(DoorLockReason.AdminCommand, value);
+                Base?.ServerChangeLock(DoorLockReason.SpecialDoorFeature, value);
                 field = value;
             }
         }
@@ -196,6 +186,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             NetworkServer.UnSpawn(doorPrefab);
             if (doorPrefab.TryGetComponent<WallableSmallNodeRoomConnector>(out var con) && DoorType == DoorType.Hcz)
                 con.Network_syncBitmask = 3;
+
+            if (doorPrefab.TryGetComponent(out DoorRandomInitialStateExtension doorRandomInitialStateExtension))
+                UnityEngine.Object.Destroy(doorRandomInitialStateExtension);
 
             Object = doorPrefab;
             NetId = Base.netId;
@@ -222,12 +215,8 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 breakable.RemainingHealth = Health;
             }
 
-            if (IsLocked)
-                door.ServerChangeLock(DoorLockReason.AdminCommand, true);
-
-            if (IsOpen)
-                DoorEvents.TriggerAction(door, DoorAction.Opened, null);
-
+            door.NetworkTargetState = IsOpen;
+            door.ServerChangeLock(DoorLockReason.SpecialDoorFeature, IsLocked);
             door.RequiredPermissions = new(Permissions, RequireAllPermissions, Bypass2176);
         }
 
