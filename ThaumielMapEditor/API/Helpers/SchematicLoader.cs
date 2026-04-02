@@ -467,6 +467,9 @@ namespace ThaumielMapEditor.API.Helpers
             SchematicSpawned?.Invoke(schematicData);
             LogManager.Info($"Schematic '{schematic.FileName}' fully spawned.");
             SchematicsById.Add(schematicData.Id, schematicData);
+
+            if (Main.Instance.Config.SchematicAnimationPlayOnLoad.TryGetValue(schematicData.FileName, out var animationname))
+                schematicData.AnimationController.Play(animationname);
         }
 
         private static void SpawnSerializableArea(SerializableArea area, SchematicData schematic)

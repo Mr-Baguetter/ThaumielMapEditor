@@ -1,8 +1,5 @@
-using System.Collections.Generic;
-using ThaumielMapEditor.API.Animation;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Helpers;
-using UnityEngine;
 
 namespace ThaumielMapEditor.Events
 {
