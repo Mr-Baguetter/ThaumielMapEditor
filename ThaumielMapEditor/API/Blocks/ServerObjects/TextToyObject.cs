@@ -30,7 +30,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// Setting this property updates the underlying <see cref="Base"/> instance's <c>TextFormat</c> if the
         /// runtime object has already been created.
         /// </remarks>
-        public string TextFormat
+        public string Text
         {
             get;
             set
@@ -83,7 +83,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             ParseValues(serializable);
             SetWorldTransform(schematic);
 
-            Base.TextFormat = TextFormat;
+            Base.TextFormat = Text;
             Base.DisplaySize = DisplaySize;
             NetworkServer.Spawn(Base.gameObject);
             base.SpawnObject(schematic, serializable);
@@ -101,11 +101,12 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 return;                
             }
 
-            if (!serializable.Values.TryConvertValue<string>("TextFormat", out var textFormat))
+            if (!serializable.Values.TryConvertValue<string>("Text", out var text))
             {
-                LogManager.Warn("Failed to parse TextFormat");
+                LogManager.Warn("Failed to parse Text");
                 return;
             }
+
             if (serializable.Values.TryGetValue("DisplaySize", out var raw) && raw is IDictionary<object, object> dict)
             {
                 float x = Convert.ToSingle(dict["x"]);
@@ -114,7 +115,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 DisplaySize = new(x, y);
             }
 
-            TextFormat = textFormat;
+            Text = text;
         }
     }
 }
