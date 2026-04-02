@@ -73,6 +73,7 @@ namespace ThaumielMapEditor.API.Components
             if (Player.TryGet(root, out var player))
             {
                 OnPlayerEntered?.Invoke(player, other);
+                return;
             }
 
             if (root.TryGetComponent<ItemPickupBase>(out var pickupbase) && Pickup.TryGet(pickupbase.Info.Serial, out var pickup))
@@ -95,6 +96,7 @@ namespace ThaumielMapEditor.API.Components
             if (Player.TryGet(root, out var player))
             {
                 OnPlayerExited?.Invoke(player, other);
+                return;
             }
 
             if (root.TryGetComponent<ItemPickupBase>(out var pickupbase) && Pickup.TryGet(pickupbase.Info.Serial, out var pickup))
