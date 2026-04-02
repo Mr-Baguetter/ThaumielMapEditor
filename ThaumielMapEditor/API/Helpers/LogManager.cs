@@ -22,7 +22,13 @@ namespace ThaumielMapEditor.API.Helpers
         {
             string formattedMessage = FormatLogMessage(message);
             Logger.Info(formattedMessage);
-            Log log = new() { LogLevel = LogLevel.Info, Message = formattedMessage, LogTime = DateTime.Now };
+            Log log = new()
+            {
+                LogLevel = LogLevel.Info,
+                Message = formattedMessage,
+                LogTime = DateTime.Now
+            };
+
             Logs.Add(log);
             LogCreated?.Invoke(log);
         }
@@ -31,7 +37,13 @@ namespace ThaumielMapEditor.API.Helpers
         {
             string formattedMessage = FormatLogMessage(message);
             Logger.Debug(formattedMessage, Main.Instance.Config.Debug);
-            Log log = new() { LogLevel = LogLevel.Debug, Message = formattedMessage, LogTime = DateTime.Now };
+            Log log = new()
+            {
+                LogLevel = LogLevel.Debug,
+                Message = formattedMessage,
+                LogTime = DateTime.Now
+            };
+
             Logs.Add(log);
             LogCreated?.Invoke(log);
         }
@@ -40,7 +52,13 @@ namespace ThaumielMapEditor.API.Helpers
         {
             string formattedMessage = FormatLogMessage(message);
             Logger.Warn(formattedMessage);
-            Log log = new() { LogLevel = LogLevel.Warn, Message = formattedMessage, LogTime = DateTime.Now };
+            Log log = new()
+            {
+                LogLevel = LogLevel.Warn,
+                Message = formattedMessage,
+                LogTime = DateTime.Now
+            };
+
             Logs.Add(log);
             LogCreated?.Invoke(log);
         }
@@ -49,10 +67,31 @@ namespace ThaumielMapEditor.API.Helpers
         {
             string formattedMessage = FormatLogMessage(message);
             Logger.Error(formattedMessage);
-            Log log = new() { LogLevel = LogLevel.Error, Message = formattedMessage, LogTime = DateTime.Now };
+            Log log = new()
+            {
+                LogLevel = LogLevel.Error,
+                Message = formattedMessage,
+                LogTime = DateTime.Now
+            };
+
             Logs.Add(log);
             LogCreated?.Invoke(log);
         }
+
+        public static void Updater(string message)
+        {
+            Logger.Raw($"[Updater] [{Main.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.Blue);
+            Log log = new()
+            {
+                LogLevel = LogLevel.Info,
+                Message = message,
+                LogTime = DateTime.Now
+            };
+            
+            Logs.Add(log);
+            LogCreated?.Invoke(log);
+        }
+        
 
         private static string FormatLogMessage(string message)
         {

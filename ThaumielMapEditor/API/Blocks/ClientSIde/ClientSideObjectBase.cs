@@ -12,7 +12,6 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 {
     public abstract class ClientSideObjectBase
     {
-
         /// <summary>
         /// All the <see cref="Player"/>s that this <see cref="ClientSideObjectBase"/> instance has been spawned for.
         /// </summary>

@@ -1,5 +1,6 @@
 using System.Linq;
 using LabApi.Events.Handlers;
+using MEC;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Serialization;
 
@@ -24,6 +25,7 @@ namespace ThaumielMapEditor.Events
         private static void OnWaitingForPlayers()
         {
             PrefabHelper.RegisterPrefabs();
+            Timing.RunCoroutine(UpdateHelper.CheckForUpdatesCoroutine(false));
 
             foreach (string name in Main.Instance.Config.LoadOnWaitingForPlayers)
             {

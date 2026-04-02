@@ -10,6 +10,7 @@ namespace ThaumielMapEditor
         public bool Debug { get; set; }
         public bool EnableCreditTags { get; set; } = true;
         public List<string> SchematiclodBlacklist { get; set; } = [];
+        public string GithubToken { get; set; } = string.Empty;
 
         public List<string> LoadOnWaitingForPlayers { get; set; } = [];
         public List<string> LoadOnRoundStart { get; set; } = [];
