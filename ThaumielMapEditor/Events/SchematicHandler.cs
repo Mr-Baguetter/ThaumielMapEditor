@@ -14,24 +14,16 @@ namespace ThaumielMapEditor.Events
         public static void Register()
         {
             SchematicLoader.SchematicSpawned += OnSchematicSpawned;
-            SchematicLoader.SchematicDestroyed += OnSchematicDestroyed;
         }
 
         public static void Unregister()
         {
             SchematicLoader.SchematicSpawned -= OnSchematicSpawned;
-            SchematicLoader.SchematicDestroyed -= OnSchematicDestroyed;
         }
 
         private static void OnSchematicSpawned(SchematicData schematic)
         {
             schematic.AnimationController.Play("Idle");
-        }
-
-        private static void OnSchematicDestroyed(SchematicData schematic)
-        {
-            if (AnimationController.AnimationSchematics.TryGetValue(schematic, out AnimationController? controller))
-                controller.Destroy();
         }
     }
 }

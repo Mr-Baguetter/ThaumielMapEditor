@@ -200,6 +200,11 @@ namespace ThaumielMapEditor.API.Data
             {
                 serverobj.DestroyObject(this);
             }
+
+            if (AnimationController.AnimationSchematics.TryGetValue(this, out var controller))
+            {
+                controller.Destroy();
+            }
         }
     }
 }

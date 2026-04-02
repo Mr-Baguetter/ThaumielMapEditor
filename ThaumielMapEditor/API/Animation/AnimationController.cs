@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using AdminToys;
+using LabApi.Features.Wrappers;
 using MEC;
 using ThaumielMapEditor.API.Blocks.ClientSide;
 using ThaumielMapEditor.API.Data;
@@ -193,6 +194,7 @@ namespace ThaumielMapEditor.API.Animation
         {
             Transform schematicRoot = Schematic.Primitive.Transform;
             yield return Timing.WaitForOneFrame;
+            Quaternion rootInverseRot = Quaternion.Inverse(schematicRoot.rotation);
 
             while (true)
             {
@@ -201,7 +203,7 @@ namespace ThaumielMapEditor.API.Animation
                 foreach (PrimitiveDummy dummy in _dummies)
                 {
                     dummy.Primitive.Position = schematicRoot.InverseTransformPoint(dummy.Transform.position);
-                    dummy.Primitive.Rotation = Quaternion.Inverse(schematicRoot.rotation) * dummy.Transform.rotation;
+                    dummy.Primitive.Rotation = rootInverseRot * dummy.Transform.rotation;
                     dummy.Primitive.Scale = new(dummy.Transform.lossyScale.x / schematicRoot.lossyScale.x, dummy.Transform.lossyScale.y / schematicRoot.lossyScale.y, dummy.Transform.lossyScale.z / schematicRoot.lossyScale.z);
                     dummy.Primitive.Color = dummy.Animatable.color;
                     dummy.Primitive.PrimitiveType = (PrimitiveType)dummy.Animatable.primitiveType;
@@ -217,8 +219,28 @@ namespace ThaumielMapEditor.API.Animation
                     yield break;
                 }
 
-                yield return Timing.WaitForOneFrame;
+                yield return GetTickRate(Schematic.Position);
             }
+        }
+
+        private float GetTickRate(Vector3 pos)
+        {
+            float closest = float.MaxValue;
+            foreach (Player player in Player.ReadyList)
+            {
+                if (!player.IsAlive)
+                    continue;
+
+                closest = Mathf.Min(closest, (player.Position - pos).sqrMagnitude);
+            }
+
+            if (closest < 25f)
+                return Timing.WaitForOneFrame;
+
+            if (closest < 100f)
+                return 0.05f;
+
+            return 0.25f;
         }
     }
 }
