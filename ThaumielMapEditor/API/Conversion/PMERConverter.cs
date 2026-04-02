@@ -73,6 +73,12 @@ namespace ThaumielMapEditor.API.Conversion
 
         private static ObjectType MapBlockType(PMERBlockType blockType)
         {
+            ObjectType Warn()
+            {
+                LogManager.Warn($"Invaild block type {blockType}");
+                return ObjectType.None;
+            }
+
             return blockType switch
             {
                 PMERBlockType.Primitive => ObjectType.Primitive,
@@ -84,7 +90,7 @@ namespace ThaumielMapEditor.API.Conversion
                 PMERBlockType.Locker => ObjectType.Locker,
                 PMERBlockType.Text => ObjectType.TextToy,
                 PMERBlockType.Interactable => ObjectType.Interactable,
-                _ => throw new InvalidOperationException(),
+                _ => Warn()
             };
         }
 

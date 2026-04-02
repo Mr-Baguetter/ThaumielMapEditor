@@ -89,6 +89,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
             NetworkServer.Spawn(locker.gameObject);
             ClearChambers();
             PopulateChambers();
+            Base._serverChambersFilled = true;
             base.SpawnObject(schematic, serializable);
         }
 
