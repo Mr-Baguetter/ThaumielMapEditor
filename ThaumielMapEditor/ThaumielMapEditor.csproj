@@ -88,4 +88,8 @@
     <Message Text="Copying dll to LabAPI plugin folder..." Importance="high" />
     <Copy SourceFiles="$(OutputPath)ThaumielMapEditor.dll" DestinationFolder="$(APPDATA)\SCP Secret Laboratory\LabAPI\plugins\global" SkipUnchangedFiles="true" />
   </Target>
+  <Target Name="ZipDependencies" AfterTargets="PostBuildCopy">
+    <Message Text="Zipping Dependencies folder..." Importance="high" />
+    <Exec Command="powershell -Command &quot;Compress-Archive -Path '$(ProjectDir)Dependencies\*' -DestinationPath '$(ProjectDir)Dependencies.zip' -Force&quot;" />
+  </Target>
 </Project>
