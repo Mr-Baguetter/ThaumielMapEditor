@@ -1,7 +1,6 @@
 ﻿using LabApi.Features.Wrappers;
 using Mirror;
 using System;
-using System.Collections.Generic;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Helpers;
@@ -15,8 +14,6 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         public static event Action<Vector3, CapybaraObject>? PositionUpdated;
         public static event Action<Vector3, CapybaraObject>? ScaleUpdated;
         public static event Action<Quaternion, CapybaraObject>? RotationUpdated;
-
-        public bool Spawned = false;
         
         /// <inheritdoc/>
         public override Quaternion Rotation
@@ -164,65 +161,6 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 
             SpawnedPlayers.Add(player);
             Spawned = true;
-        }
-
-        private ulong _pendingDirtyBits = 0;
-        private readonly SortedDictionary<ulong, Action<NetworkWriter>> _pendingWrites = [];
-
-        private void SyncToPlayers(ulong dirtyBits, Action<NetworkWriter> writeValues)
-        {
-            if (SpawnedPlayers.Count == 0 || !Spawned)
-                return;
-
-            _pendingDirtyBits |= dirtyBits;
-            _pendingWrites[dirtyBits] = writeValues;
-            FlushSync();
-        }
-
-        public void FlushSync()
-        {
-            if (_pendingDirtyBits == 0 || _pendingWrites.Count == 0)
-                return;
-
-            if (SpawnedPlayers.Count == 0 || !Spawned)
-            {
-                _pendingDirtyBits = 0;
-                _pendingWrites.Clear();
-                return;
-            }
-
-            using NetworkWriterPooled payloadWriter = NetworkWriterPool.Get();
-
-            int safetyPos = payloadWriter.Position;
-            payloadWriter.WriteByte(0);
-            int dataStart = payloadWriter.Position;
-
-            payloadWriter.WriteULong(_pendingDirtyBits);
-
-            foreach (Action<NetworkWriter> write in _pendingWrites.Values)
-                write(payloadWriter);
-
-            int dataEnd = payloadWriter.Position;
-            payloadWriter.Position = safetyPos;
-            payloadWriter.WriteByte((byte)((dataEnd - dataStart) & 0xFF));
-            payloadWriter.Position = dataEnd;
-
-            EntityStateMessage msg = new()
-            {
-                netId = NetId,
-                payload = payloadWriter.ToArraySegment()
-            };
-
-            foreach (Player player in SpawnedPlayers)
-            {
-                if (player.IsHost)
-                    continue;
-
-                player.Connection.Send(msg);
-            }
-
-            _pendingDirtyBits = 0;
-            _pendingWrites.Clear();
         }
     }
 }

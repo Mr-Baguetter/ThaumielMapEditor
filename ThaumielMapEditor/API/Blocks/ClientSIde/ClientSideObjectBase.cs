@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AdminToys;
 using LabApi.Features.Wrappers;
@@ -12,10 +13,18 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 {
     public abstract class ClientSideObjectBase
     {
+        internal ulong _pendingDirtyBits = 0;
+        internal readonly SortedDictionary<ulong, Action<NetworkWriter>> _pendingWrites = [];
+
         /// <summary>
         /// All the <see cref="Player"/>s that this <see cref="ClientSideObjectBase"/> instance has been spawned for.
         /// </summary>
         public HashSet<Player> SpawnedPlayers { get; internal set; } = [];
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="ClientSideObjectBase"/> has been spawned for any players.
+        /// </summary>
+        public bool Spawned { get; internal set; } = false;
 
         /// <summary>
         /// Gets or sets the position of the <see cref="ClientSideObjectBase"/> instance.
@@ -193,6 +202,72 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
 
             return count;
+        }
+
+        /// <summary>
+        /// Syncs the specified bits to all <see cref="Player"/>s this <see cref="ClientSideObjectBase"/> is spawned for
+        /// </summary>
+        /// <param name="dirtyBits">The bits to sync.</param>
+        /// <param name="writeValues">The writer to use.</param>
+        public void SyncToPlayers(ulong dirtyBits, Action<NetworkWriter> writeValues)
+        {
+            if (SpawnedPlayers.Count == 0 || !Spawned)
+                return;
+
+            _pendingDirtyBits |= dirtyBits;
+            _pendingWrites[dirtyBits] = writeValues;
+            FlushSync();
+        }
+
+        /// <summary>
+        /// Syncs all the pending bits in <see cref="_pendingWrites"/> and <see cref="_pendingDirtyBits"/>.
+        /// </summary>
+        public void FlushSync()
+        {
+            if (_pendingDirtyBits == 0 || _pendingWrites.Count == 0)
+                return;
+
+            if (SpawnedPlayers.Count == 0 || !Spawned)
+            {
+                _pendingDirtyBits = 0;
+                _pendingWrites.Clear();
+                return;
+            }
+
+            using NetworkWriterPooled payloadWriter = NetworkWriterPool.Get();
+
+            int safetyPos = payloadWriter.Position;
+            payloadWriter.WriteByte(0);
+            int dataStart = payloadWriter.Position;
+
+            payloadWriter.WriteULong(_pendingDirtyBits);
+
+            foreach (Action<NetworkWriter> write in _pendingWrites.Values)
+            {
+                write(payloadWriter);
+            }
+
+            int dataEnd = payloadWriter.Position;
+            payloadWriter.Position = safetyPos;
+            payloadWriter.WriteByte((byte)((dataEnd - dataStart) & 0xFF));
+            payloadWriter.Position = dataEnd;
+
+            EntityStateMessage msg = new()
+            {
+                netId = NetId,
+                payload = payloadWriter.ToArraySegment()
+            };
+
+            foreach (Player player in SpawnedPlayers)
+            {
+                if (player.IsHost)
+                    continue;
+
+                player.Connection.Send(msg);
+            }
+
+            _pendingDirtyBits = 0;
+            _pendingWrites.Clear();
         }
     }
 }

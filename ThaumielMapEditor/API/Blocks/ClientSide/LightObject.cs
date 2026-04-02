@@ -13,14 +13,6 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 {
     public class LightObject : ClientSideObjectBase
     {
-        private ulong _pendingDirtyBits = 0;
-        private readonly SortedDictionary<ulong, Action<NetworkWriter>> _pendingWrites = [];
-        
-        /// <summary>
-        /// Gets a value indicating whether this light object has been spawned for any players.
-        /// </summary>
-        public bool Spawned { get; private set; }
-
         /// <summary>
         /// Gets or sets the intensity of the light.
         /// </summary>
@@ -297,65 +289,6 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             Shape = lightShape;
             SpotAngle = spotAngle;
             InnerSpotAngle = innerSpotAngle;
-        }
-
-        private void SyncToPlayers(ulong dirtyBits, Action<NetworkWriter> writeValues)
-        {
-            if (SpawnedPlayers.Count == 0 || !Spawned)
-                return;
-
-            _pendingDirtyBits |= dirtyBits;
-            _pendingWrites[dirtyBits] = writeValues;
-            FlushSync();
-        }
-
-        /// <summary>
-        /// Flushes all pending synchronization updates to spawned players.
-        /// </summary>
-        public void FlushSync()
-        {
-            if (_pendingDirtyBits == 0 || _pendingWrites.Count == 0)
-                return;
-
-            if (SpawnedPlayers.Count == 0 || !Spawned)
-            {
-                _pendingDirtyBits = 0;
-                _pendingWrites.Clear();
-                return;
-            }
-
-            using NetworkWriterPooled payloadWriter = NetworkWriterPool.Get();
-
-            int safetyPos = payloadWriter.Position;
-            payloadWriter.WriteByte(0);
-            int dataStart = payloadWriter.Position;
-
-            payloadWriter.WriteULong(_pendingDirtyBits);
-
-            foreach (Action<NetworkWriter> write in _pendingWrites.Values)
-                write(payloadWriter);
-
-            int dataEnd = payloadWriter.Position;
-            payloadWriter.Position = safetyPos;
-            payloadWriter.WriteByte((byte)((dataEnd - dataStart) & 0xFF));
-            payloadWriter.Position = dataEnd;
-
-            EntityStateMessage msg = new()
-            {
-                netId = NetId,
-                payload = payloadWriter.ToArraySegment()
-            };
-
-            foreach (Player player in SpawnedPlayers)
-            {
-                if (player.IsHost)
-                    continue;
-
-                player.Connection.Send(msg);
-            }
-
-            _pendingDirtyBits = 0;
-            _pendingWrites.Clear();
         }
     }
 }
