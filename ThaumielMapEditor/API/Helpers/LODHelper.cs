@@ -37,7 +37,7 @@ namespace ThaumielMapEditor.API.Helpers
                 body.isKinematic = true;
 
                 LODZone lodZone = colliderobj.AddComponent<LODZone>();
-                lodZone.Init(schematic, data.Primitives, data.Index, collider);
+                lodZone.Init(schematic, data.Primitives, data.Index);
 
                 lodData.Add(data);
             }
