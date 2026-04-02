@@ -91,21 +91,18 @@ namespace ThaumielMapEditor.API.Components
                 return;
             }
 
-            if (other.TryGetComponent(out ItemPickupBase pickupbase))
+            if (other.TryGetComponent(out ItemPickupBase pickupbase) && Pickup.TryGet(pickupbase.Info.Serial, out var pickup))
             {
-                if (Pickup.TryGet(pickupbase.Info.Serial, out var pickup))
+                if (HasFlagFast(TeleporterFlags.AllowPickups))
                 {
-                    if (HasFlagFast(TeleporterFlags.AllowPickups))
-                    {
-                        pickup.Position = target.Position;
-                        LogManager.Debug($"Pickup {pickup.Type} teleported from {Teleporter.Id} to {Teleporter.Target}");
-                    }
+                    pickup.Position = target.Position;
+                    LogManager.Debug($"Pickup {pickup.Type} teleported from {Teleporter.Id} to {Teleporter.Target}");
+                }
 
-                    if (pickup is Projectile projectile && HasFlagFast(TeleporterFlags.AllowProjectiles))
-                    {
-                        projectile.Position = target.Position;
-                        LogManager.Debug($"Projectile {projectile.Type} teleported from {Teleporter.Id} to {Teleporter.Target}");
-                    }
+                if (pickup is Projectile projectile && HasFlagFast(TeleporterFlags.AllowProjectiles))
+                {
+                    projectile.Position = target.Position;
+                    LogManager.Debug($"Projectile {projectile.Type} teleported from {Teleporter.Id} to {Teleporter.Target}");
                 }
             }
         }
