@@ -1,4 +1,5 @@
 using LabApi.Features.Wrappers;
+using ThaumielMapEditor.API.Blocks;
 using ThaumielMapEditor.API.Blocks.ClientSide;
 using ThaumielMapEditor.API.Data;
 using UnityEngine;
@@ -36,7 +37,14 @@ namespace ThaumielMapEditor.API.Components
                 return;
 
             foreach (PrimitiveObject primitive in Schematic.Primitives)
+            {
                 primitive.HideForPlayer(player);
+            }
+
+            foreach (ServerObject serverObject in Schematic.SpawnedServerObjects)
+            {
+                serverObject.HideForPlayer(player);
+            }
         }
 
         private void OnTriggerExit(Player player, Collider other)
@@ -45,7 +53,14 @@ namespace ThaumielMapEditor.API.Components
                 return;
 
             foreach (PrimitiveObject primitive in Schematic.Primitives)
+            {
                 primitive.ShowForPlayer(player);
+            }
+
+            foreach (ServerObject serverObject in Schematic.SpawnedServerObjects)
+            {
+                serverObject.ShowForPlayer(player);
+            }
         }
     }
 }
