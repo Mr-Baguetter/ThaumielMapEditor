@@ -38,6 +38,16 @@ namespace ThaumielMapEditor.API.Components
         /// </summary>
         public event Action<Pickup, Collider>? OnPickupExited;
 
+        /// <summary>
+        /// Fired when a <see cref="Projectile"/> enters the bounds of the <see cref="TriggerHandler"/>
+        /// </summary>
+        public event Action<Projectile, Collider>? OnProjectileEntered;
+
+        /// <summary>
+        /// Fired when a <see cref="Projectile"/> leaves the bounds of the <see cref="TriggerHandler"/>
+        /// </summary>
+        public event Action<Projectile, Collider>? OnProjectileExited;
+
         private void Awake()
         {
             if (!TryGetComponent<BoxCollider>(out var collider))
@@ -67,7 +77,12 @@ namespace ThaumielMapEditor.API.Components
 
             if (root.TryGetComponent<ItemPickupBase>(out var pickupbase) && Pickup.TryGet(pickupbase.Info.Serial, out var pickup))
             {
-                OnPickupEntered?.Invoke(pickup, other);   
+                if (pickup is Projectile projectile)
+                {
+                    OnProjectileEntered?.Invoke(projectile, other);
+                }
+                else
+                    OnPickupEntered?.Invoke(pickup, other);
             }
         }
 
@@ -84,7 +99,12 @@ namespace ThaumielMapEditor.API.Components
 
             if (root.TryGetComponent<ItemPickupBase>(out var pickupbase) && Pickup.TryGet(pickupbase.Info.Serial, out var pickup))
             {
-                OnPickupExited?.Invoke(pickup, other);   
+                if (pickup is Projectile projectile)
+                {
+                    OnProjectileExited?.Invoke(projectile, other);
+                }
+                else
+                    OnPickupExited?.Invoke(pickup, other);   
             }
         }
     }
