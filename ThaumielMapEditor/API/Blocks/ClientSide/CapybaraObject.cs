@@ -101,7 +101,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                     return;
 
                 field = value;
-                SyncToPlayers(0x20uL, w => w.WriteBool(field));
+                SyncToPlayers(32uL, w => w.WriteBool(field));
                 ColliderHelper.SetColliders(this, value);
             }
         } = true;
