@@ -1,6 +1,8 @@
-using System;
 using LabApi.Features.Wrappers;
+using Mirror;
+using System;
 using ThaumielMapEditor.API.Extensions;
+using ThaumielMapEditor.API.Helpers;
 using UnityEngine;
 
 namespace ThaumielMapEditor.API.Components
@@ -19,7 +21,11 @@ namespace ThaumielMapEditor.API.Components
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other is not BoxCollider || !other.TryGetPlayer(out var player))
+            GameObject? root = other.GetComponentInParent<NetworkIdentity>()?.gameObject;
+            if (root == null)
+                return;
+
+            if (!Player.TryGet(root, out var player))
                 return;
 
             OnPlayerEntered?.Invoke(player, other);
@@ -27,7 +33,11 @@ namespace ThaumielMapEditor.API.Components
 
         private void OnTriggerExit(Collider other)
         {
-            if (other is not BoxCollider || !other.TryGetPlayer(out var player))
+            GameObject? root = other.GetComponentInParent<NetworkIdentity>()?.gameObject;
+            if (root == null)
+                return;
+
+            if (!Player.TryGet(root, out var player))
                 return;
 
             OnPlayerExited?.Invoke(player, other);

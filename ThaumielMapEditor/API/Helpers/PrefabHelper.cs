@@ -3,6 +3,7 @@ using System.Linq;
 using AdminToys;
 using Interactables.Interobjects.DoorUtils;
 using InventorySystem.Items.Firearms.Attachments;
+using LabApiExtensions.Helpers;
 using MapGeneration.Distributors;
 using MapGeneration.RoomConnectors;
 using Mirror;
@@ -220,6 +221,12 @@ namespace ThaumielMapEditor.API.Helpers
         {
             foreach (GameObject prefab in NetworkClient.prefabs.Values.ToArray())
             {
+                PrefabColliders.Add(new()
+                {
+                    Prefab = prefab,
+                    Colliders = ColliderData.ParseObjectColliders(prefab)
+                });
+                
                 if (prefab.TryGetComponent<PrimitiveObjectToy>(out var primitiveObject))
                 {
                     PrimitiveObject = primitiveObject;
@@ -412,12 +419,6 @@ namespace ThaumielMapEditor.API.Helpers
                             continue;
                     }
                 }
-
-                PrefabColliders.Add(new()
-                {
-                    Prefab = prefab,
-                    Colliders = ColliderData.ParseObjectColliders(prefab)
-                });
             }
 
             RanRegister = true;

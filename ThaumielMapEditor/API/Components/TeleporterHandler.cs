@@ -1,6 +1,7 @@
+using LabApi.Features.Wrappers;
+using Mirror;
 using System.Collections.Generic;
 using System.Linq;
-using LabApi.Features.Wrappers;
 using ThaumielMapEditor.API.Blocks;
 using ThaumielMapEditor.API.Blocks.ServerObjects;
 using ThaumielMapEditor.API.Helpers;
@@ -8,13 +9,8 @@ using UnityEngine;
 
 namespace ThaumielMapEditor.API.Components
 {
-    public class TeleporterHandler : TriggerHandler
+    public class TeleporterHandler : MonoBehaviour
     {
-        /// <summary>
-        /// Gets the primitive that this <see cref="TeleporterHandler"/> instance is attached to.
-        /// </summary>
-        public PrimitiveObjectToy Primitive { get; private set; }
-
         /// <summary>
         /// Gets the <see cref="TeleporterObject"/> this handler is managing.
         /// </summary>
@@ -34,24 +30,12 @@ namespace ThaumielMapEditor.API.Components
         private readonly HashSet<Player> _playersInside = [];
 
         /// <summary>
-        /// Initializes this <see cref="TeleporterHandler"/> instance with the given primitive and teleporter,
-        /// and subscribes to the trigger enter and exit events.
+        /// Initializes this <see cref="TeleporterHandler"/> instance with the given teleporter.
         /// </summary>
-        /// <param name="prim">The primitive that represents the teleporter.</param>
         /// <param name="teleporter">The <see cref="TeleporterObject"/> that defines this teleporter's configuration.</param>
-        public void Init(PrimitiveObjectToy prim, TeleporterObject teleporter)
+        public void Init(TeleporterObject teleporter)
         {
-            Primitive = prim;
             Teleporter = teleporter;
-
-            OnPlayerEntered += OnTriggerEnter;
-            OnPlayerExited += OnTriggerExit;
-        }
-
-        private void OnDestroy()
-        {
-            OnPlayerEntered -= OnTriggerEnter;
-            OnPlayerExited -= OnTriggerExit;
         }
 
         private void Update()
@@ -71,8 +55,15 @@ namespace ThaumielMapEditor.API.Components
                 PlayerCooldowns.Remove(player);
         }
 
-        private void OnTriggerEnter(Player player, Collider other)
+        private void OnTriggerEnter(Collider other)
         {
+            GameObject? root = other.GetComponentInParent<NetworkIdentity>()?.gameObject;
+            if (root == null)
+                return;
+
+            if (!Player.TryGet(root, out var player))
+                return;
+
             if (!_playersInside.Add(player))
                 return;
 
@@ -89,15 +80,34 @@ namespace ThaumielMapEditor.API.Components
                 return;
             }
 
+            target.TeleporterHandler.ForcePlayerCooldown(player);
+
             player.Position = target.Position;
             LogManager.Debug($"Player {player.Nickname} teleported from {Teleporter.Id} to {Teleporter.Target}");
 
             ApplyCooldown(player);
         }
 
-        private void OnTriggerExit(Player player, Collider other)
+        private void OnTriggerExit(Collider other)
         {
+            GameObject? root = other.GetComponentInParent<NetworkIdentity>()?.gameObject;
+            if (root == null)
+                return;
+
+            if (!Player.TryGet(root, out var player))
+                return;
+
             _playersInside.Remove(player);
+        }
+
+        /// <summary>
+        /// Forces a minimum cooldown on a player regardless of teleporter settings, used to prevent immediate return teleportation.
+        /// </summary>
+        public void ForcePlayerCooldown(Player player, float duration = 1f)
+        {
+            float expiry = Time.time + duration;
+            if (!PlayerCooldowns.TryGetValue(player, out float existing) || existing < expiry)
+                PlayerCooldowns[player] = expiry;
         }
 
         private bool IsRoleAllowed(Player player) =>

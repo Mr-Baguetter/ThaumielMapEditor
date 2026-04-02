@@ -67,7 +67,6 @@ namespace ThaumielMapEditor.API.Data
         public static IEnumerable<ColliderData> ParseObjectColliders(GameObject gameObject)
         {
             List<ColliderData> colliders = [];
-
             foreach (Collider collider in gameObject.GetComponentsInChildren<Collider>(includeInactive: true))
             {
                 ColliderType type;

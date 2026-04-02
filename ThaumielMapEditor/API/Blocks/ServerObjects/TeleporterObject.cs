@@ -49,20 +49,22 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// <inheritdoc/>
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
-            PrimitiveObjectToy primitive = PrimitiveObjectToy.Create();
             ParseValues(serializable);
             SetWorldTransform(schematic);
 
-            primitive.Position = Position;
-            primitive.Rotation = Rotation;
-            primitive.Scale = Scale;
-            primitive.Flags = AdminToys.PrimitiveFlags.None;
-            primitive.Base.transform.SetParent(schematic.Primitive?.Transform, true);
-            BoxCollider collider = primitive.Base.gameObject.AddComponent<BoxCollider>();
-            collider.size = Scale;
+            GameObject triggerObj = new($"Teleporter_{Id}");
+            triggerObj.transform.position = Position;
+            triggerObj.transform.rotation = Rotation;
+            triggerObj.transform.localScale = Scale;
+
+            BoxCollider collider = triggerObj.AddComponent<BoxCollider>();
             collider.isTrigger = true;
-            TeleporterHandler = collider.gameObject.AddComponent<TeleporterHandler>();
-            TeleporterHandler.Init(primitive, this);
+
+            Rigidbody body = triggerObj.AddComponent<Rigidbody>();
+            body.isKinematic = true;
+
+            TeleporterHandler = triggerObj.AddComponent<TeleporterHandler>();
+            TeleporterHandler.Init(this);
 
             base.SpawnObject(schematic, serializable);
         }
@@ -75,14 +77,24 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 return;
             }
 
-            if (!serializable.Values.TryConvertValue<Guid>("Id", out var id))
+            if (!serializable.Values.TryConvertValue<string>("Id", out var id))
             {
                 LogManager.Warn("Failed to parse Id");
                 return;
             }
-            if (!serializable.Values.TryConvertValue<Guid>("Target", out var target))
+            if (!Guid.TryParse(id, out var guid))
+            {
+                LogManager.Warn("Failed to parse Id as Guid");
+                return;
+            }
+            if (!serializable.Values.TryConvertValue<string>("Target", out var target))
             {
                 LogManager.Warn("Failed to parse Target");
+                return;
+            }
+            if (!Guid.TryParse(target, out var targetguid))
+            {
+                LogManager.Warn("Failed to parse Target as Guid");
                 return;
             }
             if (!serializable.Values.TryConvertValue<float>("CoolDown", out var coolDown))
@@ -101,8 +113,8 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 return;
             }
 
-            Id = id;
-            Target = target;
+            Id = guid;
+            Target = targetguid;
             CoolDown = coolDown;
             AllowedRoles = allowedRoles;
             PerPlayerCooldown = perPlayerCooldown;

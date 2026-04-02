@@ -89,29 +89,12 @@ namespace ThaumielMapEditor.Events
                     data.SyncWithPlayer(ev.Player);
                 }
 
-                AddPlayerTrigger(ev.Player);
-
-                if (Main.Instance.Config.EnableCreditTags && Credits.TryGetValue(ev.Player.UserId, out var credittag))
+                if (Main.Instance.Config.EnableCreditTags && Credits.TryGetValue(ev.Player.UserId, out var credittag) && ev.Player.UserGroup == null)
                 {
                     ev.Player.GroupColor = credittag.Color;
                     ev.Player.GroupName = credittag.Name;
                 }
             });
-        }
-
-        public static void AddPlayerTrigger(Player player)
-        {
-            LabPrimitive trigger = LabPrimitive.Create(player?.GameObject?.transform, false);
-            trigger.GameObject.name = $"[Thaumiel Map Editor] PlayerTrigger {player?.PlayerId}";
-            trigger.Flags = PrimitiveFlags.None;
-            trigger.MovementSmoothing = 0;
-            trigger.Spawn();
-
-            if (!trigger.GameObject.TryGetComponent<BoxCollider>(out var collider))
-                collider = trigger.GameObject.AddComponent<BoxCollider>();
-
-            collider.isTrigger = true;
-            collider.size = new(1, 2, 1);
         }
     }
 }

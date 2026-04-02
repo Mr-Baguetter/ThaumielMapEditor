@@ -26,12 +26,17 @@ namespace ThaumielMapEditor.API.Helpers
                     Primitives = lod.Primitives
                 };
 
-                BoxCollider collider = schematic.Primitive.GameObject.AddComponent<BoxCollider>();
+                GameObject colliderobj = new($"{schematic.FileName}-LOD{data.Index}-ColliderObj");
+                colliderobj.transform.SetParent(schematic.Primitive.GameObject.transform);
+                BoxCollider collider = colliderobj.AddComponent<BoxCollider>();
                 collider.size = data.Bounds;
                 collider.name = $"{schematic.FileName}-LOD{data.Index}-Collider";
                 collider.isTrigger = true;
 
-                LODZone lodZone = collider.gameObject.AddComponent<LODZone>();
+                Rigidbody body = colliderobj.AddComponent<Rigidbody>();
+                body.isKinematic = true;
+
+                LODZone lodZone = colliderobj.AddComponent<LODZone>();
                 lodZone.Init(schematic, data.Primitives, data.Index, collider);
 
                 lodData.Add(data);
