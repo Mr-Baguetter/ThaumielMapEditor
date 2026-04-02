@@ -1,3 +1,4 @@
+using LabApi.Features.Wrappers;
 using MapGeneration.Distributors;
 using Mirror;
 using System;
@@ -187,6 +188,36 @@ namespace ThaumielMapEditor.API.Blocks
             schematic.SpawnedServerObjects.Remove(this);
             SpawnedObjects.Remove(this);
             NetworkServer.Destroy(Object);
+        }
+
+        /// <summary>
+        /// Hides the <see cref="ServerObject"/> on the client.
+        /// </summary>
+        /// <param name="player"></param>
+        public void HideForPlayer(Player player)
+        {
+            if (Object == null)
+                return;
+
+            if (!Object.TryGetComponent<NetworkIdentity>(out var network))
+                return;
+
+            NetworkServer.HideForConnection(network, player.Connection);
+        }
+
+        /// <summary>
+        /// Shows the <see cref="ServerObject"/> on the client.
+        /// </summary>
+        /// <param name="player"></param>
+        public void ShowForPlayer(Player player)
+        {
+            if (Object == null)
+                return;
+
+            if (!Object.TryGetComponent<NetworkIdentity>(out var network))
+                return;
+
+            NetworkServer.ShowForConnection(network, player.Connection);
         }
 
         public T GetValue<T>(SerializableObject serializable, string key) =>
