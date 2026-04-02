@@ -1,9 +1,11 @@
+using InventorySystem.Items.Pickups;
 using LabApi.Features.Wrappers;
 using Mirror;
 using System.Collections.Generic;
 using System.Linq;
 using ThaumielMapEditor.API.Blocks;
 using ThaumielMapEditor.API.Blocks.ServerObjects;
+using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Helpers;
 using UnityEngine;
 
@@ -61,18 +63,6 @@ namespace ThaumielMapEditor.API.Components
             if (root == null)
                 return;
 
-            if (!Player.TryGet(root, out var player))
-                return;
-
-            if (!_playersInside.Add(player))
-                return;
-
-            if (!IsRoleAllowed(player))
-                return;
-
-            if (IsOnCooldown(player))
-                return;
-
             TeleporterObject? target = FindTargetTeleporter();
             if (target == null)
             {
@@ -80,12 +70,44 @@ namespace ThaumielMapEditor.API.Components
                 return;
             }
 
-            target.TeleporterHandler.ForcePlayerCooldown(player);
+            if (Player.TryGet(root, out var player))
+            {
+                if (!HasFlagFast(TeleporterFlags.AllowPlayers))
+                    return;
 
-            player.Position = target.Position;
-            LogManager.Debug($"Player {player.Nickname} teleported from {Teleporter.Id} to {Teleporter.Target}");
+                if (!_playersInside.Add(player))
+                    return;
 
-            ApplyCooldown(player);
+                if (!IsRoleAllowed(player))
+                    return;
+
+                if (IsOnCooldown(player))
+                    return;
+
+                target.TeleporterHandler.ForcePlayerCooldown(player);
+                player.Position = target.Position;
+                LogManager.Debug($"Player {player.Nickname} teleported from {Teleporter.Id} to {Teleporter.Target}");
+                ApplyCooldown(player);
+                return;
+            }
+
+            if (other.TryGetComponent(out ItemPickupBase pickupbase))
+            {
+                if (Pickup.TryGet(pickupbase.Info.Serial, out var pickup))
+                {
+                    if (HasFlagFast(TeleporterFlags.AllowPickups))
+                    {
+                        pickup.Position = target.Position;
+                        LogManager.Debug($"Pickup {pickup.Type} teleported from {Teleporter.Id} to {Teleporter.Target}");
+                    }
+
+                    if (pickup is Projectile projectile && HasFlagFast(TeleporterFlags.AllowProjectiles))
+                    {
+                        projectile.Position = target.Position;
+                        LogManager.Debug($"Projectile {projectile.Type} teleported from {Teleporter.Id} to {Teleporter.Target}");
+                    }
+                }
+            }
         }
 
         private void OnTriggerExit(Collider other)
@@ -134,7 +156,8 @@ namespace ThaumielMapEditor.API.Components
                 _globalCooldownEnd = Time.time + Teleporter.CoolDown;
         }
 
-        private TeleporterObject? FindTargetTeleporter() =>
-            ServerObject.SpawnedObjects.OfType<TeleporterObject>().FirstOrDefault(t => t.Id == Teleporter.Target);
+        public bool HasFlagFast(TeleporterFlags flag) => (Teleporter.Flags & flag) != 0;
+
+        private TeleporterObject? FindTargetTeleporter() => ServerObject.SpawnedObjects.OfType<TeleporterObject>().FirstOrDefault(t => t.Id == Teleporter.Target);
     }
 }

@@ -40,6 +40,11 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// </summary>
         public bool PerPlayerCooldown { get; set; }
 
+        /// <summary>
+        /// Gets the <see cref="TeleporterFlags"/> of this <see cref="TeleporterObject"/> instance
+        /// </summary>
+        public TeleporterFlags Flags { get; set; }
+
         /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Teleporter;
 
@@ -112,12 +117,18 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 LogManager.Warn("Failed to parse PerPlayerCooldown");
                 return;
             }
+            if (!serializable.Values.TryConvertValue<TeleporterFlags>("Flags", out var flags))
+            {
+                LogManager.Warn("Failed to parse Flags");
+                return;
+            }
 
             Id = guid;
             Target = targetguid;
             CoolDown = coolDown;
             AllowedRoles = allowedRoles;
             PerPlayerCooldown = perPlayerCooldown;
+            Flags = flags;
         }
     }
 }
