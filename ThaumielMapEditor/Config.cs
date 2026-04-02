@@ -18,6 +18,9 @@ namespace ThaumielMapEditor
         public List<string> LoadOnDecom { get; set; } = [];
 
         [Description("These schematics when loaded will play the specified animation by its name. Key: Schematic name. Value: Animation name")]
-        public Dictionary<string, string> SchematicAnimationPlayOnLoad { get; set; } = [];
+        public Dictionary<string, string> SchematicAnimationPlayOnLoad { get; set; } = new()
+        {
+            ["ExampleSchematicName"] = "ExampleAnimationName"
+        };
     }
 }
