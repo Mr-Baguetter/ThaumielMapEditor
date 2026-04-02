@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using AdminToys;
 using MEC;
 using ThaumielMapEditor.API.Blocks.ClientSide;
@@ -50,7 +49,7 @@ namespace ThaumielMapEditor.API.Animation
                 LogManager.Warn($"No animator controller found for '{schematic.FileName}'. Animation will not play.");
 
             Dictionary<uint, Transform> dummyByNetId = [];
-            foreach (PrimitiveObject primitive in schematic.SpawnedClientObjects.OfType<PrimitiveObject>())
+            foreach (PrimitiveObject primitive in schematic.Primitives)
             {
                 if (string.IsNullOrEmpty(primitive.Name))
                 {
@@ -193,7 +192,6 @@ namespace ThaumielMapEditor.API.Animation
         private IEnumerator<float> AnimationCoroutine(string stateName)
         {
             Transform schematicRoot = Schematic.Primitive.Transform;
-
             yield return Timing.WaitForOneFrame;
 
             while (true)
