@@ -5,8 +5,6 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
 using LabApi.Features.Wrappers;
 using Mirror;
 using ThaumielMapEditor.API.Data;
@@ -206,9 +204,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             writer.WriteInt((int)Shape);
             writer.WriteFloat(SpotAngle);
             writer.WriteFloat(InnerSpotAngle);
+            writer.WriteUInt(ParentId);
 
             int end = writer.Position;
-
             writer.Position = sizePos;
             writer.WriteByte((byte)(end - start));
             writer.Position = end;
