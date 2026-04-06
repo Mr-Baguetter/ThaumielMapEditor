@@ -10,7 +10,6 @@ using System.Linq;
 using AdminToys;
 using Interactables.Interobjects.DoorUtils;
 using InventorySystem.Items.Firearms.Attachments;
-using LabApiExtensions.Helpers;
 using MapGeneration.Distributors;
 using MapGeneration.RoomConnectors;
 using Mirror;

@@ -7,7 +7,6 @@
 
 using System;
 using System.Collections.Generic;
-using LabApi.Features.Wrappers;
 using PlayerRoles;
 using ThaumielMapEditor.API.Components;
 using ThaumielMapEditor.API.Data;
