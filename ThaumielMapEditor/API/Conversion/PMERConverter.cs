@@ -203,7 +203,7 @@ namespace ThaumielMapEditor.API.Conversion
 
                 case PMERBlockType.Text:
                     if (dict.TryGetValue("Text", out var text))
-                        dict["TextFormat"] = Convert.ToString(text);
+                        dict["Text"] = Convert.ToString(text);
 
                     if (dict.TryGetValue("DisplaySize", out var displaysize))
                         dict["DisplaySize"] = ConvertExtensions.ToVector2(displaysize);
