@@ -97,6 +97,7 @@ namespace ThaumielMapEditor.API.Conversion
                 PMERBlockType.Locker => ObjectType.Locker,
                 PMERBlockType.Text => ObjectType.TextToy,
                 PMERBlockType.Interactable => ObjectType.Interactable,
+                PMERBlockType.Empty => ObjectType.GameObject,
                 _ => Warn()
             };
         }
