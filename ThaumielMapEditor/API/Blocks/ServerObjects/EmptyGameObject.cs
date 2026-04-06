@@ -29,7 +29,13 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 name = serializable.Name
             };
 
+            gameObject.transform.localPosition = serializable.Position;
+            gameObject.transform.localRotation = serializable.Rotation;
+            gameObject.transform.localScale = serializable.Scale;
+            gameObject.transform.SetParent(schematic.Primitive!.Transform, worldPositionStays: false);
+
             Base = gameObject;
+            Object = gameObject;
             SetWorldTransform(schematic);
             base.SpawnObject(schematic, serializable);
         }
