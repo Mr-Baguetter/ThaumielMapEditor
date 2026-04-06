@@ -5,11 +5,8 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using InventorySystem.Items.Firearms.Attachments;
-using Mirror;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
-using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Serialization;
 using UnityEngine;
 using YamlDotNet.Serialization;

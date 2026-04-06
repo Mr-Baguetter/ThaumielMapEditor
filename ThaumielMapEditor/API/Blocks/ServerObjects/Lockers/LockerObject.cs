@@ -92,7 +92,6 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
             }
 
             locker.ParentRoom = RoomExtensions.GetClosestRoomToPosition(Position);
-            locker.gameObject.SetActive(true);
             NetworkServer.Spawn(locker.gameObject);
             ClearChambers();
             PopulateChambers();

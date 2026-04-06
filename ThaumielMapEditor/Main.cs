@@ -31,7 +31,7 @@ namespace ThaumielMapEditor
         public override Version Version => new(0, 2, 2);
         public override Version RequiredApiVersion => LabApiProperties.CurrentVersion;
         public override LoadPriority Priority => LoadPriority.Medium;
-        public string HarmonyId => $"MrBaguetter_{Guid.NewGuid()}";
+        public string HarmonyId => $"MrBaguetter_TME_{Guid.NewGuid()}";
         public Harmony harmony;
 
         public static Main Instance { get; set; }

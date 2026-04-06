@@ -6,7 +6,6 @@
 // -----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using CommandSystem;
 using MEC;
 using ThaumielMapEditor.API.Helpers;

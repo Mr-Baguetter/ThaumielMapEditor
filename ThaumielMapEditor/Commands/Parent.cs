@@ -14,6 +14,7 @@ using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Interfaces;
 using ThaumielMapEditor.Commands.Admin;
+
 namespace ThaumielMapEditor.Commands
 {
 #pragma warning disable CS1591
