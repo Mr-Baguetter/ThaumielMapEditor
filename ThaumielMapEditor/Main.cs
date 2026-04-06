@@ -1,4 +1,11 @@
-﻿global using Vector3 = UnityEngine.Vector3;
+﻿// -----------------------------------------------------------------------
+// <copyright file="Main.cs" company="Thaumiel Team">
+// Copyright (c) Thaumiel Team. All rights reserved.
+// Licensed under the GNU General Public License v3.0 (GPL-3.0).
+// </copyright>
+// -----------------------------------------------------------------------
+
+global using Vector3 = UnityEngine.Vector3;
 global using Quaternion = UnityEngine.Quaternion;
 global using Logger = LabApi.Features.Console.Logger;
 global using ThaumFileManager = ThaumielMapEditor.API.Helpers.FileManager;

@@ -1,3 +1,10 @@
+// -----------------------------------------------------------------------
+// <copyright file="LockerType.cs" company="Thaumiel Team">
+// Copyright (c) Thaumiel Team. All rights reserved.
+// Licensed under the GNU General Public License v3.0 (GPL-3.0).
+// </copyright>
+// -----------------------------------------------------------------------
+
 using ThaumielMapEditor.API.Blocks.ServerObjects.Lockers;
 
 namespace ThaumielMapEditor.API.Enums

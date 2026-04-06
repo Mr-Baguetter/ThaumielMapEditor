@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 ThaumielMapEditor/Dependencies/
 *.zip
+*.py

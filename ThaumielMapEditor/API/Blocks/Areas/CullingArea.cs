@@ -1,3 +1,10 @@
+// -----------------------------------------------------------------------
+// <copyright file="CullingArea.cs" company="Thaumiel Team">
+// Copyright (c) Thaumiel Team. All rights reserved.
+// Licensed under the GNU General Public License v3.0 (GPL-3.0).
+// </copyright>
+// -----------------------------------------------------------------------
+
 using ThaumielMapEditor.API.Components;
 using ThaumielMapEditor.API.Extensions;
 using ThaumielMapEditor.API.Helpers;

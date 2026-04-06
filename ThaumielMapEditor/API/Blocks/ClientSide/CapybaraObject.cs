@@ -1,4 +1,11 @@
-﻿using LabApi.Features.Wrappers;
+// -----------------------------------------------------------------------
+// <copyright file="CapybaraObject.cs" company="Thaumiel Team">
+// Copyright (c) Thaumiel Team. All rights reserved.
+// Licensed under the GNU General Public License v3.0 (GPL-3.0).
+// </copyright>
+// -----------------------------------------------------------------------
+
+using LabApi.Features.Wrappers;
 using Mirror;
 using System;
 using ThaumielMapEditor.API.Data;

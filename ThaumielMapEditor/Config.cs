@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+// -----------------------------------------------------------------------
+// <copyright file="Config.cs" company="Thaumiel Team">
+// Copyright (c) Thaumiel Team. All rights reserved.
+// Licensed under the GNU General Public License v3.0 (GPL-3.0).
+// </copyright>
+// -----------------------------------------------------------------------
+
+using System.Collections.Generic;
 using System.ComponentModel;
 using ThaumielMapEditor.API.Attributes;
 
