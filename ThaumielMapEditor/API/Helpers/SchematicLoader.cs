@@ -697,6 +697,18 @@ namespace ThaumielMapEditor.API.Helpers
                     teleporter.SpawnObject(schematicData, serializable);
                     break;
 
+                case ObjectType.GameObject:
+                    EmptyGameObject gameObject = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    gameObject.SpawnObject(schematicData, serializable);
+                    break;
+
                 default:
                     LogManager.Warn($"Unhandled ObjectType '{serializable.ObjectType}' on object '{serializable.Name}', skipping.");
                     break;
