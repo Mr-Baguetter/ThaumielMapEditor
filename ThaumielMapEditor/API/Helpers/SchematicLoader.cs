@@ -536,9 +536,11 @@ namespace ThaumielMapEditor.API.Helpers
                     schematicData.SpawnedClientObjects.Add(primitive);
 
                     foreach (Player player in Player.ReadyList)
+                    {
                         primitive.SpawnForPlayer(player);
+                    }
 
-                    CreateCollisionMesh(primitive);
+                    ColliderHelper.CreateCollisionMesh(primitive);
                     return primitive.NetId;
 
                 case ObjectType.GameObject:
@@ -562,7 +564,9 @@ namespace ThaumielMapEditor.API.Helpers
                     schematicData.SpawnedClientObjects.Add(gameObject);
 
                     foreach (Player player in Player.ReadyList)
+                    {
                         gameObject.SpawnForPlayer(player);
+                    }
 
                     return gameObject.NetId;
 
@@ -585,7 +589,9 @@ namespace ThaumielMapEditor.API.Helpers
                     schematicData.SpawnedClientObjects.Add(capybara);
 
                     foreach (Player player in Player.ReadyList)
+                    {
                         capybara.SpawnForPlayer(player);
+                    }
 
                     if (capybara.CollisionsEnabled)
                         ColliderHelper.CreateClientObjectColliders(capybara, schematicData);
@@ -753,35 +759,6 @@ namespace ThaumielMapEditor.API.Helpers
                 default:
                     LogManager.Warn($"Unhandled ObjectType '{serializable.ObjectType}' on object '{serializable.Name}', skipping.");
                     return 0;
-            }
-        }
-
-        /// <summary>
-        /// Creates the colliders for primitives
-        /// </summary>
-        /// <param name="primitive"></param>
-        public static void CreateCollisionMesh(PrimitiveObject primitive)
-        {
-            if (!primitive.PrimitiveFlags.HasFlag(PrimitiveFlags.Collidable))
-                return;
-
-            GameObject collider = new();
-            collider.transform.localScale = new(Math.Abs(primitive.Scale.x), Math.Abs(primitive.Scale.y), Math.Abs(primitive.Scale.z));
-            collider.transform.rotation = primitive.Rotation;
-            collider.transform.position = primitive.Schematic.Primitive.Transform.TransformPoint(primitive.Position);
-            collider.transform.name = $"[ThaumielMapEditor] {primitive.Name}";
-
-            MeshCollider mesh = collider.AddComponent<MeshCollider>();
-            mesh.sharedMesh = AdminToys.PrimitiveObjectToy.PrimitiveTypeToMesh[primitive.PrimitiveType];
-            if (mesh != null)
-            {
-                primitive.ServerCollider = mesh;
-                collider.transform.SetParent(primitive.Schematic.Primitive.Transform, true);
-            }
-            else
-            {
-                LogManager.Warn($"Failed to get mesh for primitive {primitive.Name}, skipping collider.");
-                UnityEngine.Object.Destroy(collider);
             }
         }
 

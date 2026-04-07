@@ -5,7 +5,9 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+using AdminToys;
 using ThaumielMapEditor.API.Blocks.ClientSide;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
@@ -62,7 +64,7 @@ namespace ThaumielMapEditor.API.Helpers
                 else
                 {
                     LogManager.Warn($"Unhandled collider type '{col.GetType().Name}' on prefab '{prefab.name}', skipping.");
-                    Object.Destroy(colGo);
+                    UnityEngine.Object.Destroy(colGo);
                 }
 
                 clientObject.ServerColliders = colliders.ToArray();
@@ -182,5 +184,35 @@ namespace ThaumielMapEditor.API.Helpers
                 _ => null
             };
         }
+
+        /// <summary>
+        /// Creates the colliders for primitives
+        /// </summary>
+        /// <param name="primitive"></param>
+        public static void CreateCollisionMesh(PrimitiveObject primitive)
+        {
+            if (!primitive.PrimitiveFlags.HasFlag(PrimitiveFlags.Collidable))
+                return;
+
+            GameObject collider = new();
+            collider.transform.localScale = new(Math.Abs(primitive.Scale.x), Math.Abs(primitive.Scale.y), Math.Abs(primitive.Scale.z));
+            collider.transform.rotation = primitive.Rotation;
+            collider.transform.position = primitive.Schematic.Primitive.Transform.TransformPoint(primitive.Position);
+            collider.transform.name = $"[ThaumielMapEditor] {primitive.Name}";
+
+            MeshCollider mesh = collider.AddComponent<MeshCollider>();
+            mesh.sharedMesh = AdminToys.PrimitiveObjectToy.PrimitiveTypeToMesh[primitive.PrimitiveType];
+            if (mesh != null)
+            {
+                primitive.ServerCollider = mesh;
+                collider.transform.SetParent(primitive.Schematic.Primitive.Transform, true);
+            }
+            else
+            {
+                LogManager.Warn($"Failed to get mesh for primitive {primitive.Name}, skipping collider.");
+                UnityEngine.Object.Destroy(collider);
+            }
+        }
+
     }
 }
