@@ -17,6 +17,9 @@ using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Serialization;
 using UnityEngine;
 using YamlDotNet.Serialization;
+using LabLocker = LabApi.Features.Wrappers.Locker;
+using LabChamber = LabApi.Features.Wrappers.LockerChamber;
+using MEC;
 
 namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
 {
@@ -93,9 +96,14 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
 
             locker.ParentRoom = RoomExtensions.GetClosestRoomToPosition(Position);
             NetworkServer.Spawn(locker.gameObject);
-            ClearChambers();
-            PopulateChambers();
-            Base._serverChambersFilled = true;
+            Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+            {
+                LabLocker labLocker = LabLocker.Get(locker);
+                labLocker.ClearAllChambers();
+                labLocker.ClearLockerLoot();
+                PopulateChambers();
+            });
+
             base.SpawnObject(schematic, serializable);
         }
 
@@ -129,27 +137,6 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
         }
 
         /// <summary>
-        /// Clears any existing loot and scheduled spawns from the instantiated <see cref="Base"/> locker.
-        /// Destroys spawned item pickups and clears internal lists so the locker can be repopulated.
-        /// </summary>
-        public void ClearChambers()
-        {
-            Base.Loot = [];
-
-            foreach (MapGeneration.Distributors.LockerChamber chamber in Base.Chambers)
-            {
-                foreach (ItemPickupBase item in chamber.Content)
-                {
-                    item.DestroySelf();
-                }
-
-                chamber.Content.Clear();
-                chamber.ToBeSpawned.Clear();
-            }
-
-        }
-
-        /// <summary>
         /// Populates the runtime locker chambers based on the serialized <see cref="Chambers"/> data.
         /// For each serialized chamber:
         /// - Matches it to the corresponding runtime chamber by index.
@@ -163,6 +150,8 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
 
             foreach (MapGeneration.Distributors.LockerChamber chamber in Base.Chambers)
             {
+                chamber.AcceptableItems = (ItemType[])Enum.GetValues(typeof(ItemType));
+                
                 foreach (LockerChamber lockerChamber in Chambers)
                 {
                     if (lockerChamber.Index != Base.Chambers.IndexOf(chamber))
@@ -173,6 +162,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
                     {
                         if (UnityEngine.Random.Range(0, 101) > chamberData.SpawnPercent)
                             continue;
+
                         if (Spawned.Contains(lockerChamber))
                             continue;
 
