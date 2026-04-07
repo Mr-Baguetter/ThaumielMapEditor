@@ -86,7 +86,6 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             if (!serializable.Values.TryConvertValue<TargetType>("TargetType", out var type))
             {
                 LogManager.Warn("Failed to parse TargetType");
-                return;
             }
 
             Type = type;

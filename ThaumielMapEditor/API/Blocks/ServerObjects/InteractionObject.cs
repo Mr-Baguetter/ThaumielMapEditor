@@ -201,22 +201,21 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             if (!serializable.Values.TryConvertValue<ColliderShape>("Shape", out var shape))
             {
                 LogManager.Warn("Failed to parse Shape");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<float>("Duration", out var duration))
             {
                 LogManager.Warn("Failed to parse Duration");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<bool>("Locked", out var locked))
             {
                 LogManager.Warn("Failed to parse Locked");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<DoorPermissionFlags>("Permissions", out var perms))
             {
                 LogManager.Warn("Failed to parse Permissions");
-                return;
             }
 
             Shape = shape;

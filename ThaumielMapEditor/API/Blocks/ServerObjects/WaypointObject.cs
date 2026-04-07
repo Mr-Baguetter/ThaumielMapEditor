@@ -130,13 +130,13 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             if (!serializable.Values.TryConvertValue<bool>("VisualizeBounds", out var visualizeBounds))
             {
                 LogManager.Warn("Failed to parse VisualizeBounds");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<float>("Priority", out var priority))
             {
                 LogManager.Warn("Failed to parse Priority");
-                return;
             }
+
             if (serializable.Values.TryGetValue("BoundsSize", out var raw) && raw is IDictionary<object, object> dict)
             {
                 float x = Convert.ToSingle(dict["x"]);

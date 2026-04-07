@@ -91,42 +91,41 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             if (!serializable.Values.TryConvertValue<string>("Id", out var id))
             {
                 LogManager.Warn("Failed to parse Id");
-                return;
             }
+            
             if (!Guid.TryParse(id, out var guid))
             {
                 LogManager.Warn("Failed to parse Id as Guid");
-                return;
             }
+            
             if (!serializable.Values.TryConvertValue<string>("Target", out var target))
             {
                 LogManager.Warn("Failed to parse Target");
-                return;
             }
+            
             if (!Guid.TryParse(target, out var targetguid))
             {
                 LogManager.Warn("Failed to parse Target as Guid");
-                return;
             }
+            
             if (!serializable.Values.TryConvertValue<float>("CoolDown", out var coolDown))
             {
                 LogManager.Warn("Failed to parse CoolDown");
-                return;
             }
+            
             if (!serializable.Values.TryConvertValue<List<RoleTypeId>>("AllowedRoles", out var allowedRoles))
             {
                 LogManager.Warn("Failed to parse AllowedRoles");
-                return;
             }
+            
             if (!serializable.Values.TryConvertValue<bool>("PerPlayerCooldown", out var perPlayerCooldown))
             {
                 LogManager.Warn("Failed to parse PerPlayerCooldown");
-                return;
             }
+            
             if (!serializable.Values.TryConvertValue<TeleporterFlags>("Flags", out var flags))
             {
                 LogManager.Warn("Failed to parse Flags");
-                return;
             }
 
             Id = guid;

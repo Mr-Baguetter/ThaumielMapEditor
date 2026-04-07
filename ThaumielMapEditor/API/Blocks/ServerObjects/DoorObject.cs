@@ -248,47 +248,49 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         public void ParseValues(SerializableObject serializable)
         {
             if (serializable.ObjectType != ObjectType.Door)
+            {
+                LogManager.Warn($"Tried to parse {serializable.ObjectType} as Door.");
                 return;
+            }
 
             if (!serializable.Values.TryConvertValue<DoorType>("DoorType", out var doorType))
             {
                 LogManager.Warn("Failed to parse DoorType");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<DoorPermissionFlags>("Permissions", out var permissions))
             {
                 LogManager.Warn("Failed to parse Permissions");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<bool>("RequireAllPermissions", out var requireAllPermissions))
             {
                 LogManager.Warn("Failed to parse RequireAllPermissions");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<bool>("Bypass2176", out var bypass2176))
             {
                 LogManager.Warn("Failed to parse Bypass2176");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<float>("MaxHealth", out var maxHealth))
             {
                 LogManager.Warn("Failed to parse MaxHealth");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<float>("Health", out var health))
             {
                 LogManager.Warn("Failed to parse Health");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<bool>("IsOpen", out var isOpen))
             {
                 LogManager.Warn("Failed to parse IsOpen");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<bool>("IsLocked", out var isLocked))
             {
                 LogManager.Warn("Failed to parse IsLocked");
-                return;
             }
 
             DoorType = doorType;

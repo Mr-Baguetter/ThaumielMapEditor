@@ -172,13 +172,13 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             if (!serializable.Values.TryConvertValue<string>("Label", out var label))
             {
                 LogManager.Warn("Failed to parse Label");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<RoomName>("Room", out var room))
             {
                 LogManager.Warn("Failed to parse Room");
-                return;
             }
+
             if (serializable.Values.TryGetValue("VerticalConstraint", out var raw) && raw is IDictionary<object, object> dict)
             {
                 float x = Convert.ToSingle(dict["x"]);
@@ -186,6 +186,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 
                 VerticalConstraint = new(x, y);
             }
+
             if (serializable.Values.TryGetValue("HorizontalConstraint", out var raw1) && raw1 is IDictionary<object, object> dict1)
             {
                 float x = Convert.ToSingle(dict1["x"]);
@@ -193,6 +194,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 
                 HorizontalConstraint = new(x, y);
             }
+
             if (serializable.Values.TryGetValue("ZoomConstraint", out var raw2) && raw2 is IDictionary<object, object> dict2)
             {
                 float x = Convert.ToSingle(dict2["x"]);

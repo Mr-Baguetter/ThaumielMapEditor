@@ -123,13 +123,11 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
             if (!serializable.Values.TryConvertValue<LockerType>("LockerType", out var lockerType))
             {
                 LogManager.Warn("Failed to parse LockerType");
-                return;
             }
 
             if (!serializable.Values.TryConvertValue<List<LockerChamber>>("Chambers", out var chambers))
             {
                 LogManager.Warn("Failed to parse LockerChambers");
-                return;
             }
 
             Type = lockerType;
@@ -151,7 +149,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
             foreach (MapGeneration.Distributors.LockerChamber chamber in Base.Chambers)
             {
                 chamber.AcceptableItems = (ItemType[])Enum.GetValues(typeof(ItemType));
-                
+
                 foreach (LockerChamber lockerChamber in Chambers)
                 {
                     if (lockerChamber.Index != Base.Chambers.IndexOf(chamber))

@@ -235,54 +235,56 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         public void DeserializeValues(SerializableObject serializable)
         {
             if (serializable.ObjectType != ObjectType.Light)
+            {
+                LogManager.Warn($"Tried to parse {serializable.ObjectType} as Light");
                 return;
+            }
 
             if (!serializable.Values.TryConvertValue<float>("LightIntensity", out var intensity))
             {
                 LogManager.Warn("Failed to parse LightIntensity");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<float>("LightRange", out var range))
             {
                 LogManager.Warn("Failed to parse LightRange");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<Color>("LightColor", out var color))
             {
                 LogManager.Warn("Failed to parse LightColor");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<LightShadows>("ShadowType", out var shadowType))
             {
                 LogManager.Warn("Failed to parse ShadowType");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<float>("ShadowStrength", out var shadowStrength))
             {
                 LogManager.Warn("Failed to parse ShadowStrength");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<LightType>("LightType", out var lightType))
             {
                 LogManager.Warn("Failed to parse LightType");
-                return;
             }
 #pragma warning disable CS0618 // Type or member is obsolete
+
             if (!serializable.Values.TryConvertValue<LightShape>("LightShape", out var lightShape))
             {
                 LogManager.Warn("Failed to parse LightShape");
-                return;
             }
 #pragma warning restore CS0618 // Type or member is obsolete
+
             if (!serializable.Values.TryConvertValue<float>("SpotAngle", out var spotAngle))
             {
                 LogManager.Warn("Failed to parse SpotAngle");
-                return;
             }
+
             if (!serializable.Values.TryConvertValue<float>("InnerSpotAngle", out var innerSpotAngle))
             {
                 LogManager.Warn("Failed to parse InnerSpotAngle");
-                return;
             }
 
             Intensity = intensity;

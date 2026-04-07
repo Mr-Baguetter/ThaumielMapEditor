@@ -105,13 +105,12 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             if (serializable.ObjectType != ObjectType.TextToy)
             {
                 LogManager.Warn($"Tried to parse {serializable.ObjectType} as TextToy");
-                return;                
+                return;
             }
 
             if (!serializable.Values.TryConvertValue<string>("Text", out var text))
             {
                 LogManager.Warn("Failed to parse Text");
-                return;
             }
 
             if (serializable.Values.TryGetValue("DisplaySize", out var raw) && raw is IDictionary<object, object> dict)
