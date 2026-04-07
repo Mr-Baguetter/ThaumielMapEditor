@@ -5,11 +5,10 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System.Linq;
+using LabApi.Events.Arguments.WarheadEvents;
 using LabApi.Events.Handlers;
 using MEC;
 using ThaumielMapEditor.API.Helpers;
-using ThaumielMapEditor.API.Serialization;
 
 namespace ThaumielMapEditor.Events
 {
@@ -20,6 +19,8 @@ namespace ThaumielMapEditor.Events
             ServerEvents.WaitingForPlayers += OnWaitingForPlayers;
             ServerEvents.RoundStarted += OnRoundStart;
             ServerEvents.LczDecontaminationStarted += OnDecom;
+            WarheadEvents.Started += OnWarheadStarting;
+            WarheadEvents.Detonated += OnWarheadDetonated;
         }
 
         public static void Unregister()
@@ -27,6 +28,8 @@ namespace ThaumielMapEditor.Events
             ServerEvents.WaitingForPlayers -= OnWaitingForPlayers;
             ServerEvents.RoundStarted -= OnRoundStart;
             ServerEvents.LczDecontaminationStarted -= OnDecom; 
+            WarheadEvents.Started -= OnWarheadStarting;
+            WarheadEvents.Detonated -= OnWarheadDetonated;
         }
 
         private static void OnWaitingForPlayers()
@@ -34,49 +37,41 @@ namespace ThaumielMapEditor.Events
             PrefabHelper.RegisterPrefabs();
             Timing.RunCoroutine(UpdateHelper.CheckForUpdatesCoroutine(false));
 
-            foreach (string name in Main.Instance.Config.LoadOnWaitingForPlayers)
+            foreach (string name in Main.Instance.Config.WaitingForPlayers)
             {
-                SerializableMap? map = SchematicLoader.LoadedMaps.FirstOrDefault(s => s.FileName.ToLower() == name.ToLower());
-                if (map == null)
-                {
-                    LogManager.Warn($"Map name {name} is invalid!");
-                    continue;
-                }
-
-                LogManager.Debug($"Loaded map {name} when Waiting for players");
-                SchematicLoader.SpawnMap(map);
+                MapLoader.ParseInput(name);
             }
         }
 
         private static void OnRoundStart()
         {
-            foreach (string name in Main.Instance.Config.LoadOnRoundStart)
+            foreach (string name in Main.Instance.Config.RoundStarted)
             {
-                SerializableMap? map = SchematicLoader.LoadedMaps.FirstOrDefault(s => s.FileName.ToLower() == name.ToLower());
-                if (map == null)
-                {
-                    LogManager.Warn($"Map name {name} is invalid!");
-                    continue;
-                }
-
-                LogManager.Debug($"Loaded map {name} on Round Start");
-                SchematicLoader.SpawnMap(map);
+                MapLoader.ParseInput(name);
             }
         }
 
         private static void OnDecom()
         {
-            foreach (string name in Main.Instance.Config.LoadOnDecom)
+            foreach (string name in Main.Instance.Config.DecontaminationStarted)
             {
-                SerializableMap? map = SchematicLoader.LoadedMaps.FirstOrDefault(s => s.FileName.ToLower() == name.ToLower());
-                if (map == null)
-                {
-                    LogManager.Warn($"Map name {name} is invalid!");
-                    continue;
-                }
+                MapLoader.ParseInput(name);
+            }
+        }
 
-                LogManager.Debug($"Loaded map {name} during Decontamination");
-                SchematicLoader.SpawnMap(map);
+        private static void OnWarheadStarting(WarheadStartedEventArgs ev)
+        {
+            foreach (string name in Main.Instance.Config.WarheadStarted)
+            {
+                MapLoader.ParseInput(name);
+            }
+        }
+
+        private static void OnWarheadDetonated(WarheadDetonatedEventArgs ev)
+        {
+            foreach (string name in Main.Instance.Config.WarheadDetonated)
+            {
+                MapLoader.ParseInput(name);
             }
         }
     }

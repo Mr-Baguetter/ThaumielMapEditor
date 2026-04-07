@@ -306,15 +306,33 @@ namespace ThaumielMapEditor.API.Helpers
             foreach (SerializedMapSchematic ms in map.Schematics)
             {
                 Vector3 offset = data.Room.WorldPosition(ms.Position);
-                SerializableSchematic? schematic = LoadedSchematics.FirstOrDefault(s => s.FileName.ToLower() == ms.SchematicName.ToLower());
+                SerializableSchematic? schematic = LoadedSchematics.FirstOrDefault(s => string.Equals(s.FileName, ms.SchematicName, StringComparison.CurrentCultureIgnoreCase));
                 if (schematic == null)
                     continue;
 
                 SchematicData schematicData = SpawnSchematic(schematic, offset);
-                data.Schematics.Add(new() { LocalPosition = offset, SchematicName = schematicData.FileName});
+                data.Schematics.Add(new() { LocalPosition = offset, SchematicName = schematicData.FileName, SchematicId = schematicData.Id});
             }
 
             MapsById.Add(data.Id, data);
+        }
+
+        /// <summary>
+        /// Destroys a map.
+        /// </summary>
+        /// <param name="map">The <see cref="MapData"/> to be destroyed.</param>
+        public static void DestroyMap(MapData map)
+        {
+            foreach (MapSchematicData schematic in map.Schematics.ToArray())
+            {
+                if (!TryGetSchematicById(schematic.SchematicId, out var schematicData))
+                    continue;
+
+                DestroySchematic(schematicData);
+                map.Schematics.Remove(schematic);
+            }
+
+            MapsById.Remove(map.Id);
         }
 
         /// <summary>

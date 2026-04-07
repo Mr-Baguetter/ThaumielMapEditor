@@ -5,7 +5,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-﻿using CommandSystem;
+using CommandSystem;
 using System.Collections.Generic;
 using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Helpers;

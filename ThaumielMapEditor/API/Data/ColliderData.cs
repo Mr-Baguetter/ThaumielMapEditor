@@ -5,7 +5,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Helpers;

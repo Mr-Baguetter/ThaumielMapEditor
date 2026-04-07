@@ -20,9 +20,11 @@ namespace ThaumielMapEditor
         public List<string> SchematiclodBlacklist { get; set; } = [];
         public string GithubToken { get; set; } = string.Empty;
 
-        public List<string> LoadOnWaitingForPlayers { get; set; } = [];
-        public List<string> LoadOnRoundStart { get; set; } = [];
-        public List<string> LoadOnDecom { get; set; } = [];
+        public List<string> WaitingForPlayers { get; set; } = [];
+        public List<string> RoundStarted { get; set; } = [];
+        public List<string> DecontaminationStarted { get; set; } = [];
+        public List<string> WarheadStarted { get; set; } = [];
+        public List<string> WarheadDetonated { get; set; } = [];
 
         [Description("These schematics when loaded will play the specified animation by its name. Key: Schematic name. Value: Animation name")]
         public Dictionary<string, string> SchematicAnimationPlayOnLoad { get; set; } = new()

@@ -5,7 +5,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-﻿using LabApi.Features.Wrappers;
+using LabApi.Features.Wrappers;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Extensions;

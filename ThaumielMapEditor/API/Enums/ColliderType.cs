@@ -5,7 +5,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace ThaumielMapEditor.API.Enums
 {

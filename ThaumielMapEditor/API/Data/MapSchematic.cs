@@ -5,6 +5,8 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using YamlDotNet.Serialization;
+
 namespace ThaumielMapEditor.API.Data
 {
     public class MapSchematicData
@@ -18,5 +20,8 @@ namespace ThaumielMapEditor.API.Data
         /// Gets or sets the schematic name to load of this <see cref="MapSchematicData"/> instance.
         /// </summary>
         public string SchematicName { get; set; } = string.Empty;
+
+        [YamlIgnore]
+        public uint SchematicId { get; set; }
     }
 }
