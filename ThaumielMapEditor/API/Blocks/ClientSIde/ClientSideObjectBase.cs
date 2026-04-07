@@ -276,5 +276,35 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             _pendingDirtyBits = 0;
             _pendingWrites.Clear();
         }
+
+        public void SpawnForPlayers(NetworkIdentity identity)
+        {
+            if (identity == null)
+            {
+                LogManager.Warn("Cannot spawn: Prefab NetworkIdentity is null.");
+                return;
+            }
+
+            foreach (Player player in Player.ReadyList)
+            {
+                if (player.IsHost)
+                    continue;
+
+                SpawnMessage msg = new()
+                {
+                    netId = NetworkIdentity.GetNextNetworkId(),
+                    isLocalPlayer = false,
+                    isOwner = false,
+                    sceneId = 0,
+                    assetId = identity.assetId,
+                    position = Position,
+                    rotation = Rotation,
+                    scale = Scale,
+                    payload = default
+                };
+
+                player.Connection.Send(msg);
+            }
+        }
     }
 }

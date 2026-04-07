@@ -237,7 +237,7 @@ namespace ThaumielMapEditor.API.Helpers
             return id;
         }
 
-        private static void SpawnObjectRecursive(int id, SerializableSchematic schematic, SchematicData schematicData, HashSet<int>? visited = null)
+        private static void SpawnObjectRecursive(int id, SerializableSchematic schematic, SchematicData schematicData, HashSet<int>? visited = null, uint parentNetId = 0)
         {
             visited ??= [];
 
@@ -247,9 +247,11 @@ namespace ThaumielMapEditor.API.Helpers
                 return;
             }
 
+            uint currentParentNetId = parentNetId == 0 ? schematicData.Primitive!.Base.netId : parentNetId;
+
             SerializableObject? obj = schematic.Objects.Find(o => o.ObjectId == id);
             if (obj != null)
-                SpawnSerializableObject(obj, schematicData);
+                currentParentNetId = SpawnSerializableObject(obj, schematicData, currentParentNetId);
 
             SerializableArea? areaobj = schematic.Areas.Find(o => o.ObjectId == id);
             if (areaobj != null)
@@ -262,7 +264,7 @@ namespace ThaumielMapEditor.API.Helpers
                 if (nestedSchematicIds.Contains(objectChild.ParentId))
                     continue;
 
-                SpawnObjectRecursive(objectChild.ObjectId, schematic, schematicData, visited);
+                SpawnObjectRecursive(objectChild.ObjectId, schematic, schematicData, visited, currentParentNetId);
             }
 
             foreach (SerializableArea areaChild in schematic.Areas.FindAll(o => o.ParentId == id))
@@ -270,7 +272,7 @@ namespace ThaumielMapEditor.API.Helpers
                 if (nestedSchematicIds.Contains(areaChild.ParentId))
                     continue;
 
-                SpawnObjectRecursive(areaChild.ObjectId, schematic, schematicData, visited);
+                SpawnObjectRecursive(areaChild.ObjectId, schematic, schematicData, visited, currentParentNetId);
             }
         }
 
@@ -493,7 +495,7 @@ namespace ThaumielMapEditor.API.Helpers
             }
         }
 
-        private static void SpawnSerializableObject(SerializableObject serializable, SchematicData schematicData)
+        private static uint SpawnSerializableObject(SerializableObject serializable, SchematicData schematicData, uint parentNetId)
         {
             switch (serializable.ObjectType)
             {
@@ -501,7 +503,7 @@ namespace ThaumielMapEditor.API.Helpers
                     PrimitiveObject primitive = new()
                     {
                         Name = serializable.Name,
-                        ParentId = schematicData.Primitive!.Base.netId,
+                        ParentId = parentNetId,
                         NetId = NetworkIdentity.GetNextNetworkId(),
                         Scale = serializable.Scale,
                         IsStatic = serializable.IsStatic,
@@ -519,13 +521,39 @@ namespace ThaumielMapEditor.API.Helpers
                         primitive.SpawnForPlayer(player);
 
                     CreateCollisionMesh(primitive);
-                    break;
+                    return primitive.NetId;
+
+                case ObjectType.GameObject:
+                    PrimitiveObject gameObject = new()
+                    {
+                        Name = serializable.Name,
+                        ParentId = parentNetId,
+                        NetId = NetworkIdentity.GetNextNetworkId(),
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic,
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        MovementSmoothing = serializable.MovementSmoothing,
+                        AssetId = PrefabHelper.PrimitiveAssetId,
+                        Schematic = schematicData,
+                        PrimitiveFlags = PrimitiveFlags.None,
+                        PrimitiveType = PrimitiveType.Cube,
+                        Color = Color.white
+                    };
+
+                    schematicData.SpawnedClientObjects.Add(gameObject);
+
+                    foreach (Player player in Player.ReadyList)
+                        gameObject.SpawnForPlayer(player);
+
+                    return gameObject.NetId;
+
 
                 case ObjectType.Capybara:
                     CapybaraObject capybara = new()
                     {
                         Name = serializable.Name,
-                        ParentId = schematicData.Primitive!.Base.netId,
+                        ParentId = parentNetId,
                         NetId = NetworkIdentity.GetNextNetworkId(),
                         Scale = serializable.Scale,
                         IsStatic = serializable.IsStatic,
@@ -543,13 +571,13 @@ namespace ThaumielMapEditor.API.Helpers
 
                     if (capybara.CollisionsEnabled)
                         ColliderHelper.CreateClientObjectColliders(capybara, schematicData);
-                        
-                    break;
+
+                    return capybara.NetId;
 
                 case ObjectType.Light:
                     LightObject light = new()
                     {
-                        ParentId = schematicData.Primitive!.Base.netId,
+                        ParentId = parentNetId,
                         NetId = NetworkIdentity.GetNextNetworkId(),
                         AssetId = PrefabHelper.LightSource.netIdentity.assetId,
                         Scale = serializable.Scale,
@@ -567,8 +595,8 @@ namespace ThaumielMapEditor.API.Helpers
                     {
                         light.SpawnForPlayer(player);
                     }
-                        
-                    break;
+
+                    return light.NetId;
 
                 case ObjectType.Clutter:
                     ClutterObject clutter = new()
@@ -581,7 +609,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     clutter.Type = clutter.GetValue<ClutterType>(serializable, "ClutterType");
                     clutter.SpawnObject(schematicData, serializable);
-                    break;
+                    return clutter.NetId;
 
                 case ObjectType.Door:
                     DoorObject door = new()
@@ -594,7 +622,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     door.ParseValues(serializable);
                     door.SpawnObject(schematicData, serializable);
-                    break;
+                    return door.NetId;
 
                 case ObjectType.TextToy:
                     TextToyObject textToy = new()
@@ -606,7 +634,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     textToy.SpawnObject(schematicData, serializable);
-                    break;
+                    return textToy.NetId;
 
                 case ObjectType.Workstation:
                     WorkstationObject workstation = new()
@@ -618,7 +646,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     workstation.SpawnObject(schematicData, serializable);
-                    break;
+                    return workstation.NetId;
 
                 case ObjectType.Camera:
                     CameraObject camera = new()
@@ -630,7 +658,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     camera.SpawnObject(schematicData, serializable);
-                    break;
+                    return camera.NetId;
 
                 case ObjectType.Interactable:
                     InteractionObject interaction = new()
@@ -642,7 +670,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     interaction.SpawnObject(schematicData, serializable);
-                    break;
+                    return interaction.NetId;
 
                 case ObjectType.Waypoint:
                     WaypointObject waypoint = new()
@@ -654,7 +682,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     waypoint.SpawnObject(schematicData, serializable);
-                    break;
+                    return waypoint.NetId;
 
                 case ObjectType.Locker:
                     LockerObject locker = new()
@@ -666,7 +694,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     locker.SpawnObject(schematicData, serializable);
-                    break;
+                    return locker.NetId;
 
                 case ObjectType.Pickup:
                     PickupObject pickup = new()
@@ -678,7 +706,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     pickup.SpawnObject(schematicData, serializable);
-                    break;
+                    return pickup.NetId;
 
                 case ObjectType.Target:
                     TargetDummyObject target = new()
@@ -690,7 +718,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     target.SpawnObject(schematicData, serializable);
-                    break;
+                    return target.NetId;
 
                 case ObjectType.Teleporter:
                     TeleporterObject teleporter = new()
@@ -702,23 +730,11 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     teleporter.SpawnObject(schematicData, serializable);
-                    break;
-
-                case ObjectType.GameObject:
-                    EmptyGameObject gameObject = new()
-                    {
-                        Position = serializable.Position,
-                        Rotation = serializable.Rotation,
-                        Scale = serializable.Scale,
-                        IsStatic = serializable.IsStatic
-                    };
-
-                    gameObject.SpawnObject(schematicData, serializable);
-                    break;
+                    return teleporter.NetId;
 
                 default:
                     LogManager.Warn($"Unhandled ObjectType '{serializable.ObjectType}' on object '{serializable.Name}', skipping.");
-                    break;
+                    return 0;
             }
         }
 
