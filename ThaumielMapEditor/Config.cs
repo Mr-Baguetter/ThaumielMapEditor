@@ -20,6 +20,7 @@ namespace ThaumielMapEditor
         public List<string> SchematiclodBlacklist { get; set; } = [];
         public string GithubToken { get; set; } = string.Empty;
 
+        [Description("Use || to randomly load a map use && to load all inline maps. Example: 'Load::MAPNAME||MAPNAME1' will load either MAPNAME or MAPNAME1 but not both. 'Load::MAPNAME&&MAPNAME1' will load both MAPNAME and MAPNAME1")]
         public List<string> WaitingForPlayers { get; set; } = [];
         public List<string> RoundStarted { get; set; } = [];
         public List<string> DecontaminationStarted { get; set; } = [];
