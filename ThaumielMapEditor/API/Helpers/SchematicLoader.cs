@@ -592,6 +592,7 @@ namespace ThaumielMapEditor.API.Helpers
             LODHelper.GenerateLODZones(schematicData, schematic);
 
             ApplyAnimators(schematic, schematicData);
+            ApplyTools(schematic, schematicData);
 
             SchematicSpawned?.Invoke(schematicData);
             LogManager.Info($"Schematic '{schematic.FileName}' fully spawned.");
@@ -702,29 +703,41 @@ namespace ThaumielMapEditor.API.Helpers
             }
         }
 
-        private static void ApplyTools(SerializableObject serializable, SchematicData schematicData, ServerObject obj)
+        private static void ApplyTools(SerializableSchematic schematic, SchematicData schematicData)
         {
-            if (obj.Object == null)
-                return;
+            IEnumerable<SerializableObject> toolables = schematic.Objects.Concat(schematic.ServerSideObjects).Where(o => o.Tools.Count > 0);
 
-            foreach (SerializableTool tool in serializable.Tools)
+            foreach (SerializableObject serializable in toolables)
             {
-                if (!Enum.TryParse<ToolType>(tool.ToolName, true, out var type))
-                    continue;
-
-                switch (type)
+                ServerObject? match = schematicData.SpawnedServerObjects.FirstOrDefault(o => o.ObjectId == serializable.ObjectId);
+                if (match?.Object == null)
                 {
-                    case ToolType.Health:
-                        ObjectHealth health = obj.Object.AddComponent<ObjectHealth>();
-                        health.Init(obj, schematicData, tool.Properties);
-                        obj.Tools.AddItem(health);
-                        break;
+                    LogManager.Warn($"Could not find spawned object for tools on '{serializable.Name}' in '{schematic.FileName}'.");
+                    continue;
+                }
 
-                    case ToolType.Physics:
-                        ObjectPhysics physics = obj.Object.AddComponent<ObjectPhysics>();
-                        physics.Init(obj, schematicData, tool.Properties);
-                        obj.Tools.AddItem(physics);
-                        break;
+                foreach (SerializableTool tool in serializable.Tools)
+                {
+                    if (!Enum.TryParse<ToolType>(tool.ToolName, true, out var type))
+                    {
+                        LogManager.Warn($"Unknown tool type '{tool.ToolName}' on object '{serializable.Name}'.");
+                        continue;
+                    }
+
+                    switch (type)
+                    {
+                        case ToolType.Health:
+                            ObjectHealth health = match.Object.AddComponent<ObjectHealth>();
+                            health.Init(match, schematicData, tool.Properties);
+                            match.Tools.AddItem(health);
+                            break;
+
+                        case ToolType.Physics:
+                            ObjectPhysics physics = match.Object.AddComponent<ObjectPhysics>();
+                            physics.Init(match, schematicData, tool.Properties);
+                            match.Tools.AddItem(physics);
+                            break;
+                    }
                 }
             }
         }
