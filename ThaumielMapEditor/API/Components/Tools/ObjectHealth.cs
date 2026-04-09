@@ -44,7 +44,16 @@ namespace ThaumielMapEditor.API.Components.Tools
         /// <summary>
         /// Gets or sets the current health that the <see cref="ObjectHealth"/> instance has.
         /// </summary>
-        public float Health { get; set; } = 100f;
+        public float Health
+        {
+            get;
+            set
+            {
+                field = Mathf.Max(0f, value);
+                if (field <= 0)
+                    Destroy();
+            }
+        } = 100f;
 
         /// <summary>
         /// Gets or sets the allowed <see cref="DamageType"/>s that the <see cref="ObjectHealth"/> instance can be damaged by.
@@ -109,14 +118,6 @@ namespace ThaumielMapEditor.API.Components.Tools
             DespawnTime = despawn;
         }
 
-        private void Update()
-        {
-            if (Health > 0)
-                return;
-
-            Destroy();
-        }
-
         /// <summary>
         /// Damages the <see cref="ObjectHealth"/> instance.
         /// </summary>
@@ -127,7 +128,7 @@ namespace ThaumielMapEditor.API.Components.Tools
             if (!AllowedDamage.Contains(type))
                 return;
 
-            Health = Mathf.Max(0f, Health - amount);
+            Health -= amount;
         }
 
         /// <summary>
