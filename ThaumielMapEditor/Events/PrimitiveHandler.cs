@@ -7,7 +7,11 @@
 
 using System;
 using AdminToys;
+using MEC;
+using Mirror;
+using ThaumielMapEditor.API.Blocks;
 using ThaumielMapEditor.API.Blocks.ClientSide;
+using ThaumielMapEditor.API.Blocks.ServerObjects;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Helpers;
 
@@ -15,6 +19,7 @@ namespace ThaumielMapEditor.Events
 {
     internal class PrimitiveHandler
     {
+
         public static void Register()
         {
             PrimitiveObject.ScaleUpdated += OnScaleUpdated;

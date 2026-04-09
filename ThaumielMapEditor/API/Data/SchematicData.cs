@@ -71,7 +71,7 @@ namespace ThaumielMapEditor.API.Data
             }
         }
 
-        public AnimationController AnimationController => AnimationController.GetOrCreate(this);
+        public AnimationController AnimationController => AnimationController.Get(this);
 
         /// <summary>
         /// Gets or sets the scale of this <see cref="SchematicData"/> instance.
@@ -208,10 +208,7 @@ namespace ThaumielMapEditor.API.Data
                 serverobj.DestroyObject(this);
             }
 
-            if (AnimationController.AnimationSchematics.TryGetValue(this, out var controller))
-            {
-                controller.Destroy();
-            }
+            AnimationController.Remove(this);
         }
     }
 }

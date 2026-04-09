@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------
-// <copyright file="DummyAnimatable.cs" company="Thaumiel Team">
+// <copyright file="DamageType.cs" company="Thaumiel Team">
 // Copyright (c) Thaumiel Team. All rights reserved.
 // Licensed under the GNU General Public License v3.0 (GPL-3.0).
 // </copyright>
 // -----------------------------------------------------------------------
 
-using UnityEngine;
-
-namespace ThaumielMapEditor.API.Animation
+namespace ThaumielMapEditor.API.Enums
 {
-    public class DummyAnimatable : MonoBehaviour
+    public enum DamageType
     {
-        public Color color = Color.white;
-        public int primitiveType = 0;
-        public int primitiveFlags = 0;
+        Shot,
+        Scp939Lunge,
+        Scp939Swipe,
+        Scp096Charge,
+        Explosion,
     }
 }

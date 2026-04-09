@@ -10,6 +10,7 @@ using MapGeneration.Distributors;
 using Mirror;
 using System;
 using System.Collections.Generic;
+using ThaumielMapEditor.API.Components.Tools;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Extensions;
@@ -50,6 +51,8 @@ namespace ThaumielMapEditor.API.Blocks
         /// This event is invoked at the end of <see cref="UpdateObject"/> after the new transform has been applied via <see cref="SetWorldTransform"/>.
         /// </remarks>
         public static event Action<ServerObject, bool>? OnObjectUpdated;
+
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the Position of the ServerObject
@@ -105,19 +108,39 @@ namespace ThaumielMapEditor.API.Blocks
         public bool IsStatic { get; set; }
 
         /// <summary>
+        /// Gets the <see cref="ToolBase"/> tools that are added to this <see cref="ServerObject"/>.
+        /// </summary>
+        public IEnumerable<ToolBase> Tools { get; internal set; } = [];
+
+        private AdminToy AdminToy;
+
+        /// <summary>
         /// The ticks between the server sending a update to the client about this object's position. 0 means no delay, 1 means the server will send an update every tick, 2 means every other tick, and so on.
         /// </summary>
-        public byte MovementSmoothing { get; set; }
+        public byte MovementSmoothing
+        {
+            get;
+            set
+            {
+                if (field == value)
+                    return;
+
+                if (AdminToy == null && Object.TryGetComponent<AdminToy>(out AdminToy))
+                    AdminToy.MovementSmoothing = value;
+
+                field = value;
+            }
+        }
 
         /// <summary>
         /// The NetId of the spawned ServerObject.
         /// </summary>
-        public uint NetId { get; set; }
+        public uint NetId { get; internal set; }
 
         /// <summary>
         /// Gets or sets the associated game object instance.
         /// </summary>
-        public virtual GameObject? Object { get; set; }
+        public virtual GameObject? Object { get; internal set; }
 
         /// <summary>
         /// Gets or sets the type of the object represented by this instance.
@@ -174,6 +197,7 @@ namespace ThaumielMapEditor.API.Blocks
             PositionSync?.Network_rotationY = (sbyte)Mathf.RoundToInt(Rotation.eulerAngles.y / 5.625f);
 
             OnObjectUpdated?.Invoke(this, respawn);
+            
             if (respawn)
                 NetworkServer.Spawn(Object);
         }
@@ -227,6 +251,12 @@ namespace ThaumielMapEditor.API.Blocks
             NetworkServer.ShowForConnection(network, player.Connection);
         }
 
+        /// <summary>
+        /// Gets a value from <see cref="SerializableObject.Values"/> and converts it to the specified type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="serializable">The <see cref="SerializableObject"/> instance.</param>
+        /// <param name="key">The string key to lookup.</param>
         public T GetValue<T>(SerializableObject serializable, string key) =>
             serializable.Values.GetConvertValue<T>(key);
     }

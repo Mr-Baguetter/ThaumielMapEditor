@@ -17,7 +17,10 @@ namespace ThaumielMapEditor
     {
         public bool Debug { get; set; }
         public bool EnableCreditTags { get; set; } = true;
+        public bool EnableServerTracking { get; set; } = true;
+
         public List<string> SchematiclodBlacklist { get; set; } = [];
+
         public string GithubToken { get; set; } = string.Empty;
 
         [Description("Use || to randomly load a map use && to load all inline maps. Example: 'Load::MAPNAME||MAPNAME1' will load either MAPNAME or MAPNAME1 but not both. 'Load::MAPNAME&&MAPNAME1' will load both MAPNAME and MAPNAME1")]

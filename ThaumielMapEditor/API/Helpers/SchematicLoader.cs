@@ -28,6 +28,9 @@ using ThaumielMapEditor.API.Blocks.Areas;
 using ThaumielMapEditor.API.Blocks.ServerObjects;
 using ThaumielMapEditor.API.Blocks.ServerObjects.Lockers;
 using ThaumielMapEditor.API.Extensions;
+using ThaumielMapEditor.API.Components.Tools;
+using ThaumielMapEditor.API.Blocks;
+using HarmonyLib;
 
 namespace ThaumielMapEditor.API.Helpers
 {
@@ -257,6 +260,10 @@ namespace ThaumielMapEditor.API.Helpers
             if (areaobj != null)
                 SpawnSerializableArea(areaobj, schematicData);
 
+            SerializableObject? serverobj = schematic.ServerSideObjects.Find(o => o.ObjectId == id);
+            if (serverobj != null)
+                currentParentNetId = SpawnSerializableObject(serverobj, schematicData, currentParentNetId, true);
+
             int[] nestedSchematicIds = schematic.Objects.Where(o => o.ObjectType == ObjectType.Schematic).Select(o => o.ObjectId).ToArray();
 
             foreach (SerializableObject objectChild in schematic.Objects.FindAll(o => o.ParentId == id))
@@ -265,6 +272,14 @@ namespace ThaumielMapEditor.API.Helpers
                     continue;
 
                 SpawnObjectRecursive(objectChild.ObjectId, schematic, schematicData, visited, currentParentNetId);
+            }
+
+            foreach (SerializableObject serverobjectChild in schematic.ServerSideObjects.FindAll(o => o.ParentId == id))
+            {
+                if (nestedSchematicIds.Contains(serverobjectChild.ParentId))
+                    continue;
+
+                SpawnObjectRecursive(serverobjectChild.ObjectId, schematic, schematicData, visited, currentParentNetId);
             }
 
             foreach (SerializableArea areaChild in schematic.Areas.FindAll(o => o.ParentId == id))
@@ -491,12 +506,76 @@ namespace ThaumielMapEditor.API.Helpers
             SpawnObjectRecursive(schematic.RootObjectId, schematic, schematicData);
             LODHelper.GenerateLODZones(schematicData, schematic);
 
+            ApplyAnimators(schematic, schematicData);
+
             SchematicSpawned?.Invoke(schematicData);
             LogManager.Info($"Schematic '{schematic.FileName}' fully spawned.");
             SchematicsById.Add(schematicData.Id, schematicData);
 
             if (Main.Instance.Config.SchematicAnimationPlayOnLoad.TryGetValue(schematicData.FileName, out var animationname))
                 schematicData.AnimationController.Play(animationname);
+        }
+
+        private static bool TryLoadAnimatorController(string schematicFileName, string animatorName, out RuntimeAnimatorController controller)
+        {
+            controller = null!;
+
+            foreach (AssetBundle bundle in AssetBundle.GetAllLoadedAssetBundles())
+            {
+                RuntimeAnimatorController[] controllers = bundle.LoadAllAssets<RuntimeAnimatorController>();
+                if (controllers.Length == 0)
+                    continue;
+
+                controller = controllers[0];
+                return true;
+            }
+
+            string path = Path.Combine(ThaumFileManager.Dir(["Schematics"]), $"{schematicFileName}-{animatorName}");
+            if (!File.Exists(path))
+            {
+                LogManager.Warn($"Animator bundle not found at '{path}'.");
+                return false;
+            }
+
+            AssetBundle loaded = AssetBundle.LoadFromFile(path);
+            if (loaded == null)
+            {
+                LogManager.Warn($"Failed to load asset bundle at '{path}'.");
+                return false;
+            }
+
+            RuntimeAnimatorController[] bundleControllers = loaded.LoadAllAssets<RuntimeAnimatorController>();
+            if (bundleControllers.Length == 0)
+                return false;
+
+            controller = bundleControllers[0];
+            return true;
+        }
+
+        private static void ApplyAnimators(SerializableSchematic schematic, SchematicData schematicData)
+        {
+            IEnumerable<SerializableObject> animatables = schematic.Objects.Concat(schematic.ServerSideObjects).Where(o => !string.IsNullOrEmpty(o.AnimatorName));
+
+            foreach (SerializableObject serializable in animatables)
+            {
+                if (!TryLoadAnimatorController(schematic.FileName, serializable.AnimatorName, out RuntimeAnimatorController controller))
+                    continue;
+
+                ServerObject? match = schematicData.SpawnedServerObjects.FirstOrDefault(o => o.Name == serializable.Name);
+                if (match?.Object == null)
+                {
+                    LogManager.Warn($"Could not find spawned object for animator '{serializable.AnimatorName}' in '{schematic.FileName}'.");
+                    continue;
+                }
+
+                Animator animator = match.Object.GetComponent<Animator>() ?? match.Object.AddComponent<Animator>();
+
+                animator.runtimeAnimatorController = controller;
+                animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+                LogManager.Debug($"Applied animator '{controller.name}' to '{match.Object.name}' in '{schematic.FileName}'.");
+            }
+
+            AssetBundle.UnloadAllAssetBundles(false);
         }
 
         private static void SpawnSerializableArea(SerializableArea area, SchematicData schematic)
@@ -513,114 +592,224 @@ namespace ThaumielMapEditor.API.Helpers
             }
         }
 
-        private static uint SpawnSerializableObject(SerializableObject serializable, SchematicData schematicData, uint parentNetId)
+        private static void ApplyTools(SerializableObject serializable, SchematicData schematicData, ServerObject obj)
         {
+            if (obj.Object == null)
+                return;
+
+            foreach (SerializableTool tool in serializable.Tools)
+            {
+                if (!Enum.TryParse<ToolType>(tool.ToolName, true, out var type))
+                    continue;
+
+                switch (type)
+                {
+                    case ToolType.Health:
+                        ObjectHealth health = obj.Object.AddComponent<ObjectHealth>();
+                        health.Init(obj, schematicData, tool.Properties);
+                        obj.Tools.AddItem(health);
+                        break;
+
+                    case ToolType.Physics:
+                        ObjectPhysics physics = obj.Object.AddComponent<ObjectPhysics>();
+                        physics.Init(obj, schematicData, tool.Properties);
+                        obj.Tools.AddItem(physics);
+                        break;
+                }
+            }
+        }
+
+        private static uint SpawnSerializableObject(SerializableObject serializable, SchematicData schematicData, uint parentNetId, bool serverside = false)
+        {
+            NetworkServer.spawned.TryGetValue(parentNetId, out var identity);
+
             switch (serializable.ObjectType)
             {
                 case ObjectType.Primitive:
-                    PrimitiveObject primitive = new()
+                    if (serverside)
                     {
-                        Name = serializable.Name,
-                        ParentId = parentNetId,
-                        NetId = NetworkIdentity.GetNextNetworkId(),
-                        Scale = serializable.Scale,
-                        IsStatic = serializable.IsStatic,
-                        Position = serializable.Position,
-                        Rotation = serializable.Rotation,
-                        MovementSmoothing = serializable.MovementSmoothing,
-                        AssetId = PrefabHelper.PrimitiveAssetId,
-                        Schematic = schematicData
-                    };
+                        PrimitiveObjectServer serverprim = new()
+                        {
+                            Position = serializable.Position,
+                            Rotation = serializable.Rotation,
+                            Scale = serializable.Scale,
+                            IsStatic = serializable.IsStatic
+                        };
 
-                    primitive.DeserializeValues(serializable);
-                    schematicData.SpawnedClientObjects.Add(primitive);
+                        serverprim.ParseValues(serializable);
+                        serverprim.SpawnObject(schematicData, serializable);
+                        if (identity != null)
+                            serverprim.Object?.transform.SetParent(identity.transform, false);
 
-                    foreach (Player player in Player.ReadyList)
-                    {
-                        primitive.SpawnForPlayer(player);
+                        serverprim.Name = serializable.Name;
+                        return serverprim.NetId;
                     }
+                    else
+                    {
+                        PrimitiveObject primitive = new()
+                        {
+                            Name = serializable.Name,
+                            ParentId = parentNetId,
+                            NetId = NetworkIdentity.GetNextNetworkId(),
+                            Scale = serializable.Scale,
+                            IsStatic = serializable.IsStatic,
+                            Position = serializable.Position,
+                            Rotation = serializable.Rotation,
+                            MovementSmoothing = serializable.MovementSmoothing,
+                            AssetId = PrefabHelper.PrimitiveAssetId,
+                            Schematic = schematicData
+                        };
 
-                    ColliderHelper.CreateCollisionMesh(primitive);
-                    return primitive.NetId;
+                        primitive.DeserializeValues(serializable);
+                        schematicData.SpawnedClientObjects.Add(primitive);
+
+                        foreach (Player player in Player.ReadyList)
+                        {
+                            primitive.SpawnForPlayer(player);
+                        }
+
+                        ColliderHelper.CreateCollisionMesh(primitive);
+                        return primitive.NetId;
+                    }
 
                 case ObjectType.GameObject:
-                    PrimitiveObject gameObject = new()
+                    if (serverside)
                     {
-                        Name = serializable.Name,
-                        ParentId = parentNetId,
-                        NetId = NetworkIdentity.GetNextNetworkId(),
-                        Scale = serializable.Scale,
-                        IsStatic = serializable.IsStatic,
-                        Position = serializable.Position,
-                        Rotation = serializable.Rotation,
-                        MovementSmoothing = serializable.MovementSmoothing,
-                        AssetId = PrefabHelper.PrimitiveAssetId,
-                        Schematic = schematicData,
-                        PrimitiveFlags = PrimitiveFlags.None,
-                        PrimitiveType = PrimitiveType.Cube,
-                        Color = Color.white
-                    };
+                        PrimitiveObjectServer serverprim = new()
+                        {
+                            Position = serializable.Position,
+                            Rotation = serializable.Rotation,
+                            Scale = serializable.Scale,
+                            IsStatic = serializable.IsStatic
+                        };
 
-                    schematicData.SpawnedClientObjects.Add(gameObject);
+                        serverprim.SpawnObject(schematicData, serializable);
+                        if (identity != null)
+                            serverprim.Object?.transform.SetParent(identity.transform, false);
 
-                    foreach (Player player in Player.ReadyList)
-                    {
-                        gameObject.SpawnForPlayer(player);
+                        serverprim.Name = serializable.Name;
+                        return serverprim.NetId;
                     }
+                    else
+                    {
+                        PrimitiveObject gameObject = new()
+                        {
+                            Name = serializable.Name,
+                            ParentId = parentNetId,
+                            NetId = NetworkIdentity.GetNextNetworkId(),
+                            Scale = serializable.Scale,
+                            IsStatic = serializable.IsStatic,
+                            Position = serializable.Position,
+                            Rotation = serializable.Rotation,
+                            MovementSmoothing = serializable.MovementSmoothing,
+                            AssetId = PrefabHelper.PrimitiveAssetId,
+                            Schematic = schematicData,
+                            PrimitiveFlags = PrimitiveFlags.None,
+                            PrimitiveType = PrimitiveType.Cube,
+                            Color = Color.white
+                        };
 
-                    return gameObject.NetId;
+                        schematicData.SpawnedClientObjects.Add(gameObject);
 
+                        foreach (Player player in Player.ReadyList)
+                        {
+                            gameObject.SpawnForPlayer(player);
+                        }
+
+                        return gameObject.NetId;
+                    }
 
                 case ObjectType.Capybara:
-                    CapybaraObject capybara = new()
+                    if (serverside)
                     {
-                        Name = serializable.Name,
-                        ParentId = parentNetId,
-                        NetId = NetworkIdentity.GetNextNetworkId(),
-                        Scale = serializable.Scale,
-                        IsStatic = serializable.IsStatic,
-                        Position = serializable.Position,
-                        Rotation = serializable.Rotation,
-                        MovementSmoothing = serializable.MovementSmoothing,
-                        Schematic = schematicData
-                    };
+                        CapybaraObjectServer servercapy = new()
+                        {
+                            Position = serializable.Position,
+                            Rotation = serializable.Rotation,
+                            Scale = serializable.Scale,
+                            IsStatic = serializable.IsStatic
+                        };
 
-                    capybara.CollisionsEnabled = capybara.GetValue<bool>(serializable, "Collisions");
-                    schematicData.SpawnedClientObjects.Add(capybara);
+                        servercapy.CollisionsEnabled = servercapy.GetValue<bool>(serializable, "Collisions");
+                        servercapy.SpawnObject(schematicData, serializable);
+                        if (identity != null)
+                            servercapy.Object?.transform.SetParent(identity.transform, false);
 
-                    foreach (Player player in Player.ReadyList)
-                    {
-                        capybara.SpawnForPlayer(player);
+                        servercapy.Name = serializable.Name;
+                        return servercapy.NetId;
                     }
+                    else
+                    {
+                        CapybaraObject capybara = new()
+                        {
+                            Name = serializable.Name,
+                            ParentId = parentNetId,
+                            NetId = NetworkIdentity.GetNextNetworkId(),
+                            Scale = serializable.Scale,
+                            IsStatic = serializable.IsStatic,
+                            Position = serializable.Position,
+                            Rotation = serializable.Rotation,
+                            MovementSmoothing = serializable.MovementSmoothing,
+                            Schematic = schematicData
+                        };
 
-                    if (capybara.CollisionsEnabled)
-                        ColliderHelper.CreateClientObjectColliders(capybara, schematicData);
+                        capybara.CollisionsEnabled = capybara.GetValue<bool>(serializable, "Collisions");
+                        schematicData.SpawnedClientObjects.Add(capybara);
 
-                    return capybara.NetId;
+                        foreach (Player player in Player.ReadyList)
+                        {
+                            capybara.SpawnForPlayer(player);
+                        }
+
+                        if (capybara.CollisionsEnabled)
+                            ColliderHelper.CreateClientObjectColliders(capybara, schematicData);
+
+                        return capybara.NetId;
+                    }
 
                 case ObjectType.Light:
-                    LightObject light = new()
+                    if (serverside)
                     {
-                        ParentId = parentNetId,
-                        NetId = NetworkIdentity.GetNextNetworkId(),
-                        AssetId = PrefabHelper.LightSource.netIdentity.assetId,
-                        Scale = serializable.Scale,
-                        IsStatic = serializable.IsStatic,
-                        Position = serializable.Position,
-                        Rotation = serializable.Rotation,
-                        MovementSmoothing = serializable.MovementSmoothing,
-                        Schematic = schematicData
-                    };
+                        LightObjectServer serverlight = new()
+                        {
+                            Position = serializable.Position,
+                            Rotation = serializable.Rotation,
+                            Scale = serializable.Scale,
+                            IsStatic = serializable.IsStatic
+                        };
 
-                    light.DeserializeValues(serializable);
-                    schematicData.SpawnedClientObjects.Add(light);
+                        serverlight.SpawnObject(schematicData, serializable);
+                        if (identity != null)
+                            serverlight.Object?.transform.SetParent(identity.transform, false);
 
-                    foreach (Player player in Player.ReadyList)
-                    {
-                        light.SpawnForPlayer(player);
+                        serverlight.Name = serializable.Name;
+                        return serverlight.NetId;
                     }
+                    else
+                    {
+                        LightObject light = new()
+                        {
+                            ParentId = parentNetId,
+                            NetId = NetworkIdentity.GetNextNetworkId(),
+                            AssetId = PrefabHelper.LightSource.netIdentity.assetId,
+                            Scale = serializable.Scale,
+                            IsStatic = serializable.IsStatic,
+                            Position = serializable.Position,
+                            Rotation = serializable.Rotation,
+                            MovementSmoothing = serializable.MovementSmoothing,
+                            Schematic = schematicData
+                        };
 
-                    return light.NetId;
+                        light.DeserializeValues(serializable);
+                        schematicData.SpawnedClientObjects.Add(light);
+
+                        foreach (Player player in Player.ReadyList)
+                        {
+                            light.SpawnForPlayer(player);
+                        }
+
+                        return light.NetId;
+                    }
 
                 case ObjectType.Clutter:
                     ClutterObject clutter = new()
@@ -633,6 +822,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     clutter.Type = clutter.GetValue<ClutterType>(serializable, "ClutterType");
                     clutter.SpawnObject(schematicData, serializable);
+                    clutter.Name = serializable.Name;
                     return clutter.NetId;
 
                 case ObjectType.Door:
@@ -646,6 +836,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     door.ParseValues(serializable);
                     door.SpawnObject(schematicData, serializable);
+                    door.Name = serializable.Name;
                     return door.NetId;
 
                 case ObjectType.TextToy:
@@ -658,6 +849,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     textToy.SpawnObject(schematicData, serializable);
+                    textToy.Name = serializable.Name;
                     return textToy.NetId;
 
                 case ObjectType.Workstation:
@@ -670,6 +862,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     workstation.SpawnObject(schematicData, serializable);
+                    workstation.Name = serializable.Name;
                     return workstation.NetId;
 
                 case ObjectType.Camera:
@@ -682,6 +875,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     camera.SpawnObject(schematicData, serializable);
+                    camera.Name = serializable.Name;
                     return camera.NetId;
 
                 case ObjectType.Interactable:
@@ -694,6 +888,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     interaction.SpawnObject(schematicData, serializable);
+                    interaction.Name = serializable.Name;
                     return interaction.NetId;
 
                 case ObjectType.Waypoint:
@@ -706,6 +901,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     waypoint.SpawnObject(schematicData, serializable);
+                    waypoint.Name = serializable.Name;
                     return waypoint.NetId;
 
                 case ObjectType.Locker:
@@ -718,6 +914,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     locker.SpawnObject(schematicData, serializable);
+                    locker.Name = serializable.Name;
                     return locker.NetId;
 
                 case ObjectType.Pickup:
@@ -730,6 +927,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     pickup.SpawnObject(schematicData, serializable);
+                    pickup.Name = serializable.Name;
                     return pickup.NetId;
 
                 case ObjectType.Target:
@@ -742,6 +940,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     target.SpawnObject(schematicData, serializable);
+                    target.Name = serializable.Name;
                     return target.NetId;
 
                 case ObjectType.Teleporter:
@@ -754,6 +953,7 @@ namespace ThaumielMapEditor.API.Helpers
                     };
 
                     teleporter.SpawnObject(schematicData, serializable);
+                    teleporter.Name = serializable.Name;
                     return teleporter.NetId;
 
                 default:

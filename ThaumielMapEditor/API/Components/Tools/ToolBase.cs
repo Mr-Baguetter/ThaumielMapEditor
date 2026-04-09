@@ -1,0 +1,45 @@
+using System.Collections.Generic;
+using System.Linq;
+using ThaumielMapEditor.API.Blocks;
+using ThaumielMapEditor.API.Data;
+using ThaumielMapEditor.API.Enums;
+using UnityEngine;
+
+namespace ThaumielMapEditor.API.Components.Tools
+{
+    public class ToolBase : MonoBehaviour
+    {
+        /// <summary>
+        /// Gets the <see cref="ServerObject"/> for this <see cref="ToolBase"/> instance.
+        /// Null until <see cref="Init(ServerObject, SchematicData, Dictionary{string, object})"/> is called.
+        /// </summary>
+        public ServerObject? Object { get; internal set; }
+
+        /// <summary>
+        /// Gets the <see cref="ServerObject"/> for this <see cref="ToolBase"/> instance.
+        /// Null until <see cref="Init(ServerObject, SchematicData, Dictionary{string, object})"/> is called.
+        /// </summary>
+        public SchematicData? Schematic { get; internal set; }
+
+        /// <summary>
+        /// The <see cref="ToolType"/> this <see cref="ToolBase"/> instance uses. 
+        /// </summary>
+        public virtual ToolType Type { get; }
+
+        /// <summary>
+        /// Initializes the component.
+        /// </summary>
+        /// <param name="obj">The <see cref="ServerObject"/> instance this was added to.</param>
+        /// <param name="schem">The <see cref="SchematicData"/> that the <see cref="ServerObject"/> was spawned from.</param>
+        /// <param name="properties">The serialized properties.</param>
+        public virtual void Init(ServerObject obj, SchematicData schem, Dictionary<string, object> properties) { }
+
+        private void OnDestroy()
+        {
+            if (Object == null)
+                return;
+
+            Object.Tools = Object.Tools.Where(t => t != this);
+        }
+    }
+}

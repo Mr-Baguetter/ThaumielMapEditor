@@ -8,6 +8,7 @@
 using Interactables.Interobjects;
 using Interactables.Interobjects.DoorUtils;
 using MapGeneration.RoomConnectors;
+using MEC;
 using Mirror;
 using System;
 using ThaumielMapEditor.API.Data;
@@ -202,6 +203,14 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             SetWorldTransform(schematic);
             ApplyProperties(doorPrefab);
             NetworkServer.Spawn(doorPrefab);
+            Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+            {
+                IsOpen = !IsOpen;
+                Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+                {
+                    IsOpen = !IsOpen;
+                });
+            });
             base.SpawnObject(schematic, serializable);
         }
 
