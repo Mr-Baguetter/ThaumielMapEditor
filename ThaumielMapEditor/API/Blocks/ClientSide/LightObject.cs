@@ -204,7 +204,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             writer.WriteInt((int)Shape);
             writer.WriteFloat(SpotAngle);
             writer.WriteFloat(InnerSpotAngle);
-            writer.WriteUInt(ParentId);
+            writer.WriteUInt(ParentNetId);
 
             int end = writer.Position;
             writer.Position = sizePos;
@@ -296,6 +296,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             Shape = lightShape;
             SpotAngle = spotAngle;
             InnerSpotAngle = innerSpotAngle;
+
+            ObjectId = serializable.ObjectId;
+            ParentId = serializable.ParentId;
         }
     }
 }

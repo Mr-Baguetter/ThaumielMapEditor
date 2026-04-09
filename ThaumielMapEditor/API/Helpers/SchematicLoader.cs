@@ -79,6 +79,11 @@ namespace ThaumielMapEditor.API.Helpers
         public static List<SerializableMap> LoadedMaps = [];
 
         /// <summary>
+        /// dodad
+        /// </summary>
+        public static Dictionary<int, Transform> ServerSideTransforms = [];
+
+        /// <summary>
         /// The YAML deserializer used to parse schematic and map files
         /// </summary>
         public static IDeserializer Deserializer { get; } = new DeserializerBuilder()
@@ -326,7 +331,7 @@ namespace ThaumielMapEditor.API.Helpers
                     continue;
 
                 SchematicData schematicData = SpawnSchematic(schematic, offset);
-                data.Schematics.Add(new() { LocalPosition = offset, SchematicName = schematicData.FileName, SchematicId = schematicData.Id});
+                data.Schematics.Add(new() { LocalPosition = offset, SchematicName = schematicData.FileName, SchematicId = schematicData.Id });
             }
 
             MapsById.Add(data.Id, data);
@@ -406,7 +411,7 @@ namespace ThaumielMapEditor.API.Helpers
             Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, default, default));
             return schematicData;
         }
-        
+
         /// <summary>
         /// Spawns a loaded schematic by name at the specified position with default rotation and scale.
         /// </summary>
@@ -502,7 +507,8 @@ namespace ThaumielMapEditor.API.Helpers
             schematicData.Primitive = baseprimitive;
             schematicData.Position = position;
             schematicData.RootObjectId = schematic.RootObjectId;
-
+            
+            GetGameObjectTransforms(schematic, schematicData);
             SpawnObjectRecursive(schematic.RootObjectId, schematic, schematicData);
             LODHelper.GenerateLODZones(schematicData, schematic);
 
@@ -514,6 +520,31 @@ namespace ThaumielMapEditor.API.Helpers
 
             if (Main.Instance.Config.SchematicAnimationPlayOnLoad.TryGetValue(schematicData.FileName, out var animationname))
                 schematicData.AnimationController.Play(animationname);
+        }
+
+        private static void GetGameObjectTransforms(SerializableSchematic schematic, SchematicData schematicData)
+        {
+            foreach (SerializableObject obj in schematic.Objects)
+            {
+                if (obj.ObjectType == ObjectType.GameObject)
+                {
+                    GameObject dummyNode = new($"[SchematicNode] {obj.Name}");
+
+                    if (ServerSideTransforms.TryGetValue(obj.ParentId, out Transform parentTransform))
+                    {
+                        dummyNode.transform.SetParent(parentTransform, false);
+                    }
+                    else
+                        dummyNode.transform.SetParent(schematicData.Primitive?.Transform, false);
+
+                    dummyNode.transform.localPosition = obj.Position;
+                    dummyNode.transform.localRotation = obj.Rotation;
+                    dummyNode.transform.localScale = obj.Scale;
+
+                    LogManager.Info($"Added transform with local position: {dummyNode.transform.localPosition}");
+                    ServerSideTransforms[obj.ObjectId] = dummyNode.transform;
+                }
+            }
         }
 
         private static bool TryLoadAnimatorController(string schematicFileName, string animatorName, out RuntimeAnimatorController controller)
@@ -649,7 +680,7 @@ namespace ThaumielMapEditor.API.Helpers
                         PrimitiveObject primitive = new()
                         {
                             Name = serializable.Name,
-                            ParentId = parentNetId,
+                            ParentNetId = parentNetId,
                             NetId = NetworkIdentity.GetNextNetworkId(),
                             Scale = serializable.Scale,
                             IsStatic = serializable.IsStatic,
@@ -695,7 +726,7 @@ namespace ThaumielMapEditor.API.Helpers
                         PrimitiveObject gameObject = new()
                         {
                             Name = serializable.Name,
-                            ParentId = parentNetId,
+                            ParentNetId = parentNetId,
                             NetId = NetworkIdentity.GetNextNetworkId(),
                             Scale = serializable.Scale,
                             IsStatic = serializable.IsStatic,
@@ -743,7 +774,7 @@ namespace ThaumielMapEditor.API.Helpers
                         CapybaraObject capybara = new()
                         {
                             Name = serializable.Name,
-                            ParentId = parentNetId,
+                            ParentNetId = parentNetId,
                             NetId = NetworkIdentity.GetNextNetworkId(),
                             Scale = serializable.Scale,
                             IsStatic = serializable.IsStatic,
@@ -754,6 +785,8 @@ namespace ThaumielMapEditor.API.Helpers
                         };
 
                         capybara.CollisionsEnabled = capybara.GetValue<bool>(serializable, "Collisions");
+                        capybara.ObjectId = serializable.ObjectId;
+                        capybara.ParentId = serializable.ParentId;
                         schematicData.SpawnedClientObjects.Add(capybara);
 
                         foreach (Player player in Player.ReadyList)
@@ -789,7 +822,7 @@ namespace ThaumielMapEditor.API.Helpers
                     {
                         LightObject light = new()
                         {
-                            ParentId = parentNetId,
+                            ParentNetId = parentNetId,
                             NetId = NetworkIdentity.GetNextNetworkId(),
                             AssetId = PrefabHelper.LightSource.netIdentity.assetId,
                             Scale = serializable.Scale,

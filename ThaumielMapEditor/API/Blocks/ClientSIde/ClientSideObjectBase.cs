@@ -34,6 +34,16 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         public bool Spawned { get; internal set; } = false;
 
         /// <summary>
+        /// Gets the object id from the <see cref="SerializableObject"/> this <see cref="ClientSideObjectBase"/> instance was generated from.
+        /// </summary>
+        public int ObjectId { get; internal set; }
+
+        /// <summary>
+        /// Gets the parent id from the <see cref="SerializableObject"/> this <see cref="ClientSideObjectBase"/> instance was generated from.
+        /// </summary>
+        public int ParentId { get; internal set; }
+
+        /// <summary>
         /// Gets or sets the position of the <see cref="ClientSideObjectBase"/> instance.
         /// </summary>
         /// <remarks>
@@ -58,6 +68,16 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         public virtual Quaternion Rotation { get; set; }
 
         /// <summary>
+        /// Gets or sets the world position of the <see cref="ClientSideObjectBase"/> instance.
+        /// </summary>
+        public Vector3 WorldPosition { get; set; }
+
+        /// <summary>
+        /// Gets or sets the world rotation of the <see cref="ClientSideObjectBase"/> instance.
+        /// </summary>
+        public Quaternion WorldRotation { get; set; }
+
+        /// <summary>
         /// Gets or sets 
         /// </summary>
         public virtual bool IsStatic { get; set; }
@@ -80,7 +100,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         /// <summary>
         /// Gets or sets the netId of the <see cref="GameObject"/> this <see cref="ClientSideObjectBase"/> is parented to.
         /// </summary>
-        public uint ParentId { get; internal set; }
+        public uint ParentNetId { get; internal set; }
 
         /// <summary>
         /// Gets or sets the netid of the <see cref="ClientSideObjectBase"/> instance.
@@ -136,13 +156,13 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         {
             player.SendFakeRPC(NetId, typeof(AdminToyBase), nameof(AdminToyBase.RpcChangeParent), 0, parentId);
 
-            GameObject? go = NetworkServer.spawned.TryGetValue(ParentId, out NetworkIdentity identity) ? identity.gameObject : null;
+            GameObject? go = NetworkServer.spawned.TryGetValue(ParentNetId, out NetworkIdentity identity) ? identity.gameObject : null;
             if (go != null)
             {
                 Parent = go;
             }
             else
-                LogManager.Warn($"Failed to find GameObject with NetId {ParentId}!");
+                LogManager.Warn($"Failed to find GameObject with NetId {ParentNetId}!");
         }
 
         /// <summary>

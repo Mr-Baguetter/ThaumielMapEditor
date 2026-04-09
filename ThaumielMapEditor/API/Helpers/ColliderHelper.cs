@@ -195,17 +195,26 @@ namespace ThaumielMapEditor.API.Helpers
                 return;
 
             GameObject collider = new();
-            collider.transform.localScale = new(Math.Abs(primitive.Scale.x), Math.Abs(primitive.Scale.y), Math.Abs(primitive.Scale.z));
-            collider.transform.rotation = primitive.Rotation;
-            collider.transform.position = primitive.Schematic.Primitive.Transform.TransformPoint(primitive.Position);
-            collider.transform.name = $"[ThaumielMapEditor] {primitive.Name}";
+            collider.transform.name = $"[ThaumielMapEditor] Collider_{primitive.Name}";
+
+            Transform? targetParent = ResolveServerParentTransform(primitive.ParentId, primitive.Schematic);
+            if (targetParent == null)
+            {
+                LogManager.Warn($"Failed to get parent for primitive {primitive.Name} - {primitive.ObjectId}");
+                return;
+            }
+
+            collider.transform.SetParent(targetParent, worldPositionStays: false);
+            collider.transform.localPosition = primitive.Position;
+            collider.transform.localRotation = primitive.Rotation;
+            collider.transform.localScale = new Vector3(Math.Abs(primitive.Scale.x), Math.Abs(primitive.Scale.y), Math.Abs(primitive.Scale.z));
 
             MeshCollider mesh = collider.AddComponent<MeshCollider>();
             mesh.sharedMesh = AdminToys.PrimitiveObjectToy.PrimitiveTypeToMesh[primitive.PrimitiveType];
+
             if (mesh != null)
             {
                 primitive.ServerCollider = mesh;
-                collider.transform.SetParent(primitive.Schematic.Primitive.Transform, true);
             }
             else
             {
@@ -214,5 +223,15 @@ namespace ThaumielMapEditor.API.Helpers
             }
         }
 
+        private static Transform ResolveServerParentTransform(int parentId, SchematicData schematic)
+        {
+            if (SchematicLoader.ServerSideTransforms.TryGetValue(parentId, out Transform transform))
+                return transform;
+
+            if (transform == null && schematic?.Primitive?.Transform != null)
+                transform = schematic.Primitive.Transform;
+
+            return transform!;
+        }
     }
 }

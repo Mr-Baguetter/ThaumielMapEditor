@@ -173,7 +173,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             payloadWriter.WriteInt((int)PrimitiveType);
             payloadWriter.WriteColor(Color);
             payloadWriter.WriteByte((byte)PrimitiveFlags);
-            payloadWriter.WriteUInt(ParentId);
+            payloadWriter.WriteUInt(ParentNetId);
 
             int dataEnd = payloadWriter.Position;
             payloadWriter.Position = sizePos;
@@ -225,6 +225,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             Color = color;
             PrimitiveType = primitiveType;
             PrimitiveFlags = flags;
+
+            ObjectId = serializable.ObjectId;
+            ParentId = serializable.ParentId;
         }
     }
 }

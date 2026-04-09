@@ -55,6 +55,16 @@ namespace ThaumielMapEditor.API.Blocks
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets the object id from the <see cref="SerializableObject"/> this <see cref="ServerObject"/> instance was generated from.
+        /// </summary>
+        public int ObjectId { get; internal set; }
+
+        /// <summary>
+        /// Gets the parent id from the <see cref="SerializableObject"/> this <see cref="ServerObject"/> instance was generated from.
+        /// </summary>
+        public int ParentId { get; internal set; }
+
+        /// <summary>
         /// Gets or sets the Position of the ServerObject
         /// </summary>
         public Vector3 Position
@@ -170,6 +180,8 @@ namespace ThaumielMapEditor.API.Blocks
             OnObjectCreated?.Invoke(this);
             SpawnedObjects.Add(this);
             schematic.SpawnedServerObjects.Add(this);
+            ObjectId = serializable.ObjectId;
+            ParentId = serializable.ParentId;
         }
 
         /// <summary>

@@ -144,7 +144,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             payloadWriter.WriteByte(MovementSmoothing);
             payloadWriter.WriteBool(IsStatic);
             payloadWriter.WriteBool(CollisionsEnabled);
-            payloadWriter.WriteUInt(ParentId);
+            payloadWriter.WriteUInt(ParentNetId);
 
             int dataEnd = payloadWriter.Position;
             payloadWriter.Position = sizePos;
