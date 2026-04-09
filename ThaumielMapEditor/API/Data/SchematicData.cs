@@ -178,6 +178,30 @@ namespace ThaumielMapEditor.API.Data
         /// </summary>
         public IEnumerable<WorkstationObject> Workstations =>
             SpawnedServerObjects.OfType<WorkstationObject>();
+
+        /// <summary>
+        /// Gets all spawned <see cref="TeleporterObject"/>s belonging to this schematic.
+        /// </summary>
+        public IEnumerable<TeleporterObject> Teleporters =>
+            SpawnedServerObjects.OfType<TeleporterObject>();
+
+        /// <summary>
+        /// Gets all spawned <see cref="CapybaraObjectServer"/>s belonging to this schematic.
+        /// </summary>
+        public IEnumerable<CapybaraObjectServer> ServerCapybaras =>
+            SpawnedServerObjects.OfType<CapybaraObjectServer>();
+
+        /// <summary>
+        /// Gets all spawned <see cref="LightObjectServer"/>s belonging to this schematic.
+        /// </summary>
+        public IEnumerable<LightObjectServer> ServerLights =>
+            SpawnedServerObjects.OfType<LightObjectServer>();
+
+        /// <summary>
+        /// Gets all spawned <see cref="PrimitiveObjectServer"/>s belonging to this schematic.
+        /// </summary>
+        public IEnumerable<PrimitiveObjectServer> ServerPrimitives =>
+            SpawnedServerObjects.OfType<PrimitiveObjectServer>();
 #endregion
 
         /// <summary>
