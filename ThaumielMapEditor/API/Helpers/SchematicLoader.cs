@@ -672,7 +672,7 @@ namespace ThaumielMapEditor.API.Helpers
                 if (!TryLoadAnimatorController(schematic.FileName, serializable.AnimatorName, out RuntimeAnimatorController controller))
                     continue;
 
-                ServerObject? match = schematicData.SpawnedServerObjects.FirstOrDefault(o => o.Name == serializable.Name);
+                ServerObject? match = schematicData.SpawnedServerObjects.FirstOrDefault(o => o.ObjectId == serializable.ObjectId);
                 if (match?.Object == null)
                 {
                     LogManager.Warn($"Could not find spawned object for animator '{serializable.AnimatorName}' in '{schematic.FileName}'.");
@@ -705,9 +705,7 @@ namespace ThaumielMapEditor.API.Helpers
 
         private static void ApplyTools(SerializableSchematic schematic, SchematicData schematicData)
         {
-            IEnumerable<SerializableObject> toolables = schematic.Objects.Concat(schematic.ServerSideObjects).Where(o => o.Tools.Count > 0);
-
-            foreach (SerializableObject serializable in toolables)
+            foreach (SerializableObject serializable in schematic.Objects.Concat(schematic.ServerSideObjects).Where(o => o.Tools.Count > 0))
             {
                 ServerObject? match = schematicData.SpawnedServerObjects.FirstOrDefault(o => o.ObjectId == serializable.ObjectId);
                 if (match?.Object == null)
