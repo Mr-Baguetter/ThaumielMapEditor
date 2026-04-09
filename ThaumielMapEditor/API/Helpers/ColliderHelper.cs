@@ -228,10 +228,14 @@ namespace ThaumielMapEditor.API.Helpers
             if (SchematicLoader.ServerSideTransforms.TryGetValue(parentId, out Transform transform))
                 return transform;
 
-            if (transform == null && schematic?.Primitive?.Transform != null)
-                transform = schematic.Primitive.Transform;
+            if (schematic?.Primitive?.Transform != null)
+            {
+                LogManager.Warn($"Could not find parent transform for id {parentId}, falling back to schematic root.");
+                return schematic.Primitive.Transform;
+            }
 
-            return transform!;
+            LogManager.Error($"Could not resolve parent transform for id {parentId} and schematic root is null.");
+            return null!;
         }
     }
 }
