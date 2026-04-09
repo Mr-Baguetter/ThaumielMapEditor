@@ -479,8 +479,7 @@ namespace ThaumielMapEditor.API.Helpers
 
             LabPrimitive baseprimitive = LabPrimitive.Create();
             baseprimitive.Type = PrimitiveType.Cube;
-            baseprimitive.Flags &= ~PrimitiveFlags.Visible;
-            baseprimitive.Flags &= ~PrimitiveFlags.Collidable;
+            baseprimitive.Flags = PrimitiveFlags.None;
             baseprimitive.Position = position;
             if (rotation != default)
             {
