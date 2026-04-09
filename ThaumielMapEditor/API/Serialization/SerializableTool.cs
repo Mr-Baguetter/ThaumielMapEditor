@@ -5,7 +5,6 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-
 using System.Collections.Generic;
 
 namespace ThaumielMapEditor.API.Serialization
