@@ -47,23 +47,6 @@ namespace ThaumielMapEditor.API.Components
             Teleporter = teleporter;
         }
 
-        private void Update()
-        {
-            if (PlayerCooldowns.IsEmpty())
-                return;
-
-            List<Player> expired = [];
-
-            foreach (KeyValuePair<Player, float> kvp in PlayerCooldowns)
-            {
-                if (Time.time >= kvp.Value)
-                    expired.Add(kvp.Key);
-            }
-
-            foreach (Player player in expired)
-                PlayerCooldowns.Remove(player);
-        }
-
         private void OnTriggerEnter(Collider other)
         {
             GameObject? root = other.GetComponentInParent<NetworkIdentity>()?.gameObject;
@@ -144,7 +127,23 @@ namespace ThaumielMapEditor.API.Components
             if (Teleporter.CoolDown <= 0f)
                 return false;
 
-            return Teleporter.PerPlayerCooldown ? PlayerCooldowns.TryGetValue(player, out float expiry) && Time.time < expiry : Time.time < _globalCooldownEnd;
+            if (Teleporter.PerPlayerCooldown)
+            {
+                if (PlayerCooldowns.TryGetValue(player, out float expiry))
+                {
+                    if (Time.time >= expiry)
+                    {
+                        PlayerCooldowns.Remove(player);
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            return Time.time < _globalCooldownEnd;
         }
 
         private void ApplyCooldown(Player player)
