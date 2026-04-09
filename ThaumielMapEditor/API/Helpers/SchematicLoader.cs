@@ -356,6 +356,86 @@ namespace ThaumielMapEditor.API.Helpers
         }
 
         /// <summary>
+        /// Spawns a schematic from a file path at the specified position with default rotation and scale.
+        /// </summary>
+        /// <param name="path">The full file path to the schematic YAML file.</param>
+        /// <param name="position">The world position at which to place the schematic.</param>
+        /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic, or <see langword="null"/> if the file could not be loaded.</returns>
+        public static SchematicData? SpawnSchematicFromPath(string path, Vector3 position)
+        {
+            SerializableSchematic? schematic = TryLoadSchematicFromPath(path);
+            if (schematic == null)
+                return null;
+
+            return SpawnSchematic(schematic, position);
+        }
+
+        /// <summary>
+        /// Spawns a schematic from a file path at the specified position and rotation with default scale.
+        /// </summary>
+        /// <param name="path">The full file path to the schematic YAML file.</param>
+        /// <param name="position">The world position at which to place the schematic.</param>
+        /// <param name="rotation">The rotation to apply to the schematic.</param>
+        /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic, or <see langword="null"/> if the file could not be loaded.</returns>
+        public static SchematicData? SpawnSchematicFromPath(string path, Vector3 position, Quaternion rotation)
+        {
+            SerializableSchematic? schematic = TryLoadSchematicFromPath(path);
+            if (schematic == null)
+                return null;
+
+            return SpawnSchematic(schematic, position, rotation);
+        }
+
+        /// <summary>
+        /// Spawns a schematic from a file path at the specified position, rotation, and scale.
+        /// </summary>
+        /// <param name="path">The full file path to the schematic YAML file.</param>
+        /// <param name="position">The world position at which to place the schematic.</param>
+        /// <param name="rotation">The rotation to apply to the schematic.</param>
+        /// <param name="scale">The scale to apply to the schematic.</param>
+        /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic, or <see langword="null"/> if the file could not be loaded.</returns>
+        public static SchematicData? SpawnSchematicFromPath(string path, Vector3 position, Quaternion rotation, Vector3 scale)
+        {
+            SerializableSchematic? schematic = TryLoadSchematicFromPath(path);
+            if (schematic == null)
+                return null;
+
+            return SpawnSchematic(schematic, position, rotation, scale);
+        }
+
+        /// <summary>
+        /// Attempts to load and deserialize a <see cref="SerializableSchematic"/> from a file path.
+        /// </summary>
+        /// <param name="path">The full file path to the schematic YAML file.</param>
+        /// <returns>A <see cref="SerializableSchematic"/> if successful, otherwise <see langword="null"/>.</returns>
+        private static SerializableSchematic? TryLoadSchematicFromPath(string path)
+        {
+            if (!File.Exists(path))
+            {
+                LogManager.Warn($"Schematic file not found at path '{path}'.");
+                return null;
+            }
+
+            try
+            {
+                SerializableSchematic schematic = Deserializer.Deserialize<SerializableSchematic>(File.ReadAllText(path));
+                schematic.FileName = Path.GetFileNameWithoutExtension(path);
+                LogManager.Debug($"Loaded schematic from path '{path}'.");
+                return schematic;
+            }
+            catch (YamlException yamlex)
+            {
+                LogManager.Warn($"Failed to parse schematic at '{path}'.\n\n{yamlex}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                LogManager.Warn($"Exception when loading schematic at '{path}'.\n\n{ex}");
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Spawns a schematic at the specified position, rotation, and scale.
         /// </summary>
         /// <param name="schematic">The serialized schematic to spawn.</param>
@@ -506,7 +586,7 @@ namespace ThaumielMapEditor.API.Helpers
             schematicData.Primitive = baseprimitive;
             schematicData.Position = position;
             schematicData.RootObjectId = schematic.RootObjectId;
-            
+
             GetGameObjectTransforms(schematic, schematicData);
             SpawnObjectRecursive(schematic.RootObjectId, schematic, schematicData);
             LODHelper.GenerateLODZones(schematicData, schematic);
