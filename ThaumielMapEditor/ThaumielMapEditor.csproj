@@ -87,6 +87,10 @@
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\YamlDotNet.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <Target Name="SyncVersion" BeforeTargets="BeforeBuild">
+    <Message Text="Syncing version..." Importance="high" />
+    <Exec Command="python ..\syncversion.py" />
+  </Target>
   <Target Name="PostBuildCopy" AfterTargets="Build">
     <Message Text="Copying dll to LabAPI plugin folder..." Importance="high" />
     <Copy SourceFiles="$(OutputPath)ThaumielMapEditor.dll" DestinationFolder="$(APPDATA)\SCP Secret Laboratory\LabAPI\plugins\global" SkipUnchangedFiles="true" />
