@@ -99,6 +99,19 @@ namespace ThaumielMapEditor.API.Helpers
             LogCreated?.Invoke(log);
         }
         
+        public static void LogShare(string message)
+        {
+            Logger.Raw($"[LogShare] [{Main.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.DarkMagenta);
+            Log log = new()
+            {
+                LogLevel = LogLevel.Info,
+                Message = message,
+                LogTime = DateTime.Now
+            };
+            
+            Logs.Add(log);
+            LogCreated?.Invoke(log);
+        }
 
         private static string FormatLogMessage(string message)
         {

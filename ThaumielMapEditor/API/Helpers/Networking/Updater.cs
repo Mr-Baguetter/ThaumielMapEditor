@@ -17,9 +17,9 @@ using LabApi.Loader.Features.Paths;
 using MEC;
 using UnityEngine.Networking;
 
-namespace ThaumielMapEditor.API.Helpers
+namespace ThaumielMapEditor.API.Helpers.Networking
 {
-    public class UpdateHelper
+    public class Updater
     {
         public class GitHubReleaseInfo
         {

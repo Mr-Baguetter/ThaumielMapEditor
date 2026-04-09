@@ -12,6 +12,7 @@ using MEC;
 using ThaumielMapEditor.API.Components.Tools;
 using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Helpers;
+using ThaumielMapEditor.API.Helpers.Networking;
 using UnityEngine;
 
 namespace ThaumielMapEditor.Events
@@ -59,7 +60,7 @@ namespace ThaumielMapEditor.Events
         private static void OnWaitingForPlayers()
         {
             PrefabHelper.RegisterPrefabs();
-            Timing.RunCoroutine(UpdateHelper.CheckForUpdatesCoroutine(false));
+            Timing.RunCoroutine(Updater.CheckForUpdatesCoroutine(false));
 
             foreach (string name in Main.Instance.Config.WaitingForPlayers)
             {

@@ -8,7 +8,7 @@
 using System;
 using CommandSystem;
 using MEC;
-using ThaumielMapEditor.API.Helpers;
+using ThaumielMapEditor.API.Helpers.Networking;
 
 namespace ThaumielMapEditor.Commands.Console
 {
@@ -25,7 +25,7 @@ namespace ThaumielMapEditor.Commands.Console
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            Timing.WaitUntilDone(Timing.RunCoroutine(UpdateHelper.CheckForUpdatesCoroutine(true)));
+            Timing.WaitUntilDone(Timing.RunCoroutine(Updater.CheckForUpdatesCoroutine(true)));
             response = "Request ran";
             return true;
         }
