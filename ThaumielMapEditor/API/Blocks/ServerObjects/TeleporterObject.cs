@@ -29,7 +29,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// <summary>
         /// Gets or sets the Id to teleport to for this <see cref="TeleporterObject"/> instance
         /// </summary>
-        public Guid Target { get; set; }
+        public List<Guid> Targets { get; set; } = [];
 
         /// <summary>
         /// Gets or sets the cooldown time for this <see cref="TeleporterObject"/> instance
@@ -98,16 +98,20 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 LogManager.Warn("Failed to parse Id as Guid");
             }
             
-            if (!serializable.Values.TryConvertValue<string>("Target", out var target))
+            if (!serializable.Values.TryConvertValue<List<string>>("Target", out var target))
             {
                 LogManager.Warn("Failed to parse Target");
             }
-            
-            if (!Guid.TryParse(target, out var targetguid))
+
+            List<Guid> ids = [];
+            foreach (string rawid in target)
             {
-                LogManager.Warn("Failed to parse Target as Guid");
+                if (!Guid.TryParse(rawid, out var result))
+                    continue;
+                
+                ids.Add(result);
             }
-            
+
             if (!serializable.Values.TryConvertValue<float>("CoolDown", out var coolDown))
             {
                 LogManager.Warn("Failed to parse CoolDown");
@@ -129,7 +133,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
 
             Id = guid;
-            Target = targetguid;
+            Targets = ids;
             CoolDown = coolDown;
             AllowedRoles = allowedRoles;
             PerPlayerCooldown = perPlayerCooldown;

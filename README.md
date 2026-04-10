@@ -37,6 +37,9 @@ TME supports spawning the following object types. Objects marked as Client are s
 | Capybaras | Client |
 
 ---
+## Usage & Commands
+
+To view the full list of in-game console and admin commands, permissions, and aliases, please see our **[Commands Documentation](Commands.md)**.
 
 ## Installation
 

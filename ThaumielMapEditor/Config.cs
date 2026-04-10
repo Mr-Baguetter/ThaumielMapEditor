@@ -19,6 +19,9 @@ namespace ThaumielMapEditor
         public bool EnableCreditTags { get; set; } = true;
         public bool EnableServerTracking { get; set; } = true;
 
+        [Description("The delay for the DoorLink coroutine (In seconds) if 0 it will run every frame.")]
+        public float DoorPollingDelay { get; set; } = 0.1f;
+
         public List<string> SchematiclodBlacklist { get; set; } = [];
 
         public string GithubToken { get; set; } = string.Empty;

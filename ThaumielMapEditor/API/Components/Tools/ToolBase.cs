@@ -39,7 +39,11 @@ namespace ThaumielMapEditor.API.Components.Tools
         /// <param name="obj">The <see cref="ServerObject"/> instance this was added to.</param>
         /// <param name="schem">The <see cref="SchematicData"/> that the <see cref="ServerObject"/> was spawned from.</param>
         /// <param name="properties">The serialized properties.</param>
-        public virtual void Init(ServerObject obj, SchematicData schem, Dictionary<string, object> properties) { }
+        public virtual void Init(ServerObject obj, SchematicData schem, Dictionary<string, object> properties)
+        {
+            Object = obj;
+            Schematic = schem;
+        }
 
         private void OnDestroy()
         {

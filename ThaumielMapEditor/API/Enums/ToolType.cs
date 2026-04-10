@@ -12,5 +12,6 @@ namespace ThaumielMapEditor.API.Enums
         Custom = 0, // Todo: setup custom.
         Health = 1,
         Physics = 2,
+        Doorlink = 3,
     }
 }

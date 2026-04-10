@@ -7,7 +7,9 @@
 
 using InventorySystem.Items.Pickups;
 using LabApi.Features.Wrappers;
+using LabApiExtensions.Extensions;
 using Mirror;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThaumielMapEditor.API.Blocks;
@@ -56,7 +58,7 @@ namespace ThaumielMapEditor.API.Components
             TeleporterObject? target = FindTargetTeleporter();
             if (target == null)
             {
-                LogManager.Warn($"Teleporter {Teleporter.Id} could not find target teleporter with Id: {Teleporter.Target}");
+                LogManager.Warn($"Teleporter {Teleporter.Id} could not find target teleporter.");
                 return;
             }
 
@@ -76,7 +78,7 @@ namespace ThaumielMapEditor.API.Components
 
                 target.TeleporterHandler.ForcePlayerCooldown(player);
                 player.Position = target.Position;
-                LogManager.Debug($"Player {player.Nickname} teleported from {Teleporter.Id} to {Teleporter.Target}");
+                LogManager.Debug($"Player {player.Nickname} teleported from {Teleporter.Id} to {target.Id}");
                 ApplyCooldown(player);
                 return;
             }
@@ -86,13 +88,13 @@ namespace ThaumielMapEditor.API.Components
                 if (HasFlagFast(TeleporterFlags.AllowPickups))
                 {
                     pickup.Position = target.Position;
-                    LogManager.Debug($"Pickup {pickup.Type} teleported from {Teleporter.Id} to {Teleporter.Target}");
+                    LogManager.Debug($"Pickup {pickup.Type} teleported from {Teleporter.Id} to {target.Id}");
                 }
 
                 if (pickup is Projectile projectile && HasFlagFast(TeleporterFlags.AllowProjectiles))
                 {
                     projectile.Position = target.Position;
-                    LogManager.Debug($"Projectile {projectile.Type} teleported from {Teleporter.Id} to {Teleporter.Target}");
+                    LogManager.Debug($"Projectile {projectile.Type} teleported from {Teleporter.Id} to {target.Id}");
                 }
             }
         }
@@ -161,6 +163,13 @@ namespace ThaumielMapEditor.API.Components
 
         public bool HasFlagFast(TeleporterFlags flag) => (Teleporter.Flags & flag) != 0;
 
-        private TeleporterObject? FindTargetTeleporter() => ServerObject.SpawnedObjects.OfType<TeleporterObject>().FirstOrDefault(t => t.Id == Teleporter.Target);
+        private TeleporterObject? FindTargetTeleporter()
+        {
+            TeleporterObject target = ServerObject.SpawnedObjects.OfType<TeleporterObject>().FirstOrDefault(t => t.Id == Teleporter.Targets.GetRandom());
+            if (target == null)
+                return null;
+
+            return target;
+        }
     }
 }

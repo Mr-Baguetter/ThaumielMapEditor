@@ -99,4 +99,8 @@
     <Message Text="Zipping Dependencies folder..." Importance="high" />
     <Exec Command="powershell -Command &quot;Compress-Archive -Path '$(ProjectDir)Dependencies\*' -DestinationPath '$(ProjectDir)Dependencies.zip' -Force&quot;" />
   </Target>
+  <Target Name="DocumentCommands" AfterTargets="PostBuildCopy">
+    <Message Text="Parsing commands to markdown" Importance="high" />
+    <Exec Command='python ..\parsecommands.py --base-dir "$(MSBuildProjectDirectory)\.."' />
+  </Target>
 </Project>

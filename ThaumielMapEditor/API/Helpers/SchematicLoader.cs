@@ -356,6 +356,107 @@ namespace ThaumielMapEditor.API.Helpers
         }
 
         /// <summary>
+        /// Loads all schematics from a custom directory into <see cref="LoadedSchematics"/>.
+        /// </summary>
+        /// <param name="directory">The full path to the directory to load schematics from.</param>
+        public static void LoadSchematicsFromDirectory(string directory)
+        {
+            if (!Directory.Exists(directory))
+            {
+                LogManager.Warn($"Custom schematic directory not found: '{directory}'.");
+                return;
+            }
+
+            foreach (string filename in ThaumFileManager.GetFilesInDirectory(directory))
+            {
+                try
+                {
+                    SerializableSchematic schematic = Deserializer.Deserialize<SerializableSchematic>(File.ReadAllText(filename));
+                    schematic.FileName = Path.GetFileNameWithoutExtension(filename);
+                    LoadedSchematics.Add(schematic);
+                    LogManager.Debug($"Loaded schematic '{schematic.FileName}' from custom directory '{directory}'.");
+                }
+                catch (YamlException yamlex)
+                {
+                    LogManager.Warn($"Failed to parse schematic '{Path.GetFileNameWithoutExtension(filename)}' in '{directory}'.\n\n{yamlex}");
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Warn($"Exception when loading schematic '{Path.GetFileNameWithoutExtension(filename)}' in '{directory}'.\n\n{ex}");
+                }
+            }
+        }
+        
+        private static SerializableSchematic? TryLoadSchematicFromDirectory(string directory, string schematicName)
+        {
+            if (!Directory.Exists(directory))
+            {
+                LogManager.Warn($"Custom schematic directory not found: '{directory}'.");
+                return null;
+            }
+
+            string path = Path.Combine(directory, $"{schematicName}.yml");
+            if (!File.Exists(path))
+            {
+                LogManager.Warn($"Schematic '{schematicName}' not found in directory '{directory}'.");
+                return null;
+            }
+
+            return TryLoadSchematicFromPath(path);
+        }
+
+        /// <summary>
+        /// Spawns a schematic by name from a custom directory at the specified position with default rotation and scale.
+        /// </summary>
+        /// <param name="directory">The full path to the directory containing the schematic.</param>
+        /// <param name="schematicName">The file name of the schematic (without extension).</param>
+        /// <param name="position">The world position at which to place the schematic.</param>
+        /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic, or <see langword="null"/> if the schematic could not be loaded.</returns>
+        public static SchematicData? SpawnSchematicFromDirectory(string directory, string schematicName, Vector3 position)
+        {
+            SerializableSchematic? schematic = TryLoadSchematicFromDirectory(directory, schematicName);
+            if (schematic == null)
+                return null;
+
+            return SpawnSchematic(schematic, position);
+        }
+
+        /// <summary>
+        /// Spawns a schematic by name from a custom directory at the specified position and rotation with default scale.
+        /// </summary>
+        /// <param name="directory">The full path to the directory containing the schematic.</param>
+        /// <param name="schematicName">The file name of the schematic (without extension).</param>
+        /// <param name="position">The world position at which to place the schematic.</param>
+        /// <param name="rotation">The rotation to apply to the schematic.</param>
+        /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic, or <see langword="null"/> if the schematic could not be loaded.</returns>
+        public static SchematicData? SpawnSchematicFromDirectory(string directory, string schematicName, Vector3 position, Quaternion rotation)
+        {
+            SerializableSchematic? schematic = TryLoadSchematicFromDirectory(directory, schematicName);
+            if (schematic == null)
+                return null;
+
+            return SpawnSchematic(schematic, position, rotation);
+        }
+
+        /// <summary>
+        /// Spawns a schematic by name from a custom directory at the specified position, rotation, and scale.
+        /// </summary>
+        /// <param name="directory">The full path to the directory containing the schematic.</param>
+        /// <param name="schematicName">The file name of the schematic (without extension).</param>
+        /// <param name="position">The world position at which to place the schematic.</param>
+        /// <param name="rotation">The rotation to apply to the schematic.</param>
+        /// <param name="scale">The scale to apply to the schematic.</param>
+        /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic, or <see langword="null"/> if the schematic could not be loaded.</returns>
+        public static SchematicData? SpawnSchematicFromDirectory(string directory, string schematicName, Vector3 position, Quaternion rotation, Vector3 scale)
+        {
+            SerializableSchematic? schematic = TryLoadSchematicFromDirectory(directory, schematicName);
+            if (schematic == null)
+                return null;
+
+            return SpawnSchematic(schematic, position, rotation, scale);
+        }
+
+        /// <summary>
         /// Spawns a schematic from a file path at the specified position with default rotation and scale.
         /// </summary>
         /// <param name="path">The full file path to the schematic YAML file.</param>
