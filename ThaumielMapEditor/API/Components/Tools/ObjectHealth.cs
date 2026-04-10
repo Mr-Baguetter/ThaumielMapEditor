@@ -17,6 +17,7 @@ using PlayerStatsSystem;
 using PlayerRoles.PlayableScps.Scp939;
 using InventorySystem.Items.Scp1509;
 using PlayerRoles.PlayableScps.Scp1507;
+using System.Linq;
 
 namespace ThaumielMapEditor.API.Components.Tools
 {
@@ -79,8 +80,15 @@ namespace ThaumielMapEditor.API.Components.Tools
         /// </summary>
         public Vector3 Force { get; set; } = Vector3.zero;
 
+        /// <summary>
+        /// Gets the NetworkId.
+        /// Required by <see cref="IDestructible"/>
+        /// </summary>
         public uint NetworkId => Object.NetId;
 
+        /// <summary>
+        /// Gets the center of mass of the <see cref="ObjectHealth"/> instance.
+        /// </summary>
         public Vector3 CenterOfMass => Vector3.zero;
 
         /// <inheritdoc/>
@@ -142,14 +150,14 @@ namespace ThaumielMapEditor.API.Components.Tools
                     Object.MovementSmoothing = 0;
                     if (!gameObject.TryGetComponent<Rigidbody>(out var rigidbody))
                         rigidbody = gameObject.AddComponent<Rigidbody>();
-                    
+
                     rigidbody.isKinematic = false;
                     rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
                     if (Force != Vector3.zero)
                     {
                         rigidbody.AddForce(Force, ForceMode.Impulse);
                     }
-                    
+
                     Timing.CallDelayed(DespawnTime, () => Object.DestroyObject(Schematic));
                     break;
 
@@ -159,52 +167,35 @@ namespace ThaumielMapEditor.API.Components.Tools
             }
         }
 
+        /// <summary>
+        /// Attempts to damage the <see cref="ObjectHealth"/> instance if the <paramref name="handler"/> matches an allowed <see cref="DamageType"/>.
+        /// </summary>
+        /// <param name="damage">The amount of health to subtract from <see cref="Health"/>.</param>
+        /// <param name="handler">The source of the damage.</param>
+        /// <param name="exactHitPos">The position of the hit.</param>
+        /// <returns><see langword="true"/> if the damage was applied otherwise <see langword="false"/>.</returns>
         public bool Damage(float damage, DamageHandlerBase handler, Vector3 exactHitPos)
         {
-            switch (handler)
+            DamageType[] types = handler switch
             {
-                case FirearmDamageHandler firearm when AllowedDamage.Contains(DamageType.Shot):
-                    Health -= damage;
-                    return true;
+                FirearmDamageHandler => [DamageType.Shot],
+                ExplosionDamageHandler => [DamageType.Explosion],
+                Scp939DamageHandler => [DamageType.Scp939Lunge, DamageType.Scp939Swipe],
+                Scp096DamageHandler => [DamageType.Scp096Charge, DamageType.Scp096Swipe],
+                JailbirdDamageHandler => [DamageType.JailbirdCharge, DamageType.JailbirdHit],
+                DisruptorDamageHandler => [DamageType.DisruptorBurst, DamageType.DisruptorCharge],
+                MicroHidDamageHandler => [DamageType.MicroHidQuick, DamageType.MircoHidFullCharge, DamageType.MircoHidBroken],
+                Scp1509DamageHandler => [DamageType.Scp1509],
+                MarshmallowDamageHandler => [DamageType.Marshmallow],
+                Scp1507DamageHandler => [DamageType.Scp1507],
+                _ => []
+            };
 
-                case ExplosionDamageHandler explosion when AllowedDamage.Contains(DamageType.Explosion):
-                    Health -= damage;
-                    return true;
+            if (!types.Any(AllowedDamage.Contains))
+                return false;
 
-                case Scp939DamageHandler scp939 when AllowedDamage.Contains(DamageType.Scp939Lunge) || AllowedDamage.Contains(DamageType.Scp939Swipe):
-                    Health -= damage;
-                    return true;
-
-                case Scp096DamageHandler scp096 when AllowedDamage.Contains(DamageType.Scp096Charge) || AllowedDamage.Contains(DamageType.Scp096Swipe):
-                    Health -= damage;
-                    return true;
-                    
-                case JailbirdDamageHandler jailbird when AllowedDamage.Contains(DamageType.JailbirdCharge) || AllowedDamage.Contains(DamageType.JailbirdHit):
-                    Health -= damage;
-                    return true;
-
-                case DisruptorDamageHandler disruptor when AllowedDamage.Contains(DamageType.DisruptorBurst) || AllowedDamage.Contains(DamageType.DisruptorCharge):
-                    Health -= damage;
-                    return true;
-
-                case MicroHidDamageHandler micro when AllowedDamage.Contains(DamageType.MicroHidQuick) || AllowedDamage.Contains(DamageType.MircoHidFullCharge) || AllowedDamage.Contains(DamageType.MircoHidBroken):
-                    Health -= damage;
-                    return true;
-
-                case Scp1509DamageHandler scp1509 when AllowedDamage.Contains(DamageType.Scp1509):
-                    Health -= damage;
-                    return true;
-
-                case MarshmallowDamageHandler marshmallow when AllowedDamage.Contains(DamageType.Marshmallow):
-                    Health -= damage;
-                    return true;
-
-                case Scp1507DamageHandler scp1507 when AllowedDamage.Contains(DamageType.Scp1507):
-                    Health -= damage;
-                    return true;
-            }
-
-            return false;
+            Health -= damage;
+            return true;
         }
     }
 }

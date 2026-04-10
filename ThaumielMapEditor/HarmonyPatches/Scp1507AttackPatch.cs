@@ -1,0 +1,32 @@
+using HarmonyLib;
+using PlayerRoles.PlayableScps.Scp1507;
+using UnityEngine;
+
+namespace ThaumielMapEditor.HarmonyPatches
+{
+    [HarmonyPatch]
+    public static class Scp1507AttackPatch
+    {
+        private const float AttackDamage = 20f;
+
+        [HarmonyPatch(typeof(Scp1507AttackAbility), nameof(Scp1507AttackAbility.TryAttackDoor))]
+        public static void Postfix(Scp1507AttackAbility __instance, ref bool __result)
+        {
+            if (__result)
+                return;
+
+            if (!Physics.Raycast(__instance.Owner.PlayerCameraReference.position, __instance.Owner.PlayerCameraReference.forward, out RaycastHit hitInfo, 1.728f))
+                return;
+
+            if (!hitInfo.collider.TryGetComponent<IDestructible>(out var destructible))
+                return;
+
+            Scp1507DamageHandler handler = new(new(__instance.Owner), AttackDamage);
+            if (!destructible.Damage(AttackDamage, handler, hitInfo.point))
+                return;
+
+            Hitmarker.SendHitmarkerDirectly(__instance.Owner, AttackDamage);
+            __result = true;
+        }
+    }
+}
