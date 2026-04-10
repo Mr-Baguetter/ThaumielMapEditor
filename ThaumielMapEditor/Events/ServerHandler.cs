@@ -24,7 +24,6 @@ namespace ThaumielMapEditor.Events
             ServerEvents.WaitingForPlayers += OnWaitingForPlayers;
             ServerEvents.RoundStarted += OnRoundStart;
             ServerEvents.LczDecontaminationStarted += OnDecom;
-            ServerEvents.ExplosionSpawned += OnExploded;
             WarheadEvents.Started += OnWarheadStarting;
             WarheadEvents.Detonated += OnWarheadDetonated;
         }
@@ -34,27 +33,8 @@ namespace ThaumielMapEditor.Events
             ServerEvents.WaitingForPlayers -= OnWaitingForPlayers;
             ServerEvents.RoundStarted -= OnRoundStart;
             ServerEvents.LczDecontaminationStarted -= OnDecom; 
-            ServerEvents.ExplosionSpawned -= OnExploded;
             WarheadEvents.Started -= OnWarheadStarting;
             WarheadEvents.Detonated -= OnWarheadDetonated;
-        }
-
-        private static void OnExploded(ExplosionSpawnedEventArgs ev)
-        {
-            Collider[] colliders = Physics.OverlapSphere(ev.Position, ev.Settings.MaxRadius, ev.Settings.DetectionMask);
-
-            foreach (Collider collider in colliders)
-            {
-                if (!collider.TryGetComponent<ObjectHealth>(out var healthobj))
-                    continue;
-
-                Vector3 direction = collider.transform.position - ev.Position;
-                Vector3 force = (1f - direction.magnitude / ev.Settings.MaxRadius) * (direction / direction.magnitude) * ev.Settings._rigidbodyBaseForce + Vector3.up * ev.Settings._rigidbodyLiftForce;
-
-                healthobj.Force = force;
-                healthobj.Damage(ev.Settings._playerDamageOverDistance.Evaluate(direction.magnitude), DamageType.Explosion);
-                ev.Player?.SendHitMarker();
-            }
         }
 
         private static void OnWaitingForPlayers()

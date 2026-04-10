@@ -13,10 +13,14 @@ using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Extensions;
 using UnityEngine;
 using ThaumielMapEditor.API.Enums;
+using PlayerStatsSystem;
+using PlayerRoles.PlayableScps.Scp939;
+using InventorySystem.Items.Scp1509;
+using PlayerRoles.PlayableScps.Scp1507;
 
 namespace ThaumielMapEditor.API.Components.Tools
 {
-    public class ObjectHealth : ToolBase
+    public class ObjectHealth : ToolBase, IDestructible
     {
         /// <summary>
         /// Defines the types that <see cref="ObjectHealth"/> will use.
@@ -75,6 +79,10 @@ namespace ThaumielMapEditor.API.Components.Tools
         /// </summary>
         public Vector3 Force { get; set; } = Vector3.zero;
 
+        public uint NetworkId => Object.NetId;
+
+        public Vector3 CenterOfMass => Vector3.zero;
+
         /// <inheritdoc/>
         public override void Init(ServerObject obj, SchematicData schem, Dictionary<string, object> properties)
         {
@@ -119,19 +127,6 @@ namespace ThaumielMapEditor.API.Components.Tools
         }
 
         /// <summary>
-        /// Damages the <see cref="ObjectHealth"/> instance.
-        /// </summary>
-        /// <param name="amount">The amount of <see cref="Health"/> to be removed.</param>
-        /// <param name="type">The <see cref="DamageType"/> to be used.</param>
-        public void Damage(float amount, DamageType type)
-        {
-            if (!AllowedDamage.Contains(type))
-                return;
-
-            Health -= amount;
-        }
-
-        /// <summary>
         /// Destroys the <see cref="ObjectHealth"/> instance and applies the destroy state from <see cref="State"/>
         /// </summary>
         public void Destroy()
@@ -162,6 +157,54 @@ namespace ThaumielMapEditor.API.Components.Tools
                     Object.DestroyObject(Schematic);
                     break;
             }
+        }
+
+        public bool Damage(float damage, DamageHandlerBase handler, Vector3 exactHitPos)
+        {
+            switch (handler)
+            {
+                case FirearmDamageHandler firearm when AllowedDamage.Contains(DamageType.Shot):
+                    Health -= damage;
+                    return true;
+
+                case ExplosionDamageHandler explosion when AllowedDamage.Contains(DamageType.Explosion):
+                    Health -= damage;
+                    return true;
+
+                case Scp939DamageHandler scp939 when AllowedDamage.Contains(DamageType.Scp939Lunge) || AllowedDamage.Contains(DamageType.Scp939Swipe):
+                    Health -= damage;
+                    return true;
+
+                case Scp096DamageHandler scp096 when AllowedDamage.Contains(DamageType.Scp096Charge) || AllowedDamage.Contains(DamageType.Scp096Swipe):
+                    Health -= damage;
+                    return true;
+                    
+                case JailbirdDamageHandler jailbird when AllowedDamage.Contains(DamageType.JailbirdCharge) || AllowedDamage.Contains(DamageType.JailbirdHit):
+                    Health -= damage;
+                    return true;
+
+                case DisruptorDamageHandler disruptor when AllowedDamage.Contains(DamageType.DisruptorBurst) || AllowedDamage.Contains(DamageType.DisruptorCharge):
+                    Health -= damage;
+                    return true;
+
+                case MicroHidDamageHandler micro when AllowedDamage.Contains(DamageType.MicroHidQuick) || AllowedDamage.Contains(DamageType.MircoHidFullCharge) || AllowedDamage.Contains(DamageType.MircoHidBroken):
+                    Health -= damage;
+                    return true;
+
+                case Scp1509DamageHandler scp1509 when AllowedDamage.Contains(DamageType.Scp1509):
+                    Health -= damage;
+                    return true;
+
+                case MarshmallowDamageHandler marshmallow when AllowedDamage.Contains(DamageType.Marshmallow):
+                    Health -= damage;
+                    return true;
+
+                case Scp1507DamageHandler scp1507 when AllowedDamage.Contains(DamageType.Scp1507):
+                    Health -= damage;
+                    return true;
+            }
+
+            return false;
         }
     }
 }

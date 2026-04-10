@@ -13,6 +13,17 @@ namespace ThaumielMapEditor.API.Enums
         Scp939Lunge,
         Scp939Swipe,
         Scp096Charge,
+        Scp096Swipe,
         Explosion,
+        JailbirdHit,
+        JailbirdCharge,
+        DisruptorCharge,
+        DisruptorBurst,
+        MicroHidQuick,
+        MircoHidFullCharge,
+        MircoHidBroken,
+        Scp1509,
+        Marshmallow,
+        Scp1507
     }
 }
