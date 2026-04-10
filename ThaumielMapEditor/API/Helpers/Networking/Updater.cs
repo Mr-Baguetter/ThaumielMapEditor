@@ -115,8 +115,8 @@ namespace ThaumielMapEditor.API.Helpers.Networking
 
             UnityWebRequest req = UnityWebRequest.Get(asset.BrowserDownloadUrl);
             req.SetRequestHeader("User-Agent", UserAgent);
-            if (!string.IsNullOrEmpty(Main.Instance.Config?.GithubToken))
-                req.SetRequestHeader("Authorization", $"token {Main.Instance.Config?.GithubToken}");
+            if (!string.IsNullOrEmpty(Main.Instance.Config!?.GithubToken))
+                req.SetRequestHeader("Authorization", $"token {Main.Instance.Config!?.GithubToken}");
 
             req.downloadHandler = new DownloadHandlerBuffer();
             yield return Timing.WaitUntilDone(req.SendWebRequest());
@@ -152,8 +152,8 @@ namespace ThaumielMapEditor.API.Helpers.Networking
 
                 UnityWebRequest depsReq = UnityWebRequest.Get(depsAsset.BrowserDownloadUrl);
                 depsReq.SetRequestHeader("User-Agent", UserAgent);
-                if (!string.IsNullOrEmpty(Main.Instance.Config?.GithubToken))
-                    depsReq.SetRequestHeader("Authorization", $"token {Main.Instance.Config?.GithubToken}");
+                if (!string.IsNullOrEmpty(Main.Instance.Config!?.GithubToken))
+                    depsReq.SetRequestHeader("Authorization", $"token {Main.Instance.Config!?.GithubToken}");
 
                 depsReq.downloadHandler = new DownloadHandlerBuffer();
                 yield return Timing.WaitUntilDone(depsReq.SendWebRequest());
@@ -205,8 +205,8 @@ namespace ThaumielMapEditor.API.Helpers.Networking
             UnityWebRequest req = UnityWebRequest.Get(ReleasesApiUrl);
             req.SetRequestHeader("User-Agent", UserAgent);
             req.SetRequestHeader("Accept", "application/vnd.github.v3+json");
-            if (!string.IsNullOrEmpty(Main.Instance.Config?.GithubToken))
-                req.SetRequestHeader("Authorization", $"token {Main.Instance.Config?.GithubToken}");
+            if (!string.IsNullOrEmpty(Main.Instance.Config!?.GithubToken))
+                req.SetRequestHeader("Authorization", $"token {Main.Instance.Config!?.GithubToken}");
 
             req.downloadHandler = new DownloadHandlerBuffer();
             yield return Timing.WaitUntilDone(req.SendWebRequest());

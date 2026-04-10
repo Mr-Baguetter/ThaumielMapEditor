@@ -223,7 +223,7 @@ namespace ThaumielMapEditor.Events
                     data.SyncWithPlayer(ev.Player);
                 }
 
-                if (Main.Instance.Config.EnableCreditTags && Credits.TryGetValue(ev.Player.UserId, out var credittag) && ev.Player.UserGroup == null)
+                if (Main.Instance.Config!.EnableCreditTags && Credits.TryGetValue(ev.Player.UserId, out var credittag) && ev.Player.UserGroup == null)
                 {
                     ev.Player.GroupColor = credittag.Color;
                     ev.Player.GroupName = credittag.Name;

@@ -65,12 +65,12 @@ namespace ThaumielMapEditor.API.Components.Tools
             if (!PollHandle.IsRunning)
                 PollHandle = Timing.RunCoroutine(GlobalPollRoutine());
 
-            if (Main.Instance.Config.DoorPollingDelay == 0)
+            if (Main.Instance.Config!.DoorPollingDelay == 0)
             {
                 waitTime = Timing.WaitForOneFrame;
             }
             else
-                waitTime = Main.Instance.Config.DoorPollingDelay;
+                waitTime = Main.Instance.Config!.DoorPollingDelay;
         }
 
         private static IEnumerator<float> GlobalPollRoutine()

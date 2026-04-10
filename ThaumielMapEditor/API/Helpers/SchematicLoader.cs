@@ -699,7 +699,7 @@ namespace ThaumielMapEditor.API.Helpers
             LogManager.Info($"Schematic '{schematic.FileName}' fully spawned.");
             SchematicsById.Add(schematicData.Id, schematicData);
 
-            if (Main.Instance.Config.SchematicAnimationPlayOnLoad.TryGetValue(schematicData.FileName, out var animationname))
+            if (Main.Instance.Config!.SchematicAnimationPlayOnLoad.TryGetValue(schematicData.FileName, out var animationname))
                 schematicData.AnimationController.Play(animationname);
         }
 

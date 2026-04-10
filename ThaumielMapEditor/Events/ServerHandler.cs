@@ -62,7 +62,7 @@ namespace ThaumielMapEditor.Events
             PrefabHelper.RegisterPrefabs();
             Timing.RunCoroutine(Updater.CheckForUpdatesCoroutine(false));
 
-            foreach (string name in Main.Instance.Config.WaitingForPlayers)
+            foreach (string name in Main.Instance.Config!.WaitingForPlayers)
             {
                 MapLoader.ParseInput(name);
             }
@@ -70,7 +70,7 @@ namespace ThaumielMapEditor.Events
 
         private static void OnRoundStart()
         {
-            foreach (string name in Main.Instance.Config.RoundStarted)
+            foreach (string name in Main.Instance.Config!.RoundStarted)
             {
                 MapLoader.ParseInput(name);
             }
@@ -78,7 +78,7 @@ namespace ThaumielMapEditor.Events
 
         private static void OnDecom()
         {
-            foreach (string name in Main.Instance.Config.DecontaminationStarted)
+            foreach (string name in Main.Instance.Config!.DecontaminationStarted)
             {
                 MapLoader.ParseInput(name);
             }
@@ -86,7 +86,7 @@ namespace ThaumielMapEditor.Events
 
         private static void OnWarheadStarting(WarheadStartedEventArgs ev)
         {
-            foreach (string name in Main.Instance.Config.WarheadStarted)
+            foreach (string name in Main.Instance.Config!.WarheadStarted)
             {
                 MapLoader.ParseInput(name);
             }
@@ -94,7 +94,7 @@ namespace ThaumielMapEditor.Events
 
         private static void OnWarheadDetonated(WarheadDetonatedEventArgs ev)
         {
-            foreach (string name in Main.Instance.Config.WarheadDetonated)
+            foreach (string name in Main.Instance.Config!.WarheadDetonated)
             {
                 MapLoader.ParseInput(name);
             }

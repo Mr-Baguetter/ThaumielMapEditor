@@ -18,7 +18,7 @@ namespace ThaumielMapEditor.API.Helpers
     {
         public static List<LODData>? GenerateLODZones(SchematicData schematic, SerializableSchematic serializable)
         {
-            if (Main.Instance.Config.SchematiclodBlacklist.Contains(schematic.FileName))
+            if (Main.Instance.Config!.SchematiclodBlacklist.Contains(schematic.FileName))
                 return null;
 
             List<LODData> lodData = [];
@@ -61,7 +61,7 @@ namespace ThaumielMapEditor.API.Helpers
         /// <returns></returns>
         public static IEnumerable<Player> PlayersInsideZone(uint index, SchematicData schematic)
         {
-            if (Main.Instance.Config.SchematiclodBlacklist.Contains(schematic.FileName))
+            if (Main.Instance.Config!.SchematiclodBlacklist.Contains(schematic.FileName))
                 return [];
 
             List<Player> players = [];
