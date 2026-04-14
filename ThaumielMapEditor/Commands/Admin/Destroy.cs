@@ -27,7 +27,7 @@ namespace ThaumielMapEditor.Commands.Admin
 
         public string Description => "Destroys the specified schematic";
 
-        public string[] Aliases => ["de", "delete", "remove"];
+        public string[] Aliases => ["de", "delete", "remove", "del"];
 
         public string RequiredPermission => "tme.destroy";
 
