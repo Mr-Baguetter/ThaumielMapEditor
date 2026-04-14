@@ -43,7 +43,7 @@ namespace ThaumielMapEditor.API.Helpers
         public static void Debug(string message)
         {
             string formattedMessage = FormatLogMessage(message);
-            Logger.Debug(formattedMessage, Main.Instance.Config!.Debug);
+            Logger.Debug(formattedMessage, Main.Instance.Config.Debug);
             Log log = new()
             {
                 LogLevel = LogLevel.Debug,

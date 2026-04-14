@@ -1,0 +1,15 @@
+﻿<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
+  <Costura>
+    <IncludeAssemblies>
+      0Harmony
+      LabApiExtensions
+      SecretLabNAudio.Core
+      SecretLabNAudio.FFmpeg
+      SecretLabNAudio.MediaFoundation
+      SecretLabNAudio.NLayer
+      SecretLabNAudio.NVorbis
+      NAudio
+      NAudio.Core
+    </IncludeAssemblies>
+  </Costura>
+</Weavers>

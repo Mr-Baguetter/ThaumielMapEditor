@@ -80,7 +80,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             if (serializable.ObjectType != ObjectType.Target)
             {
                 LogManager.Warn($"Tried to parse {serializable.ObjectType} as Target Dummy");
-                return;                
+                return;
             }
 
             if (!serializable.Values.TryConvertValue<TargetType>("TargetType", out var type))

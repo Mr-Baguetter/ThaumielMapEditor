@@ -1,3 +1,10 @@
+// -----------------------------------------------------------------------
+// <copyright file="Scp1507AttackPatch.cs" company="Thaumiel Team">
+// Copyright (c) Thaumiel Team. All rights reserved.
+// Licensed under the GNU General Public License v3.0 (GPL-3.0).
+// </copyright>
+// -----------------------------------------------------------------------
+
 using HarmonyLib;
 using PlayerRoles.PlayableScps.Scp1507;
 using UnityEngine;
@@ -7,6 +14,7 @@ namespace ThaumielMapEditor.HarmonyPatches
     [HarmonyPatch]
     public static class Scp1507AttackPatch
     {
+        ///
         private const float AttackDamage = 20f;
 
         [HarmonyPatch(typeof(Scp1507AttackAbility), nameof(Scp1507AttackAbility.TryAttackDoor))]

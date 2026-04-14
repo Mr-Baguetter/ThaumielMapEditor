@@ -60,4 +60,6 @@ Before getting started, make sure you have the following installed:
 
 Discord Community: https://discord.gg/N8qrNHf4s9
 
+Dependency Notices: [Click here](Dependencies.md) - (Dependencies.md)
+
 *Thaumiel Map Editor is a work in progress. Contributions, feedback, and bug reports are welcome.*

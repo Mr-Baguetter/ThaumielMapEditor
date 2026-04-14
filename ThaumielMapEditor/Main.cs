@@ -18,6 +18,8 @@ using LabApi.Loader.Features.Plugins.Enums;
 using ThaumielMapEditor.Events;
 using HarmonyLib;
 using ThaumielMapEditor.API.Attributes;
+using System.IO;
+using LabApi.Loader.Features.Paths;
 
 namespace ThaumielMapEditor
 {
@@ -32,9 +34,9 @@ namespace ThaumielMapEditor
         public override Version RequiredApiVersion => LabApiProperties.CurrentVersion;
         public override LoadPriority Priority => LoadPriority.Medium;
         public string HarmonyId => $"MrBaguetter_TME_{Guid.NewGuid()}";
-        public Harmony harmony;
 
-        public static Main Instance { get; set; }
+        public Harmony harmony;
+        public static Main Instance;
 
         public override void Enable()
         {
@@ -55,7 +57,10 @@ namespace ThaumielMapEditor
             PlayerHandler.Register();
             ServerHandler.Register();
             PrimitiveHandler.Register();
-            //SchematicHandler.Register();
+
+            ThaumFileManager.TryCreateDirectory("Audio");
+            Config?.AudioPath = Path.Combine(PathManager.Configs.ToString(), "Thaumiel", "Audio");
+            SaveConfig();
         }
 
         public override void Disable()
@@ -63,7 +68,6 @@ namespace ThaumielMapEditor
             PlayerHandler.Unregister();
             ServerHandler.Unregister();
             PrimitiveHandler.Unregister();
-            //SchematicHandler.Unregister();
             
             Instance = null!;
             harmony.UnpatchAll();

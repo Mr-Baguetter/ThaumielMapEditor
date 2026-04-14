@@ -221,6 +221,11 @@ namespace ThaumielMapEditor.API.Helpers
         public static Scp079Generator? Generator { get; private set; }
 
         /// <summary>
+        /// The registered speaker <see cref="SpeakerToy"/> prefab.
+        /// </summary>
+        public static SpeakerToy? Speaker { get; private set; }
+
+        /// <summary>
         /// Iterates over all registered network prefabs and caches them for use by the map editor.
         /// </summary>
         public static void RegisterPrefabs()
@@ -407,7 +412,6 @@ namespace ThaumielMapEditor.API.Helpers
                             continue;
                     }
                 }
-
                 if (prefab.TryGetComponent(out ShootingTarget shootingTarget))
                 {
                     switch (prefab.name)
@@ -424,6 +428,11 @@ namespace ThaumielMapEditor.API.Helpers
                             ShootingTargetBinary = shootingTarget;
                             continue;
                     }
+                }
+                if (prefab.TryGetComponent<SpeakerToy>(out var speaker))
+                {
+                    Speaker = speaker;
+                    continue;
                 }
             }
 

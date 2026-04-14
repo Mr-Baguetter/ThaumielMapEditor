@@ -6,23 +6,13 @@
 // -----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using InventorySystem.Items.Firearms.Modules;
-using InventorySystem.Items.ThrowableProjectiles;
 using LabApi.Events.Arguments.PlayerEvents;
-using LabApi.Events.Arguments.Scp096Events;
-using LabApi.Events.Arguments.Scp939Events;
 using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using MEC;
-using PlayerRoles.PlayableScps.Scp096;
-using PlayerRoles.PlayableScps.Scp939;
 using ThaumielMapEditor.API.Blocks.ClientSide;
-using ThaumielMapEditor.API.Components.Tools;
 using ThaumielMapEditor.API.Data;
-using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Helpers;
-using ThaumielMapEditor.HarmonyPatches;
-using UnityEngine;
 
 namespace ThaumielMapEditor.Events
 {
@@ -47,7 +37,7 @@ namespace ThaumielMapEditor.Events
         }
 
         // If you contribute and want a CreditTag add your own steamid to this.
-        private static readonly Dictionary<string, CreditTag> Credits = new()
+        internal static readonly Dictionary<string, CreditTag> Credits = new()
         {
             // MrBaguetter
             ["76561199150506472@steam"] = new CreditTag()

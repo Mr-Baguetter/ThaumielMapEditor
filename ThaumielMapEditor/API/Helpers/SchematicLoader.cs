@@ -245,54 +245,107 @@ namespace ThaumielMapEditor.API.Helpers
             return id;
         }
 
-        private static void SpawnObjectRecursive(int id, SerializableSchematic schematic, SchematicData schematicData, HashSet<int>? visited = null, uint parentNetId = 0)
+        // Hopefuly this will stop clients from crashing when spawning large schematics.
+        private static IEnumerator<float> SpawnObjectsBatched(SerializableSchematic schematic, SchematicData schematicData, uint rootNetId)
         {
-            visited ??= [];
+            Dictionary<int, SerializableObject> objectsById = [];
+            Dictionary<int, List<SerializableObject>> objectsByParent = [];
+            Dictionary<int, List<SerializableObject>> serverObjectsByParent = [];
+            Dictionary<int, SerializableArea> areasById = [];
+            Dictionary<int, List<SerializableArea>> areasByParent = [];
 
-            if (!visited.Add(id))
+            void CacheObject(SerializableObject obj, Dictionary<int, List<SerializableObject>> parentDict)
             {
-                LogManager.Warn($"Cycle detected at ObjectId {id}, stopping recursion.");
-                return;
+                objectsById[obj.ObjectId] = obj;
+
+                if (!parentDict.TryGetValue(obj.ParentId, out var list))
+                {
+                    list = [];
+                    parentDict[obj.ParentId] = list;
+                }
+
+                list.Add(obj);
             }
 
-            uint currentParentNetId = parentNetId == 0 ? schematicData.Primitive!.Base.netId : parentNetId;
-
-            SerializableObject? obj = schematic.Objects.Find(o => o.ObjectId == id);
-            if (obj != null)
-                currentParentNetId = SpawnSerializableObject(obj, schematicData, currentParentNetId);
-
-            SerializableArea? areaobj = schematic.Areas.Find(o => o.ObjectId == id);
-            if (areaobj != null)
-                SpawnSerializableArea(areaobj, schematicData);
-
-            SerializableObject? serverobj = schematic.ServerSideObjects.Find(o => o.ObjectId == id);
-            if (serverobj != null)
-                currentParentNetId = SpawnSerializableObject(serverobj, schematicData, currentParentNetId, true);
-
-            int[] nestedSchematicIds = schematic.Objects.Where(o => o.ObjectType == ObjectType.Schematic).Select(o => o.ObjectId).ToArray();
-
-            foreach (SerializableObject objectChild in schematic.Objects.FindAll(o => o.ParentId == id))
+            foreach (SerializableObject obj in schematic.Objects)
             {
-                if (nestedSchematicIds.Contains(objectChild.ParentId))
-                    continue;
-
-                SpawnObjectRecursive(objectChild.ObjectId, schematic, schematicData, visited, currentParentNetId);
+                CacheObject(obj, objectsByParent);
             }
 
-            foreach (SerializableObject serverobjectChild in schematic.ServerSideObjects.FindAll(o => o.ParentId == id))
+            foreach (SerializableObject obj in schematic.ServerSideObjects)
             {
-                if (nestedSchematicIds.Contains(serverobjectChild.ParentId))
-                    continue;
-
-                SpawnObjectRecursive(serverobjectChild.ObjectId, schematic, schematicData, visited, currentParentNetId);
+                CacheObject(obj, serverObjectsByParent);
             }
 
-            foreach (SerializableArea areaChild in schematic.Areas.FindAll(o => o.ParentId == id))
+            foreach (SerializableArea area in schematic.Areas)
             {
-                if (nestedSchematicIds.Contains(areaChild.ParentId))
+                areasById[area.ObjectId] = area;
+                
+                if (!areasByParent.TryGetValue(area.ParentId, out var list))
+                {
+                    list = [];
+                    areasByParent[area.ParentId] = list;
+                }
+
+                list.Add(area);
+            }
+
+            Queue<(int id, uint parentNetId)> spawnQueue = new();
+            HashSet<int> visited = [];
+            spawnQueue.Enqueue((schematic.RootObjectId, rootNetId));
+            
+            int objectsProcessed = 0;
+
+            while (spawnQueue.Count > 0)
+            {
+                (int currentId, uint parentNetId) = spawnQueue.Dequeue();
+
+                if (!visited.Add(currentId))
                     continue;
 
-                SpawnObjectRecursive(areaChild.ObjectId, schematic, schematicData, visited, currentParentNetId);
+                uint currentNetId = parentNetId;
+
+                if (objectsById.TryGetValue(currentId, out var obj))
+                {
+                    currentNetId = SpawnSerializableObject(obj, schematicData, parentNetId);
+                    objectsProcessed++;
+                }
+
+                if (areasById.TryGetValue(currentId, out var area))
+                {
+                    SpawnSerializableArea(area, schematicData);
+                    objectsProcessed++;
+                }
+
+                if (objectsByParent.TryGetValue(currentId, out var children))
+                {
+                    foreach (SerializableObject child in children)
+                    {
+                        spawnQueue.Enqueue((child.ObjectId, currentNetId));
+                    }
+                }
+
+                if (serverObjectsByParent.TryGetValue(currentId, out var serverChildren))
+                {
+                    foreach (SerializableObject child in serverChildren)
+                    {
+                        spawnQueue.Enqueue((child.ObjectId, currentNetId));
+                    }
+                }
+
+                if (areasByParent.TryGetValue(currentId, out var areaChildren))
+                {
+                    foreach (SerializableArea child in areaChildren) 
+                    {
+                        spawnQueue.Enqueue((child.ObjectId, currentNetId));
+                    }
+                }
+
+                if (objectsProcessed >= 50)
+                {
+                    objectsProcessed = 0;
+                    yield return Timing.WaitForOneFrame;
+                }
             }
         }
 
@@ -689,7 +742,7 @@ namespace ThaumielMapEditor.API.Helpers
             schematicData.RootObjectId = schematic.RootObjectId;
 
             GetGameObjectTransforms(schematic, schematicData);
-            SpawnObjectRecursive(schematic.RootObjectId, schematic, schematicData);
+            yield return Timing.WaitUntilDone(Timing.RunCoroutine(SpawnObjectsBatched(schematic, schematicData, schematicData.Primitive.Base.netId)));
             LODHelper.GenerateLODZones(schematicData, schematic);
 
             ApplyAnimators(schematic, schematicData);
@@ -1179,6 +1232,19 @@ namespace ThaumielMapEditor.API.Helpers
                     teleporter.SpawnObject(schematicData, serializable);
                     teleporter.Name = serializable.Name;
                     return teleporter.NetId;
+
+                case ObjectType.Speaker:
+                    SpeakerObject speaker = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    speaker.SpawnObject(schematicData, serializable);
+                    speaker.Name = serializable.Name;
+                    return speaker.NetId;
 
                 default:
                     LogManager.Warn($"Unhandled ObjectType '{serializable.ObjectType}' on object '{serializable.Name}', skipping.");

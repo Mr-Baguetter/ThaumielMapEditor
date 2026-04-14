@@ -230,7 +230,9 @@ namespace ThaumielMapEditor.API.Helpers
 
             if (schematic?.Primitive?.Transform != null)
             {
-                LogManager.Warn($"Could not find parent transform for id {parentId}, falling back to schematic root.");
+                if (parentId != schematic.RootObjectId)
+                    LogManager.Warn($"Could not find parent transform for id {parentId}, falling back to schematic root.");
+                    
                 return schematic.Primitive.Transform;
             }
 

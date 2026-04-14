@@ -17,8 +17,29 @@
     <PackageReference Include="Northwood.LabAPI" Version="1.1.5" Publicize="true" />
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.*" />
     <PackageReference Include="System.Text.Json" Version="10.0.1" />
+    <PackageReference Include="Costura.Fody" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="NAudio.Core" Version="2.2.1" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="SecretLabNAudio.FFmpeg">
+      <HintPath>C:\Users\Superuser\Downloads\SecretLabNAudio.FFmpeg.dll</HintPath>
+    </Reference>
+    <Reference Include="SecretLabNAudio.MediaFoundation">
+      <HintPath>C:\Users\Superuser\Downloads\SecretLabNAudio.MediaFoundation.dll</HintPath>
+    </Reference>
+    <Reference Include="SecretLabNAudio.NLayer">
+      <HintPath>C:\Users\Superuser\Downloads\SecretLabNAudio.NLayer.dll</HintPath>
+    </Reference>
+    <Reference Include="SecretLabNAudio.NVorbis">
+      <HintPath>C:\Users\Superuser\Downloads\SecretLabNAudio.NVorbis.dll</HintPath>
+    </Reference>
+    <Reference Include="SecretLabNAudio.Core">
+      <HintPath>C:\Users\Superuser\Downloads\SecretLabNAudio.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp" Publicize="true">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
@@ -94,10 +115,6 @@
   <Target Name="PostBuildCopy" AfterTargets="Build">
     <Message Text="Copying dll to LabAPI plugin folder..." Importance="high" />
     <Copy SourceFiles="$(OutputPath)ThaumielMapEditor.dll" DestinationFolder="$(APPDATA)\SCP Secret Laboratory\LabAPI\plugins\global" SkipUnchangedFiles="true" />
-  </Target>
-  <Target Name="ZipDependencies" AfterTargets="PostBuildCopy">
-    <Message Text="Zipping Dependencies folder..." Importance="high" />
-    <Exec Command="powershell -Command &quot;Compress-Archive -Path '$(ProjectDir)Dependencies\*' -DestinationPath '$(ProjectDir)Dependencies.zip' -Force&quot;" />
   </Target>
   <Target Name="DocumentCommands" AfterTargets="PostBuildCopy">
     <Message Text="Parsing commands to markdown" Importance="high" />
