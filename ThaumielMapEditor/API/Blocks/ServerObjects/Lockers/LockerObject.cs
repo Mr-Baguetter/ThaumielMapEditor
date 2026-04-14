@@ -7,7 +7,6 @@
 
 using System;
 using System.Collections.Generic;
-using InventorySystem.Items.Pickups;
 using MapGeneration.Distributors;
 using Mirror;
 using ThaumielMapEditor.API.Data;
@@ -18,7 +17,6 @@ using ThaumielMapEditor.API.Serialization;
 using UnityEngine;
 using YamlDotNet.Serialization;
 using LabLocker = LabApi.Features.Wrappers.Locker;
-using LabChamber = LabApi.Features.Wrappers.LockerChamber;
 using MEC;
 
 namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers

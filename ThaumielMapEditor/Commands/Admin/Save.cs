@@ -6,7 +6,6 @@
 // -----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using CommandSystem;
 using LabApi.Features.Wrappers;
@@ -15,8 +14,6 @@ using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Extensions;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Interfaces;
-using ThaumielMapEditor.API.Serialization;
-using LabPrimitive = LabApi.Features.Wrappers.PrimitiveObjectToy;
 
 namespace ThaumielMapEditor.Commands.Admin
 {

@@ -5,15 +5,11 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Events.Arguments.WarheadEvents;
 using LabApi.Events.Handlers;
 using MEC;
-using ThaumielMapEditor.API.Components.Tools;
-using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Helpers.Networking;
-using UnityEngine;
 
 namespace ThaumielMapEditor.Events
 {

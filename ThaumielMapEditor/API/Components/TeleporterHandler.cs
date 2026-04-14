@@ -9,7 +9,6 @@ using InventorySystem.Items.Pickups;
 using LabApi.Features.Wrappers;
 using LabApiExtensions.Extensions;
 using Mirror;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThaumielMapEditor.API.Blocks;

@@ -8,7 +8,6 @@
 using System.IO;
 using LabApi.Features.Wrappers;
 using LabApiExtensions.FakeExtension;
-using Mirror;
 using SecretLabNAudio.Core;
 using SecretLabNAudio.Core.Extensions;
 using ThaumielMapEditor.API.Data;
