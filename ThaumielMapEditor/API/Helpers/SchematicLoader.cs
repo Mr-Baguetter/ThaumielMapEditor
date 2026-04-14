@@ -944,7 +944,7 @@ namespace ThaumielMapEditor.API.Helpers
                             Position = serializable.Position,
                             Rotation = serializable.Rotation,
                             MovementSmoothing = serializable.MovementSmoothing,
-                            AssetId = PrefabHelper.PrimitiveAssetId,
+                            AssetId = PrefabHelper.PrimitiveObject.netIdentity.assetId,
                             Schematic = schematicData
                         };
 
@@ -1006,7 +1006,7 @@ namespace ThaumielMapEditor.API.Helpers
                             Position = serializable.Position,
                             Rotation = serializable.Rotation,
                             MovementSmoothing = serializable.MovementSmoothing,
-                            AssetId = PrefabHelper.PrimitiveAssetId,
+                            AssetId = PrefabHelper.PrimitiveObject.netIdentity.assetId,
                             Schematic = schematicData,
                             PrimitiveFlags = PrimitiveFlags.None,
                             PrimitiveType = PrimitiveType.Cube,

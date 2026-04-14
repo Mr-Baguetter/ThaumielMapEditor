@@ -48,6 +48,8 @@ namespace ThaumielMapEditor.API.Data
         /// </summary>
         public Quaternion Rotation { get; set; }
 
+        private static readonly List<Collider> SharedColliderBuffer = [];
+
         /// <summary>
         /// Determines the specific collider type for the given Unity collider instance.
         /// </summary>
@@ -73,8 +75,11 @@ namespace ThaumielMapEditor.API.Data
         /// <exception cref="NotSupportedException">Throws when a unsupported collider is parsed by <see cref="GetTypeFromCollider"/></exception>
         public static IEnumerable<ColliderData> ParseObjectColliders(GameObject gameObject)
         {
-            List<ColliderData> colliders = [];
-            foreach (Collider collider in gameObject.GetComponentsInChildren<Collider>(includeInactive: true))
+            SharedColliderBuffer.Clear();
+            gameObject.GetComponentsInChildren(true, SharedColliderBuffer);
+            List<ColliderData> colliders = new(SharedColliderBuffer.Count);
+            
+            foreach (Collider collider in SharedColliderBuffer)
             {
                 ColliderType type;
                 try
