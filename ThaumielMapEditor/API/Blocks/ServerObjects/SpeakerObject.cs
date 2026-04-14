@@ -140,12 +140,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         public void Unpause()
             => Player.IsPaused = false;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public bool IsLocalFile(string path = null!)
+        internal bool IsLocalFile(string path = null!)
         {
             if (string.IsNullOrEmpty(path))
             {
