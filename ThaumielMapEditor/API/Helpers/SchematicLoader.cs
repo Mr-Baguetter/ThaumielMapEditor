@@ -71,7 +71,7 @@ namespace ThaumielMapEditor.API.Helpers
         /// This list contains all the schematics loaded by <see cref="LoadSchematics"/>
         /// Use <see cref="SpawnedSchematics"/> to get the spawned schematics.
         /// </summary>
-        public static List<SerializableSchematic> LoadedSchematics = [];
+        public static Dictionary<string, SerializableSchematic> LoadedSchematics = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// This list contains all the maps loaded by <see cref="LoadMaps"/>
@@ -160,7 +160,7 @@ namespace ThaumielMapEditor.API.Helpers
                 {
                     SerializableSchematic schematic = Deserializer.Deserialize<SerializableSchematic>(File.ReadAllText(filename));
                     schematic.FileName = Path.GetFileNameWithoutExtension(filename);
-                    LoadedSchematics.Add(schematic);
+                    LoadedSchematics[schematic.FileName] = schematic;
                     LogManager.Debug($"Loaded schematic {Path.GetFileNameWithoutExtension(filename)}");
                 }
                 catch (YamlException yamlex)
@@ -245,7 +245,7 @@ namespace ThaumielMapEditor.API.Helpers
         public static uint GetId()
         {
             uint id = 0;
-            while (SchematicsById.Keys.Contains(id))
+            while (SchematicsById.ContainsKey(id))
                 id++;
 
             return id;
@@ -259,6 +259,7 @@ namespace ThaumielMapEditor.API.Helpers
             Dictionary<int, List<SerializableObject>> serverObjectsByParent = [];
             Dictionary<int, SerializableArea> areasById = [];
             Dictionary<int, List<SerializableArea>> areasByParent = [];
+            LODZone[] lodZones = schematicData.Primitive.GameObject.GetComponents<LODZone>();
 
             void CacheObject(SerializableObject obj, Dictionary<int, List<SerializableObject>> parentDict)
             {
@@ -313,7 +314,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                 if (objectsById.TryGetValue(currentId, out var obj))
                 {
-                    currentNetId = SpawnSerializableObject(obj, schematicData, parentNetId);
+                    currentNetId = SpawnSerializableObject(obj, schematicData, parentNetId, lodZones);
                     objectsProcessed++;
                 }
 
@@ -385,9 +386,11 @@ namespace ThaumielMapEditor.API.Helpers
             foreach (SerializedMapSchematic ms in map.Schematics)
             {
                 Vector3 offset = data.Room.WorldPosition(ms.Position);
-                SerializableSchematic? schematic = LoadedSchematics.FirstOrDefault(s => string.Equals(s.FileName, ms.SchematicName, StringComparison.CurrentCultureIgnoreCase));
-                if (schematic == null)
+                if (!LoadedSchematics.TryGetValue(ms.SchematicName, out SerializableSchematic schematic))
+                {
+                    LogManager.Warn($"Schematic '{ms.SchematicName}' not found.");
                     continue;
+                }
 
                 SchematicData schematicData = SpawnSchematic(schematic, offset);
                 data.Schematics.Add(new() { LocalPosition = offset, SchematicName = schematicData.FileName, SchematicId = schematicData.Id });
@@ -432,7 +435,7 @@ namespace ThaumielMapEditor.API.Helpers
                 {
                     SerializableSchematic schematic = Deserializer.Deserialize<SerializableSchematic>(File.ReadAllText(filename));
                     schematic.FileName = Path.GetFileNameWithoutExtension(filename);
-                    LoadedSchematics.Add(schematic);
+                    LoadedSchematics[schematic.FileName] = schematic;
                     LogManager.Debug($"Loaded schematic '{schematic.FileName}' from custom directory '{directory}'.");
                 }
                 catch (YamlException yamlex)
@@ -666,7 +669,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.FileName == schematicname), schematicData, position, default, default));
+            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, default, default));
             return schematicData;
         }
 
@@ -685,7 +688,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.FileName == schematicname), schematicData, position, rotation, default));
+            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, rotation, default));
             return schematicData;
         }
 
@@ -705,7 +708,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.FileName == schematicname), schematicData, position, rotation, scale));
+            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, rotation, scale));
             return schematicData;
         }
 
@@ -827,21 +830,20 @@ namespace ThaumielMapEditor.API.Helpers
         private static void ApplyAnimators(SerializableSchematic schematic, SchematicData schematicData)
         {
             IEnumerable<SerializableObject> animatables = schematic.Objects.Concat(schematic.ServerSideObjects).Where(o => !string.IsNullOrEmpty(o.AnimatorName));
+            Dictionary<int, ServerObject> serverObjectsById = schematicData.SpawnedServerObjects.ToDictionary(o => o.ObjectId);
 
             foreach (SerializableObject serializable in animatables)
             {
                 if (!TryLoadAnimatorController(schematic.FileName, serializable.AnimatorName, out RuntimeAnimatorController controller))
                     continue;
 
-                ServerObject? match = schematicData.SpawnedServerObjects.FirstOrDefault(o => o.ObjectId == serializable.ObjectId);
-                if (match?.Object == null)
+                if (!serverObjectsById.TryGetValue(serializable.ObjectId, out ServerObject match) || match.Object == null)
                 {
                     LogManager.Warn($"Could not find spawned object for animator '{serializable.AnimatorName}' in '{schematic.FileName}'.");
                     continue;
                 }
 
                 Animator animator = match.Object.GetComponent<Animator>() ?? match.Object.AddComponent<Animator>();
-
                 animator.runtimeAnimatorController = controller;
                 animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
                 LogManager.Debug($"Applied animator '{controller.name}' to '{match.Object.name}' in '{schematic.FileName}'.");
@@ -866,10 +868,11 @@ namespace ThaumielMapEditor.API.Helpers
 
         private static void ApplyTools(SerializableSchematic schematic, SchematicData schematicData)
         {
+            Dictionary<int, ServerObject> serverObjectsById = schematicData.SpawnedServerObjects.ToDictionary(o => o.ObjectId);
+
             foreach (SerializableObject serializable in schematic.Objects.Concat(schematic.ServerSideObjects).Where(o => o.Tools.Count > 0))
             {
-                ServerObject? match = schematicData.SpawnedServerObjects.FirstOrDefault(o => o.ObjectId == serializable.ObjectId);
-                if (match?.Object == null)
+                if (!serverObjectsById.TryGetValue(serializable.ObjectId, out ServerObject match) || match.Object == null)
                 {
                     LogManager.Warn($"Could not find spawned object for tools on '{serializable.Name}' in '{schematic.FileName}'.");
                     continue;
@@ -877,7 +880,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                 foreach (SerializableTool tool in serializable.Tools)
                 {
-                    if (!Enum.TryParse<ToolType>(tool.ToolName, true, out var type))
+                    if (!Enum.TryParse<ToolType>(tool.ToolName, true, out ToolType type))
                     {
                         LogManager.Warn($"Unknown tool type '{tool.ToolName}' on object '{serializable.Name}'.");
                         continue;
@@ -896,19 +899,20 @@ namespace ThaumielMapEditor.API.Helpers
                             physics.Init(match, schematicData, tool.Properties);
                             match.Tools.AddItem(physics);
                             break;
+
+                        case ToolType.Doorlink:
+                            DoorLink door = match.Object.AddComponent<DoorLink>();
+                            door.Init(match, schematicData, tool.Properties);
+                            match.Tools.AddItem(door);
+                            break;
                     }
                 }
             }
         }
 
-        private static uint SpawnSerializableObject(SerializableObject serializable, SchematicData schematicData, uint parentNetId, bool serverside = false)
+        private static uint SpawnSerializableObject(SerializableObject serializable, SchematicData schematicData, uint parentNetId, LODZone[] lodZones, bool serverside = false)
         {
             NetworkServer.spawned.TryGetValue(parentNetId, out var identity);
-            List<LODZone> zones = [];
-            foreach (LODZone zone in schematicData.Primitive.GameObject.GetComponents<LODZone>())
-            {
-                zones.Add(zone);
-            }
 
             switch (serializable.ObjectType)
             {
@@ -950,7 +954,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                         primitive.DeserializeValues(serializable);
                         schematicData.SpawnedClientObjects.Add(primitive);
-                        if (zones.IsEmpty())
+                        if (lodZones.IsEmpty())
                         {
                             foreach (Player player in Player.ReadyList)
                             {
@@ -959,7 +963,7 @@ namespace ThaumielMapEditor.API.Helpers
                         }
                         else
                         {
-                            LODZone[] varzone = zones.Where(z => z.PrimitivestoUnload.Contains(primitive.PrimitiveType)).ToArray();
+                            LODZone[] varzone = lodZones.Where(z => z.PrimitivestoUnload.Contains(primitive.PrimitiveType)).ToArray();
                             foreach (LODZone zone in varzone)
                             {
                                 foreach (Player player in Player.ReadyList)

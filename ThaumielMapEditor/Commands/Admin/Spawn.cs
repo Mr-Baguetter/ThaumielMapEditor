@@ -5,6 +5,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,10 +40,9 @@ namespace ThaumielMapEditor.Commands.Admin
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
-            SerializableSchematic? schematic = SchematicLoader.LoadedSchematics.FirstOrDefault(s => s.FileName.ToLower() == arguments[0].ToLower());
-            if (schematic is null)
+            if (!SchematicLoader.LoadedSchematics.TryGetValue(arguments[0], out SerializableSchematic schematic))
             {
-                response = $"Failed to find schematic with name {arguments[0]}";
+                response = $"Schematic '{arguments[0]}' not found.";
                 return false;
             }
 
@@ -76,7 +76,7 @@ namespace ThaumielMapEditor.Commands.Admin
                     return false;
                 }
 
-                if (!Physics.Raycast(player.Position + player.Camera.forward, player.Camera.forward, out var hit, 50, RayMask))
+                if (!Physics.Raycast(player.Camera.transform.position + player.Camera.forward, player.Camera.forward, out var hit, 50, RayMask))
                 {
                     response = "Failed to get placement position from raycast.";
                     return false;
