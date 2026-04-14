@@ -11,11 +11,10 @@ using System;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Helpers;
-using ThaumielMapEditor.API.Interfaces;
 
 namespace ThaumielMapEditor.API.Blocks.ClientSide
 {
-    public class CapybaraObject : ClientSideObjectBase, ICullableObject
+    public class CapybaraObject : ClientSideObjectBase
     {
         public string Name { get; set; } = string.Empty;
         public static event Action<Vector3, CapybaraObject>? PositionUpdated;

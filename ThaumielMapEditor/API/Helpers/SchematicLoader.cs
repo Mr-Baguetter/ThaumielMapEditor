@@ -721,6 +721,7 @@ namespace ThaumielMapEditor.API.Helpers
             baseprimitive.Type = PrimitiveType.Cube;
             baseprimitive.Flags = PrimitiveFlags.None;
             baseprimitive.Position = position;
+            schematicData.Room = Room.GetRoomAtPosition(schematicData.Position);
             if (rotation != default)
             {
                 baseprimitive.Rotation = rotation;

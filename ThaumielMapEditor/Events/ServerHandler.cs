@@ -5,9 +5,14 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System.Linq;
+using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Events.Arguments.WarheadEvents;
 using LabApi.Events.Handlers;
 using MEC;
+using ThaumielMapEditor.API.Blocks.ClientSide;
+using ThaumielMapEditor.API.Blocks.ServerObjects;
+using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Helpers.Networking;
 
@@ -22,6 +27,7 @@ namespace ThaumielMapEditor.Events
             ServerEvents.LczDecontaminationStarted += OnDecom;
             WarheadEvents.Started += OnWarheadStarting;
             WarheadEvents.Detonated += OnWarheadDetonated;
+            ServerEvents.RoomLightChanged += OnRoomLightChanged;
         }
 
         public static void Unregister()
@@ -31,6 +37,43 @@ namespace ThaumielMapEditor.Events
             ServerEvents.LczDecontaminationStarted -= OnDecom; 
             WarheadEvents.Started -= OnWarheadStarting;
             WarheadEvents.Detonated -= OnWarheadDetonated;
+            ServerEvents.RoomLightChanged -= OnRoomLightChanged;
+        }
+
+        // TODO Test.
+        private static void OnRoomLightChanged(RoomLightChangedEventArgs ev)
+        {
+            foreach (SchematicData schematic in SchematicLoader.SpawnedSchematics.Where(s => s.Room != null && s.Room == ev.Room))
+            {
+                if (schematic.Lights.IsEmpty() && schematic.ServerLights.IsEmpty())
+                    continue;
+
+                foreach (LightObjectServer serverLight in schematic.ServerLights)
+                {
+                    float Intensity = 0;
+                    Intensity = serverLight.Intensity;
+
+                    if (!ev.NewState)
+                    {
+                        serverLight.Intensity = 0;
+                    }
+                    else
+                        serverLight.Intensity = Intensity;
+                }
+
+                foreach (LightObject light in schematic.Lights)
+                {
+                    float Intensity = 0;
+                    Intensity = light.Intensity;
+
+                    if (!ev.NewState)
+                    {
+                        light.Intensity = 0;
+                    }
+                    else
+                        light.Intensity = Intensity;
+                }
+            }
         }
 
         private static void OnWaitingForPlayers()

@@ -14,12 +14,11 @@ using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Extensions;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Serialization;
-using ThaumielMapEditor.API.Interfaces;
 using UnityEngine;
 
 namespace ThaumielMapEditor.API.Blocks.ClientSide
 {
-    public class PrimitiveObject : ClientSideObjectBase, ICullableObject
+    public class PrimitiveObject : ClientSideObjectBase
     {
         public string Name { get; set; } = string.Empty;
         public static event Action<Vector3, PrimitiveObject>? PositionUpdated;

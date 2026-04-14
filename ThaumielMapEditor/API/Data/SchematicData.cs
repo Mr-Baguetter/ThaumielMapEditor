@@ -74,6 +74,11 @@ namespace ThaumielMapEditor.API.Data
             }
         }
 
+        /// <summary>
+        /// Gets the room this <see cref="SchematicData"/> instance was spawned in.
+        /// </summary>
+        public Room? Room { get; internal set; }
+
         public AnimationController AnimationController => AnimationController.Get(this);
 
         /// <summary>
