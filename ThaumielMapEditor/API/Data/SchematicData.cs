@@ -16,6 +16,8 @@ using System;
 using ThaumielMapEditor.API.Blocks.Areas;
 using ThaumielMapEditor.API.Animation;
 using ThaumielMapEditor.API.Components.Tools;
+using ThaumielMapEditor.API.Helpers;
+using ThaumielMapEditor.API.Components;
 
 namespace ThaumielMapEditor.API.Data
 {
@@ -222,6 +224,11 @@ namespace ThaumielMapEditor.API.Data
         /// </summary>
         public void Destroy()
         {
+            foreach (KeyValuePair<LODZone, SchematicData> kvp in SchematicLoader.SchematicLODZones.Where(s => s.Value == this).ToArray())
+            {
+                SchematicLoader.SchematicLODZones.Remove(kvp.Key);
+            }
+
             foreach (ClientSideObjectBase clientobj in SpawnedClientObjects.ToArray())
             {
                 clientobj.DestroyForAllPlayers();

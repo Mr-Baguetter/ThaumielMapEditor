@@ -11,6 +11,7 @@ using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using MEC;
 using ThaumielMapEditor.API.Blocks.ClientSide;
+using ThaumielMapEditor.API.Components;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Helpers;
 
@@ -27,12 +28,14 @@ namespace ThaumielMapEditor.Events
         public static void Register()
         {
             PlayerEvents.Joined += OnPlayerJoined;
+            PlayerEvents.ChangedSpectator += OnPlayerChangedSpectator;
             ReferenceHub.OnBeforePlayerDestroyed += OnPlayerLeft;
         }
 
         public static void Unregister()
         {
             PlayerEvents.Joined -= OnPlayerJoined;
+            PlayerEvents.ChangedSpectator -= OnPlayerChangedSpectator;
             ReferenceHub.OnBeforePlayerDestroyed -= OnPlayerLeft;
         }
 
@@ -46,6 +49,13 @@ namespace ThaumielMapEditor.Events
                 Color = "pumpkin"
             },
 
+            // Example developer badge
+            ["EXAMPLE99@steam"] = new CreditTag()
+            {
+                Name = "TME Developer",
+                Color = "purple"
+            },
+
             // Example contributor badge
             ["EXAMPLE99@steam"] = new CreditTag()
             {
@@ -53,6 +63,58 @@ namespace ThaumielMapEditor.Events
                 Color = "red"
             }
         };
+        
+        private static void OnPlayerChangedSpectator(PlayerChangedSpectatorEventArgs ev)
+        {
+            if (ev.OldTarget == ev.NewTarget)
+                return;
+
+            UpdateSpectatorLOD(ev.OldTarget, ev.Player, isNowVisible: false);
+            UpdateSpectatorLOD(ev.NewTarget, ev.Player, isNowVisible: true);
+
+            if (ev.OldTarget != null)
+            {
+                foreach (CullingObject cullingZone in CullingObject.AllInstances)
+                {
+                    if (cullingZone.PlayersInside.Contains(ev.OldTarget))
+                        cullingZone.ToggleVisibility(ev.Player, false);
+                }
+            }
+
+            if (ev.NewTarget != null)
+            {
+                foreach (CullingObject cullingZone in CullingObject.AllInstances)
+                {
+                    if (cullingZone.PlayersInside.Contains(ev.NewTarget))
+                        cullingZone.ToggleVisibility(ev.Player, true);
+                }
+            }
+        }
+
+        internal static void UpdateSpectatorLOD(Player target, Player spectator, bool isNowVisible)
+        {
+            if (target == null || !LODHelper.PlayersInLODZones.TryGetValue(target, out var zones))
+                return;
+
+            foreach (LODZone zone in zones)
+            {
+                if (!SchematicLoader.SchematicLODZones.TryGetValue(zone, out var schematic))
+                    continue;
+
+                foreach (PrimitiveObject primitive in schematic.Primitives)
+                {
+                    if (zone.PrimitivestoUnload.Contains(primitive.PrimitiveType))
+                    {
+                        if (isNowVisible)
+                        {
+                            primitive.ShowForPlayer(spectator);
+                        }
+                        else
+                            primitive.DespawnForPlayer(spectator);
+                    }
+                }
+            }
+        }
 
         private static void OnPlayerLeft(ReferenceHub hub)
         {

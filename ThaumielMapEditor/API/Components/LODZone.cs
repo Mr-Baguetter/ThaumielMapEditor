@@ -6,9 +6,11 @@
 // -----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Linq;
 using LabApi.Features.Wrappers;
 using ThaumielMapEditor.API.Blocks.ClientSide;
 using ThaumielMapEditor.API.Data;
+using ThaumielMapEditor.API.Helpers;
 using UnityEngine;
 
 namespace ThaumielMapEditor.API.Components
@@ -59,7 +61,12 @@ namespace ThaumielMapEditor.API.Components
                 if (!PrimitivestoUnload.Contains(prim.PrimitiveType))
                     continue;
 
+                UpdateDictionary(player);
                 prim.SpawnForPlayer(player);
+                foreach (Player spectator in player.CurrentSpectators)
+                {
+                    prim.SpawnForPlayer(spectator);
+                }
             }
         }
 
@@ -70,8 +77,39 @@ namespace ThaumielMapEditor.API.Components
                 if (!PrimitivestoUnload.Contains(prim.PrimitiveType))
                     continue;
 
-                prim.DespawnForPlayer(player);
+                RemoveFromDictionary(player);
+                prim.DestroyForPlayer(player);
+                foreach (Player spectator in player.CurrentSpectators)
+                {
+                    prim.DestroyForPlayer(spectator);
+                }
             }
+        }
+
+        private void RemoveFromDictionary(Player player)
+        {
+            if (LODHelper.PlayersInLODZones.TryGetValue(player, out var zones))
+            {
+                zones.Remove(this);
+
+                if (zones.Count == 0)
+                    LODHelper.PlayersInLODZones.Remove(player);
+            }
+            else
+            {
+                LogManager.Warn($"Failed to get player {player.DisplayName} - ({player.PlayerId}) from PlayersInLODZones dictionary.");
+            }
+        }
+
+        private void UpdateDictionary(Player player)
+        {
+            if (!LODHelper.PlayersInLODZones.TryGetValue(player, out var zones))
+            {
+                zones = [];
+                LODHelper.PlayersInLODZones[player] = zones;
+            }
+
+            zones.Add(this);
         }
     }
 }

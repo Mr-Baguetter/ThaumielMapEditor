@@ -68,6 +68,8 @@ namespace ThaumielMapEditor.API.Serialization
 
         public List<SerializableTool> Tools { get; set; } = [];
 
+        public SerializableCullingSettings CullingSettings { get; set; }
+
         public string AnimatorName { get; set; } = string.Empty;
     }
 }

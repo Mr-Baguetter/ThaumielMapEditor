@@ -85,6 +85,11 @@ namespace ThaumielMapEditor.API.Helpers
         public static Dictionary<int, Transform> ServerSideTransforms = [];
 
         /// <summary>
+        /// dodad2
+        /// </summary>
+        public static Dictionary<LODZone, SchematicData> SchematicLODZones = [];
+
+        /// <summary>
         /// The YAML deserializer used to parse schematic and map files
         /// </summary>
         public static IDeserializer Deserializer { get; } = new DeserializerBuilder()
@@ -923,6 +928,7 @@ namespace ThaumielMapEditor.API.Helpers
                             serverprim.Object?.transform.SetParent(identity.transform, false);
 
                         serverprim.Name = serializable.Name;
+                        SetupCulling(serializable, serverprim, schematicData);
                         return serverprim.NetId;
                     }
                     else
@@ -964,6 +970,7 @@ namespace ThaumielMapEditor.API.Helpers
                         }
 
                         ColliderHelper.CreateCollisionMesh(primitive);
+                        SetupCulling(serializable, primitive, schematicData);
                         return primitive.NetId;
                     }
 
@@ -983,6 +990,7 @@ namespace ThaumielMapEditor.API.Helpers
                             serverprim.Object?.transform.SetParent(identity.transform, false);
 
                         serverprim.Name = serializable.Name;
+                        SetupCulling(serializable, serverprim, schematicData);
                         return serverprim.NetId;
                     }
                     else
@@ -1010,6 +1018,7 @@ namespace ThaumielMapEditor.API.Helpers
                             gameObject.SpawnForPlayer(player);
                         }
 
+                        SetupCulling(serializable, gameObject, schematicData);
                         return gameObject.NetId;
                     }
 
@@ -1030,6 +1039,7 @@ namespace ThaumielMapEditor.API.Helpers
                             servercapy.Object?.transform.SetParent(identity.transform, false);
 
                         servercapy.Name = serializable.Name;
+                        SetupCulling(serializable, servercapy, schematicData);
                         return servercapy.NetId;
                     }
                     else
@@ -1060,6 +1070,7 @@ namespace ThaumielMapEditor.API.Helpers
                         if (capybara.CollisionsEnabled)
                             ColliderHelper.CreateClientObjectColliders(capybara, schematicData);
 
+                        SetupCulling(serializable, capybara, schematicData);
                         return capybara.NetId;
                     }
 
@@ -1079,6 +1090,7 @@ namespace ThaumielMapEditor.API.Helpers
                             serverlight.Object?.transform.SetParent(identity.transform, false);
 
                         serverlight.Name = serializable.Name;
+                        SetupCulling(serializable, serverlight, schematicData);
                         return serverlight.NetId;
                     }
                     else
@@ -1104,6 +1116,7 @@ namespace ThaumielMapEditor.API.Helpers
                             light.SpawnForPlayer(player);
                         }
 
+                        SetupCulling(serializable, light, schematicData);
                         return light.NetId;
                     }
 
@@ -1119,6 +1132,7 @@ namespace ThaumielMapEditor.API.Helpers
                     clutter.Type = clutter.GetValue<ClutterType>(serializable, "ClutterType");
                     clutter.SpawnObject(schematicData, serializable);
                     clutter.Name = serializable.Name;
+                    SetupCulling(serializable, clutter, schematicData);
                     return clutter.NetId;
 
                 case ObjectType.Door:
@@ -1133,6 +1147,7 @@ namespace ThaumielMapEditor.API.Helpers
                     door.ParseValues(serializable);
                     door.SpawnObject(schematicData, serializable);
                     door.Name = serializable.Name;
+                    SetupCulling(serializable, door, schematicData);
                     return door.NetId;
 
                 case ObjectType.TextToy:
@@ -1146,6 +1161,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     textToy.SpawnObject(schematicData, serializable);
                     textToy.Name = serializable.Name;
+                    SetupCulling(serializable, textToy, schematicData);
                     return textToy.NetId;
 
                 case ObjectType.Workstation:
@@ -1159,6 +1175,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     workstation.SpawnObject(schematicData, serializable);
                     workstation.Name = serializable.Name;
+                    SetupCulling(serializable, workstation, schematicData);
                     return workstation.NetId;
 
                 case ObjectType.Camera:
@@ -1172,6 +1189,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     camera.SpawnObject(schematicData, serializable);
                     camera.Name = serializable.Name;
+                    SetupCulling(serializable, camera, schematicData);
                     return camera.NetId;
 
                 case ObjectType.Interactable:
@@ -1185,6 +1203,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     interaction.SpawnObject(schematicData, serializable);
                     interaction.Name = serializable.Name;
+                    SetupCulling(serializable, interaction, schematicData);
                     return interaction.NetId;
 
                 case ObjectType.Waypoint:
@@ -1198,6 +1217,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     waypoint.SpawnObject(schematicData, serializable);
                     waypoint.Name = serializable.Name;
+                    SetupCulling(serializable, waypoint, schematicData);
                     return waypoint.NetId;
 
                 case ObjectType.Locker:
@@ -1211,6 +1231,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     locker.SpawnObject(schematicData, serializable);
                     locker.Name = serializable.Name;
+                    SetupCulling(serializable, locker, schematicData);
                     return locker.NetId;
 
                 case ObjectType.Pickup:
@@ -1237,6 +1258,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     target.SpawnObject(schematicData, serializable);
                     target.Name = serializable.Name;
+                    SetupCulling(serializable, target, schematicData);
                     return target.NetId;
 
                 case ObjectType.Teleporter:
@@ -1268,6 +1290,42 @@ namespace ThaumielMapEditor.API.Helpers
                 default:
                     LogManager.Warn($"Unhandled ObjectType '{serializable.ObjectType}' on object '{serializable.Name}', skipping.");
                     return 0;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="serializable"></param>
+        /// <param name="obj"></param>
+        /// <param name="schematic"></param>
+        public static void SetupCulling(SerializableObject serializable, ServerObject obj, SchematicData schematic)
+        {
+            if (serializable.CullingSettings.Bounds != Vector3.zero)
+            {
+                GameObject gameObject = new($"{obj.Name} - Culling Object");
+                gameObject.transform.SetParent(obj.Object.transform);
+                gameObject.AddComponent<CullingObject>().Init(obj, serializable.CullingSettings.Bounds);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="serializable"></param>
+        /// <param name="obj"></param>
+        /// <param name="schematic"></param>
+        public static void SetupCulling(SerializableObject serializable, ClientSideObjectBase obj, SchematicData schematic)
+        {
+            if (serializable.CullingSettings.Bounds != Vector3.zero)
+            {
+                GameObject gameObject = new($"{serializable.Name} - Culling Object");
+                Transform? targetParent = ColliderHelper.ResolveServerParentTransform(serializable.ParentId, schematic);
+                gameObject.transform.SetParent(targetParent, false);
+                gameObject.transform.localPosition = serializable.Position;
+                gameObject.transform.localRotation = serializable.Rotation;
+                gameObject.transform.localScale = new Vector3(Math.Abs(serializable.Scale.x), Math.Abs(serializable.Scale.y), Math.Abs(serializable.Scale.z));
+                gameObject.AddComponent<CullingObject>().Init(obj, serializable.CullingSettings.Bounds);
             }
         }
 

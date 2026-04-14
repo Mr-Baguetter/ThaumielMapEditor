@@ -16,6 +16,17 @@ namespace ThaumielMapEditor.API.Helpers
 {
     public class LODHelper
     {
+        /// <summary>
+        /// Gets or sets the <see cref="Player"/>s that are in a <see cref="LODZone"/>
+        /// </summary>
+        public static Dictionary<Player, HashSet<LODZone>> PlayersInLODZones { get; set; } = [];
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="schematic"></param>
+        /// <param name="serializable"></param>
+        /// <returns></returns>
         public static List<LODData>? GenerateLODZones(SchematicData schematic, SerializableSchematic serializable)
         {
             if (Main.Instance.Config!.SchematiclodBlacklist.Contains(schematic.FileName))
@@ -47,6 +58,7 @@ namespace ThaumielMapEditor.API.Helpers
                 lodZone.Init(schematic, data.Primitives, data.Index);
 
                 lodData.Add(data);
+                SchematicLoader.SchematicLODZones.Add(lodZone, schematic);
             }
 
             schematic.LODZones = lodData;
@@ -79,10 +91,10 @@ namespace ThaumielMapEditor.API.Helpers
             {
                 if (player.IsHost)
                     continue;
-                
+
                 if (lod == null)
                     return [];
-                
+
                 if (lod.Collider.bounds.Contains(player.Position))
                     players.Add(player);
             }
@@ -103,7 +115,7 @@ namespace ThaumielMapEditor.API.Helpers
             {
                 if (player.IsHost)
                     continue;
-                                
+
                 if (zone.Collider.bounds.Contains(player.Position))
                     players.Add(player);
             }
