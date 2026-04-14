@@ -31,6 +31,7 @@ using ThaumielMapEditor.API.Extensions;
 using ThaumielMapEditor.API.Components.Tools;
 using ThaumielMapEditor.API.Blocks;
 using HarmonyLib;
+using ThaumielMapEditor.API.Components;
 
 namespace ThaumielMapEditor.API.Helpers
 {
@@ -741,9 +742,9 @@ namespace ThaumielMapEditor.API.Helpers
             schematicData.Position = position;
             schematicData.RootObjectId = schematic.RootObjectId;
 
+            LODHelper.GenerateLODZones(schematicData, schematic);
             GetGameObjectTransforms(schematic, schematicData);
             yield return Timing.WaitUntilDone(Timing.RunCoroutine(SpawnObjectsBatched(schematic, schematicData, schematicData.Primitive.Base.netId)));
-            LODHelper.GenerateLODZones(schematicData, schematic);
 
             ApplyAnimators(schematic, schematicData);
             ApplyTools(schematic, schematicData);
@@ -897,6 +898,11 @@ namespace ThaumielMapEditor.API.Helpers
         private static uint SpawnSerializableObject(SerializableObject serializable, SchematicData schematicData, uint parentNetId, bool serverside = false)
         {
             NetworkServer.spawned.TryGetValue(parentNetId, out var identity);
+            List<LODZone> zones = [];
+            foreach (LODZone zone in schematicData.Primitive.GameObject.GetComponents<LODZone>())
+            {
+                zones.Add(zone);
+            }
 
             switch (serializable.ObjectType)
             {
@@ -937,10 +943,24 @@ namespace ThaumielMapEditor.API.Helpers
 
                         primitive.DeserializeValues(serializable);
                         schematicData.SpawnedClientObjects.Add(primitive);
-
-                        foreach (Player player in Player.ReadyList)
+                        if (zones.IsEmpty())
                         {
-                            primitive.SpawnForPlayer(player);
+                            foreach (Player player in Player.ReadyList)
+                            {
+                                primitive.SpawnForPlayer(player);
+                            }
+                        }
+                        else
+                        {
+                            LODZone[] varzone = zones.Where(z => z.PrimitivestoUnload.Contains(primitive.PrimitiveType)).ToArray();
+                            foreach (LODZone zone in varzone)
+                            {
+                                foreach (Player player in Player.ReadyList)
+                                {
+                                    if (zone.Collider.bounds.Contains(player.Position))
+                                        primitive.SpawnForPlayer(player);
+                                }
+                            }
                         }
 
                         ColliderHelper.CreateCollisionMesh(primitive);
@@ -985,7 +1005,6 @@ namespace ThaumielMapEditor.API.Helpers
                         };
 
                         schematicData.SpawnedClientObjects.Add(gameObject);
-
                         foreach (Player player in Player.ReadyList)
                         {
                             gameObject.SpawnForPlayer(player);

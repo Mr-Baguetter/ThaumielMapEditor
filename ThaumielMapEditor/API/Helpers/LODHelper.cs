@@ -66,11 +66,8 @@ namespace ThaumielMapEditor.API.Helpers
 
             List<Player> players = [];
             LODZone lod = null!;
-            foreach (BoxCollider collider in schematic.Primitive.GameObject.GetComponents<BoxCollider>())
+            foreach (LODZone lodzone in schematic.Primitive.GameObject.GetComponents<LODZone>())
             {
-                if (!collider.TryGetComponent<LODZone>(out var lodzone))
-                    continue;
-
                 if (lodzone.Index != index)
                     continue;
 
@@ -91,6 +88,27 @@ namespace ThaumielMapEditor.API.Helpers
             }
 
             return players;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="Player"/>s in the specified <see cref="LODZone"/>
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <returns></returns>
+        public static Player[] GetPlayersInZone(LODZone zone)
+        {
+            List<Player> players = [];
+
+            foreach (Player player in Player.ReadyList)
+            {
+                if (player.IsHost)
+                    continue;
+                                
+                if (zone.Collider.bounds.Contains(player.Position))
+                    players.Add(player);
+            }
+
+            return players.ToArray();
         }
     }
 }
