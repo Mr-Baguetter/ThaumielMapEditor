@@ -297,34 +297,79 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             _pendingWrites.Clear();
         }
 
-        public void SpawnForPlayers(NetworkIdentity identity)
+        /// <summary>
+        /// Spawns a <see cref="GameObject"/> to the specified <see cref="Player"/>.
+        /// </summary>
+        /// <param name="obj">The <see cref="GameObject"/> to be spawned.</param>
+        /// <param name="player">The <see cref="Player"/> to be spawned for.</param>
+        /// <returns><see langword="true"/> if it is successfully spawned otherwise returns <see langword="false"/></returns>
+        public static bool SpawnForPlayer(GameObject obj, Player player)
         {
-            if (identity == null)
+            if (obj == null)
             {
-                LogManager.Warn("Cannot spawn: Prefab NetworkIdentity is null.");
+                LogManager.Error("object is null.");
+                return false;
+            }
+
+            if (!obj.TryGetComponent<NetworkIdentity>(out NetworkIdentity identity))
+            {
+                LogManager.Error($"{obj.name} has no NetworkIdentity component.");
+                return false;
+            }
+
+            if (NetworkServer.spawned.ContainsKey(identity.netId))
+            {
+                LogManager.Warn($"netId {identity.netId} is already in the spawned dictionary.");
+                return false;
+            }
+            
+            identity.isLocalPlayer = false;
+            identity.isClient = true;
+            identity.isServer = false;
+            identity.netId = NetworkIdentity.GetNextNetworkId();
+            NetworkServer.spawned[identity.netId] = identity;
+            LogManager.Info($"SpawnForConnection: Registered {obj.name} with netId={identity.netId}.");
+            identity.OnStartServer();
+            SendCustomSpawnMessage(identity, player);
+
+            return true;
+        }
+
+        private static void SendCustomSpawnMessage(NetworkIdentity identity, Player player)
+        {
+            if (!player.Connection.isReady)
+            {
+                LogManager.Warn($"Player is not ready. Message not sent.");
                 return;
             }
 
-            foreach (Player player in Player.ReadyList)
+            using NetworkWriterPooled ownerWriter = NetworkWriterPool.Get();
+            using NetworkWriterPooled observersWriter = NetworkWriterPool.Get();
+            ArraySegment<byte> payload = BuildSpawnPayload(identity, ownerWriter, observersWriter);
+            SpawnMessage message = new()
             {
-                if (player.IsHost)
-                    continue;
+                netId = identity.netId,
+                isLocalPlayer = false,
+                isOwner = false,
+                sceneId = 0,
+                assetId = identity.assetId,
+                position = identity.transform.localPosition,
+                rotation = identity.transform.localRotation,
+                scale = identity.transform.localScale,
+                payload = payload
+            };
 
-                SpawnMessage msg = new()
-                {
-                    netId = NetworkIdentity.GetNextNetworkId(),
-                    isLocalPlayer = false,
-                    isOwner = false,
-                    sceneId = 0,
-                    assetId = identity.assetId,
-                    position = Position,
-                    rotation = Rotation,
-                    scale = Scale,
-                    payload = default
-                };
+            player.Connection.Send(message);
+            LogManager.Debug($"Sent SpawnMessage for {identity.name} (netId={identity.netId}) to player {player.DisplayName}.");
+        }
 
-                player.Connection.Send(msg);
-            }
+        private static ArraySegment<byte> BuildSpawnPayload(NetworkIdentity identity, NetworkWriterPooled ownerWriter, NetworkWriterPooled observersWriter)
+        {
+            if (identity.NetworkBehaviours.Length == 0)
+                return default;
+
+            identity.SerializeServer(initialState: true, ownerWriter, observersWriter);
+            return observersWriter.ToArraySegment();
         }
     }
 }

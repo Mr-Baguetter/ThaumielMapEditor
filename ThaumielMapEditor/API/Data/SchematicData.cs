@@ -13,7 +13,6 @@ using ThaumielMapEditor.API.Blocks.ServerObjects;
 using ThaumielMapEditor.API.Blocks.ClientSide;
 using LabPrimitive = LabApi.Features.Wrappers.PrimitiveObjectToy;
 using System;
-using ThaumielMapEditor.API.Blocks.Areas;
 using ThaumielMapEditor.API.Animation;
 using ThaumielMapEditor.API.Components.Tools;
 using ThaumielMapEditor.API.Helpers;
@@ -105,11 +104,6 @@ namespace ThaumielMapEditor.API.Data
         /// A list of all spawned <see cref="ServerObject"/> instances.
         /// </summary>
         public List<ServerObject> SpawnedServerObjects = [];
-        
-        /// <summary>
-        /// A list of all spawned <see cref="AreaObject"/> instances.
-        /// </summary>
-        public List<AreaObject> SpawnedAreas = [];
 
 #region ClientObjects
         /// <summary>

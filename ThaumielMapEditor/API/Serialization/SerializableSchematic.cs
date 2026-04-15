@@ -43,12 +43,7 @@ namespace ThaumielMapEditor.API.Serialization
         /// Gets or sets the server-side objects for the <see cref="SerializableSchematic"/> instance.
         /// </summary>
         public List<SerializableObject> ServerSideObjects { get; set; } = [];
-
-        /// <summary>
-        /// Gets or sets the areas for the <see cref="SerializableSchematic"/> instance.
-        /// </summary>
-        public List<SerializableArea> Areas { get; set; } = [];
-
+        
         /// <summary>
         /// Gets or sets the LOD Zones for the <see cref="SerializableSchematic"/> instance.
         /// </summary>

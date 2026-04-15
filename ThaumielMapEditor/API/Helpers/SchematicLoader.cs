@@ -24,7 +24,6 @@ using ThaumielMapEditor.API.Blocks.ClientSide;
 using System.Linq;
 using YamlDotNet.Core;
 using Utils.NonAllocLINQ;
-using ThaumielMapEditor.API.Blocks.Areas;
 using ThaumielMapEditor.API.Blocks.ServerObjects;
 using ThaumielMapEditor.API.Blocks.ServerObjects.Lockers;
 using ThaumielMapEditor.API.Extensions;
@@ -257,8 +256,6 @@ namespace ThaumielMapEditor.API.Helpers
             Dictionary<int, SerializableObject> objectsById = [];
             Dictionary<int, List<SerializableObject>> objectsByParent = [];
             Dictionary<int, List<SerializableObject>> serverObjectsByParent = [];
-            Dictionary<int, SerializableArea> areasById = [];
-            Dictionary<int, List<SerializableArea>> areasByParent = [];
             LODZone[] lodZones = schematicData.Primitive.GameObject.GetComponents<LODZone>();
 
             void CacheObject(SerializableObject obj, Dictionary<int, List<SerializableObject>> parentDict)
@@ -284,19 +281,6 @@ namespace ThaumielMapEditor.API.Helpers
                 CacheObject(obj, serverObjectsByParent);
             }
 
-            foreach (SerializableArea area in schematic.Areas)
-            {
-                areasById[area.ObjectId] = area;
-                
-                if (!areasByParent.TryGetValue(area.ParentId, out var list))
-                {
-                    list = [];
-                    areasByParent[area.ParentId] = list;
-                }
-
-                list.Add(area);
-            }
-
             Queue<(int id, uint parentNetId)> spawnQueue = new();
             HashSet<int> visited = [];
             spawnQueue.Enqueue((schematic.RootObjectId, rootNetId));
@@ -318,12 +302,6 @@ namespace ThaumielMapEditor.API.Helpers
                     objectsProcessed++;
                 }
 
-                if (areasById.TryGetValue(currentId, out var area))
-                {
-                    SpawnSerializableArea(area, schematicData);
-                    objectsProcessed++;
-                }
-
                 if (objectsByParent.TryGetValue(currentId, out var children))
                 {
                     foreach (SerializableObject child in children)
@@ -335,14 +313,6 @@ namespace ThaumielMapEditor.API.Helpers
                 if (serverObjectsByParent.TryGetValue(currentId, out var serverChildren))
                 {
                     foreach (SerializableObject child in serverChildren)
-                    {
-                        spawnQueue.Enqueue((child.ObjectId, currentNetId));
-                    }
-                }
-
-                if (areasByParent.TryGetValue(currentId, out var areaChildren))
-                {
-                    foreach (SerializableArea child in areaChildren) 
                     {
                         spawnQueue.Enqueue((child.ObjectId, currentNetId));
                     }
@@ -850,20 +820,6 @@ namespace ThaumielMapEditor.API.Helpers
             }
 
             AssetBundle.UnloadAllAssetBundles(false);
-        }
-
-        private static void SpawnSerializableArea(SerializableArea area, SchematicData schematic)
-        {
-            switch (area.AreaType)
-            {
-                case AreaType.CullingArea:
-                    CullingArea culling = new();
-                    culling.ParentSchematic = schematic;
-                    culling.ParseValues();
-                    culling.CreateCullingZone();
-                    schematic.SpawnedAreas.Add(culling);
-                    break;
-            }
         }
 
         private static void ApplyTools(SerializableSchematic schematic, SchematicData schematicData)

@@ -5,8 +5,11 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
+
 namespace ThaumielMapEditor.API.Serialization
 {
+    [Serializable]
     public class SerializableCullingSettings
     {
         public Vector3 Bounds { get; set; }
