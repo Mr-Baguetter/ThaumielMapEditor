@@ -17,7 +17,6 @@ using ThaumielMapEditor.API.Animation;
 using ThaumielMapEditor.API.Components.Tools;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Components;
-using UnityEngine;
 using ThaumielMapEditor.Events.EventArgs.Handlers;
 
 namespace ThaumielMapEditor.API.Data

@@ -1,19 +1,17 @@
 // -----------------------------------------------------------------------
-// <copyright file="ToolType.cs" company="Thaumiel Team">
+// <copyright file="Animation.cs" company="Thaumiel Team">
 // Copyright (c) Thaumiel Team. All rights reserved.
 // Licensed under the GNU General Public License v3.0 (GPL-3.0).
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace ThaumielMapEditor.API.Enums
+using System;
+
+namespace ThaumielMapEditor.API.Components.Tools.Helpers
 {
-    public enum ToolType
+    [Serializable]
+    public class PlayAnimation
     {
-        Custom = 0, // Todo: setup custom.
-        Health = 1,
-        Physics = 2,
-        Doorlink = 3,
-        ColliderTrigger = 4,
-        InteractableTrigger = 5,
+        public string ResolvedAnimationName { get; set; } = string.Empty;
     }
 }

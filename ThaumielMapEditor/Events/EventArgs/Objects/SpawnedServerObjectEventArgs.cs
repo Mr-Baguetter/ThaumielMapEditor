@@ -5,7 +5,6 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using LabApi.Features.Wrappers;
 using ThaumielMapEditor.API.Blocks;
 
 namespace ThaumielMapEditor.Events.EventArgs.Objects

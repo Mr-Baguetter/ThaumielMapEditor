@@ -19,6 +19,7 @@ using static ThaumielMapEditor.API.Extensions.PlayerExtensions;
 using YamlDotNet.Serialization;
 using Interactables.Interobjects.DoorUtils;
 using System.Linq;
+using ThaumielMapEditor.Events.EventArgs.Handlers;
 
 namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
@@ -182,6 +183,35 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             toy.OnSearchAborted += HandleSearchAborted;
             base.SpawnObject(schematic, serializable);
         }
+
+        public void SpawnObject(SchematicData schematic)
+        {
+            if (PrefabHelper.Interactable == null)
+            {
+                LogManager.Warn($"Failed to spawn Interact Object. Prefab is null.");
+                return;
+            }
+
+            InvisibleInteractableToy toy = UnityEngine.Object.Instantiate(PrefabHelper.Interactable);
+            NetworkServer.UnSpawn(toy.gameObject);
+            Base = toy;
+            Object = toy.gameObject;
+            NetId = toy.netId;
+            SetWorldTransform(schematic);
+            Base.Shape = Shape;
+            Base.InteractionDuration = InteractionDuration;
+            Base.IsLocked = IsLocked;
+            NetworkServer.Spawn(toy.gameObject);
+
+            toy.OnInteracted += HandleInteracted;
+            toy.OnSearching += HandleSearching;
+            toy.OnSearched += HandleSearched;
+            toy.OnSearchAborted += HandleSearchAborted;
+            schematic.SpawnedServerObjects.Add(this);
+            ObjectHandler.OnServerObjectSpawned(new(this));
+            SpawnedObjects.Add(this);
+        }
+
 
         /// <summary>
         /// Parses configuration values from a <see cref="SerializableObject"/> into this instance.

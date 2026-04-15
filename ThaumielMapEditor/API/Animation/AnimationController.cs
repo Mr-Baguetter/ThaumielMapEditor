@@ -47,7 +47,12 @@ namespace ThaumielMapEditor.API.Animation
         /// </summary>
         /// <param name="stateName">The state to play.</param>
         /// <param name="animatorIndex">The index of the animator to use.</param>
-        public void Play(string stateName, int animatorIndex = 0) => Animators[animatorIndex].Play(stateName);
+        public void Play(string stateName, int animatorIndex = 0)
+        {
+            Animator animator = Animators[animatorIndex];
+            animator.Play(stateName);
+            animator.speed = 1f;
+        }
 
         /// <summary>
         /// Sets a boolean parameter on the animator at the given index.
@@ -55,26 +60,46 @@ namespace ThaumielMapEditor.API.Animation
         /// <param name="animParam">The animator parameter name.</param>
         /// <param name="state">The boolean value to set.</param>
         /// <param name="animatorIndex">The index of the animator to use.</param>
-        public void Play(string animParam, bool state, int animatorIndex = 0) => Animators[animatorIndex].SetBool(animParam, state);
+        public void Play(string animParam, bool state, int animatorIndex = 0)
+        {
+            Animator animator = Animators[animatorIndex];
+            animator.SetBool(animParam, state);
+            animator.speed = 1f;
+        }
 
         /// <summary>
         /// Plays an animation state on the animator matching the given name.
         /// </summary>
         /// <param name="stateName">The state to play.</param>
         /// <param name="animatorName">The name of the animator GameObject to target.</param>
-        public void Play(string stateName, string animatorName) => Animators.FirstOrDefault(a => a.name == animatorName)?.Play(stateName);
+        public void Play(string stateName, string animatorName)
+        {
+            Animator animator = Animators.FirstOrDefault(a => a.name == animatorName);
+            animator.Play(stateName);
+            animator.speed = 1f;
+        }
 
         /// <summary>
         /// Stops playback on the animator at the given index.
         /// </summary>
         /// <param name="animatorIndex">The index of the animator to stop.</param>
-        public void Stop(int animatorIndex = 0) => Animators[animatorIndex].StopPlayback();
+        public void Stop(int animatorIndex = 0)
+        {
+            Animator animator = Animators[animatorIndex];
+            animator.StopPlayback();
+            animator.speed = 0f;
+        }
 
         /// <summary>
         /// Stops playback on the animator matching the given name.
         /// </summary>
         /// <param name="animatorName">The name of the animator GameObject to stop.</param>
-        public void Stop(string animatorName) => Animators.FirstOrDefault(a => a.name == animatorName)?.StopPlayback();
+        public void Stop(string animatorName)
+        {
+            Animator animator = Animators.FirstOrDefault(a => a.name == animatorName);
+            animator.StopPlayback();
+            animator.speed = 0f;
+        }
 
         /// <summary>
         /// Gets or creates an <see cref="AnimationController"/> for the given <see cref="SchematicData"/>.

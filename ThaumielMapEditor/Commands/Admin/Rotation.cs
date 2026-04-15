@@ -6,7 +6,6 @@
 // -----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using CommandSystem;
 using LabApi.Features.Wrappers;
 using ThaumielMapEditor.API.Attributes;

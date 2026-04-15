@@ -863,6 +863,18 @@ namespace ThaumielMapEditor.API.Helpers
                             door.Init(match, schematicData, tool.Properties);
                             match.Tools.AddItem(door);
                             break;
+
+                        case ToolType.ColliderTrigger:
+                            ColliderTrigger collider = match.Object.AddComponent<ColliderTrigger>();
+                            collider.Init(match, schematicData, tool.Properties);
+                            match.Tools.AddItem(collider);
+                            break;
+
+                        case ToolType.InteractableTrigger:
+                            InteractableTrigger interactable = match.Object.AddComponent<InteractableTrigger>();
+                            interactable.Init(match, schematicData, tool.Properties);
+                            match.Tools.AddItem(interactable);
+                            break;
                     }
                 }
             }

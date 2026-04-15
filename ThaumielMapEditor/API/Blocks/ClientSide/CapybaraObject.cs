@@ -8,7 +8,6 @@
 using LabApi.Features.Wrappers;
 using Mirror;
 using System;
-using System.Runtime.Remoting;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Helpers;

@@ -6,7 +6,9 @@
 // -----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using ThaumielMapEditor.API.Blocks;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
@@ -51,6 +53,22 @@ namespace ThaumielMapEditor.API.Components.Tools
                 return;
 
             Object.Tools = Object.Tools.Where(t => t != this);
+        }
+
+        public T? MapToObject<T>(object data)
+        {
+            if (data is T alreadyType)
+                return alreadyType;
+
+            return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(data));
+        }
+
+        public bool IsLocalFile(string path)
+        {
+            if (Path.IsPathRooted(path))
+                return false;
+
+            return true;
         }
     }
 }
