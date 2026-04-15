@@ -10,12 +10,14 @@ using MapGeneration.Distributors;
 using Mirror;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Remoting;
 using ThaumielMapEditor.API.Components.Tools;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Extensions;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Serialization;
+using ThaumielMapEditor.Events.EventArgs.Handlers;
 using UnityEngine;
 
 namespace ThaumielMapEditor.API.Blocks
@@ -178,6 +180,7 @@ namespace ThaumielMapEditor.API.Blocks
         public virtual void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             OnObjectCreated?.Invoke(this);
+            ObjectHandler.OnServerObjectSpawned(new(this));
             SpawnedObjects.Add(this);
             schematic.SpawnedServerObjects.Add(this);
             ObjectId = serializable.ObjectId;
@@ -228,6 +231,7 @@ namespace ThaumielMapEditor.API.Blocks
             }
 
             OnObjectDestroying?.Invoke(this);
+            ObjectHandler.OnServerObjectDestroyed(new(this));
             schematic.SpawnedServerObjects.Remove(this);
             SpawnedObjects.Remove(this);
             NetworkServer.Destroy(Object);

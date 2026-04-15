@@ -6,6 +6,7 @@
 // -----------------------------------------------------------------------
 
 using CommandSystem;
+using System;
 using System.Collections.Generic;
 using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Helpers;
@@ -29,7 +30,7 @@ namespace ThaumielMapEditor.Commands.Admin
 
         public string RequiredPermission => "tme.reload";
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             SchematicLoader.ReloadSchematics();
             response = "Reloaded.";

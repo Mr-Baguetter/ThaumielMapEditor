@@ -5,9 +5,11 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 using CommandSystem;
+using LabApi.Features.Wrappers;
 using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Helpers;
@@ -21,9 +23,9 @@ namespace ThaumielMapEditor.Commands.Admin
     {
         public string Name => "position";
 
-        public string VisibleArgs => "<Schematic Id>, <Get|Set>, <X>, <Y>, <Z>";
+        public string VisibleArgs => "[Schematic Id], <Get|Set>, [X], [Y], [Z]";
 
-        public int RequiredArgsCount => 2;
+        public int RequiredArgsCount => 1;
 
         public string Description => "Changes the position of a schematic";
 
@@ -31,41 +33,85 @@ namespace ThaumielMapEditor.Commands.Admin
 
         public string RequiredPermission => "tme.position";
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             StringBuilder sb = new();
-            if (!SchematicLoader.SchematicsById.TryGetValue(uint.Parse(arguments[0]), out var data) || data.Primitive == null)
-            {
-                sb.AppendLine();
-                sb.AppendLine($"No schematic with id {arguments[0]} was found.");
-                sb.AppendLine($"Available schematics:");
-                foreach (KeyValuePair<uint, SchematicData> kvp in SchematicLoader.SchematicsById)
-                    sb.AppendLine($"- [{kvp.Key}]: {kvp.Value.FileName}");
+            sb.AppendLine();
+            bool hasId = uint.TryParse(arguments.At(0), out uint id);
+            SchematicData? data;
 
-                response = sb.ToString();
-                return false;
+            if (hasId)
+            {
+                if (!SchematicLoader.SchematicsById.TryGetValue(id, out data) || data.Primitive == null)
+                {
+                    sb.AppendLine($"No schematic with id {id} was found.");
+                    sb.AppendLine($"Available schematics:");
+
+                    foreach (KeyValuePair<uint, SchematicData> kvp in SchematicLoader.SchematicsById)
+                    {
+                        sb.AppendLine($"- [{kvp.Key}]: {kvp.Value.FileName}");
+                    }
+
+                    response = sb.ToString();
+                    return false;
+                }
+            }
+            else
+            {
+                if (!Player.TryGet(sender, out var player))
+                {
+                    response = "Failed to parse player. Use the version with a Schematic ID instead.";
+                    return false;
+                }
+
+                data = CommandHelper.GetSchematic(player);
+                if (data == null)
+                {
+                    response = "Failed to find schematic via raycast. Make sure you are looking at one.";
+                    return false;
+                }
             }
 
-            sb.AppendLine();
-            switch (arguments[1].ToLower())
+            string subCommand = hasId ? arguments.At(1).ToLower() : arguments.At(0).ToLower();
+            switch (subCommand)
             {
                 case "get":
                     sb.AppendLine($"Got Schematic Position:");
-                    sb.AppendLine($"- X: {data.Primitive.Position.x}");
+                    sb.AppendLine($"- X: {data.Primitive!.Position.x}");
                     sb.AppendLine($"- Y: {data.Primitive.Position.y}");
                     sb.AppendLine($"- Z: {data.Primitive.Position.z}");
                     break;
 
                 case "set":
-                    if (arguments.Count != 5)
+                    int offset = hasId ? 2 : 1;
+
+                    if (arguments.Count < offset + 3)
                     {
-                        response = "You require 5 arguments to set the position <Schematic Id>, Set, <X>, <Y>, <Z>";
+                        response = hasId ? "You require 5 arguments to set the position: <Schematic Id>, Set, <X>, <Y>, <Z>" : "You require 4 arguments to set the position: Set, <X>, <Y>, <Z>";
                         return false;
                     }
 
-                    data.Position = new(float.Parse(arguments[2]), float.Parse(arguments[3]), float.Parse(arguments[4]));
-                    data.Primitive.Position = data.Position;
-                    
+                    if (!float.TryParse(arguments.At(offset), out float x))
+                    {
+                        response = "Failed to parse X coordinate. Make sure its a number.";
+                        return false;
+                    }
+
+                    if (!float.TryParse(arguments.At(offset + 1), out float y))
+                    {
+                        response = "Failed to parse Y coordinate. Make sure its a number.";
+                        return false;
+                    }
+
+                    if (!float.TryParse(arguments.At(offset + 2), out float z))
+                    {
+                        response = "Failed to parse Z coordinate. Make sure its a number.";
+                        return false;
+                    }
+
+                    data.Position = new(x, y, z);
+                    data.Primitive!.Position = data.Position;
+
                     sb.AppendLine($"Set Schematic Position:");
                     sb.AppendLine($"- X: {data.Primitive.Position.x}");
                     sb.AppendLine($"- Y: {data.Primitive.Position.y}");

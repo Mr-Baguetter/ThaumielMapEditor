@@ -23,7 +23,6 @@ using LabApi.Loader.Features.Paths;
 
 namespace ThaumielMapEditor
 {
-#pragma warning disable CS1591
     [DoNotParse]
     public class Main : Plugin<Config>
     {
@@ -35,8 +34,10 @@ namespace ThaumielMapEditor
         public override LoadPriority Priority => LoadPriority.Medium;
         public string HarmonyId => $"MrBaguetter_TME_{Guid.NewGuid()}";
 
+#pragma warning disable CS8618
         public Harmony harmony;
         public static Main Instance;
+#pragma warning restore CS8618
 
         public override void Enable()
         {

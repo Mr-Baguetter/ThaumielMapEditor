@@ -5,6 +5,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using CommandSystem;
 using LabApi.Features.Wrappers;
@@ -28,7 +29,7 @@ namespace ThaumielMapEditor.Commands.Admin
         public string[] Aliases => ["gr"];
         public string RequiredPermission => "tme.grab";
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             if (!Player.TryGet(sender, out var player))
             {
@@ -45,7 +46,7 @@ namespace ThaumielMapEditor.Commands.Admin
                 return true;
             }
 
-            if (arguments.Count == 0 || !uint.TryParse(arguments[0], out var id))
+            if (arguments.Count == 0 || !uint.TryParse(arguments.At(0), out var id))
             {
                 response = "Invalid ID. This should be a non negative number. Run 'tme spawned' to get all spawned schematics";
                 return false;

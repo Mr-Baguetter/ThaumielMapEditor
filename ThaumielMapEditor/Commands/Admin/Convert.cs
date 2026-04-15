@@ -30,7 +30,7 @@ namespace ThaumielMapEditor.Commands.Admin
         public string[] Aliases => ["cv"];
         public string RequiredPermission => "tme.convert";
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             if (arguments == null || arguments.Count == 0)
             {
@@ -46,14 +46,14 @@ namespace ThaumielMapEditor.Commands.Admin
 
                 if (filename.Contains("-Rigidbodies"))
                     continue;
-                if (!filename.Equals(arguments[0], StringComparison.OrdinalIgnoreCase))
+                if (!filename.Equals(arguments.At(0), StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 string content = File.ReadAllText(file);
                 if (!content.TrimStart().StartsWith("{"))
                     continue;
 
-                string schematicName = arguments[0];
+                string schematicName = arguments.At(0);
 
                 Task.Run(async () =>
                 {
@@ -79,7 +79,7 @@ namespace ThaumielMapEditor.Commands.Admin
                 return true;
             }
 
-            response = $"Failed to find file with name {arguments[0]}";
+            response = $"Failed to find file with name {arguments.At(0)}";
             return true;
         }
     }

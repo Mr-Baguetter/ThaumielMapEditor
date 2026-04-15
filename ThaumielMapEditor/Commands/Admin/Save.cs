@@ -5,6 +5,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 using CommandSystem;
@@ -33,7 +34,7 @@ namespace ThaumielMapEditor.Commands.Admin
 
         public string RequiredPermission => "tme.save";
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             StringBuilder sb = new();
             MapData map = new();
@@ -50,7 +51,7 @@ namespace ThaumielMapEditor.Commands.Admin
             }
 
             map.Room = player.Room;
-            map.FileName = arguments[0];
+            map.FileName = arguments.At(0);
             foreach (SchematicData schematic in SchematicLoader.SpawnedSchematics)
             {
                 Vector3 pos = player.Room.LocalPosition(schematic.Position);
@@ -58,7 +59,7 @@ namespace ThaumielMapEditor.Commands.Admin
             }
 
             SchematicLoader.SaveMap(map);
-            response = $"Saved map {arguments[0]}.";
+            response = $"Saved map {arguments.At(0)}.";
             return true;
         }
     }

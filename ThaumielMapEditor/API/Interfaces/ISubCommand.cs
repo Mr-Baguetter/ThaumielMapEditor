@@ -5,7 +5,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System.Collections.Generic;
+using System;
 using CommandSystem;
 
 namespace ThaumielMapEditor.API.Interfaces
@@ -24,6 +24,6 @@ namespace ThaumielMapEditor.API.Interfaces
 
         public string RequiredPermission { get; }
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response);
+        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response);
     }
 }

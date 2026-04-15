@@ -31,6 +31,7 @@ using ThaumielMapEditor.API.Components.Tools;
 using ThaumielMapEditor.API.Blocks;
 using HarmonyLib;
 using ThaumielMapEditor.API.Components;
+using ThaumielMapEditor.Events.EventArgs.Handlers;
 
 namespace ThaumielMapEditor.API.Helpers
 {
@@ -728,6 +729,7 @@ namespace ThaumielMapEditor.API.Helpers
             ApplyAnimators(schematic, schematicData);
             ApplyTools(schematic, schematicData);
 
+            SchematicHandler.OnSchematicSpawned(new(schematicData));
             SchematicSpawned?.Invoke(schematicData);
             LogManager.Info($"Schematic '{schematic.FileName}' fully spawned.");
             SchematicsById.Add(schematicData.Id, schematicData);

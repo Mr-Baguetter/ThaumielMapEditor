@@ -17,6 +17,8 @@ using ThaumielMapEditor.API.Animation;
 using ThaumielMapEditor.API.Components.Tools;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Components;
+using UnityEngine;
+using ThaumielMapEditor.Events.EventArgs.Handlers;
 
 namespace ThaumielMapEditor.API.Data
 {
@@ -223,6 +225,8 @@ namespace ThaumielMapEditor.API.Data
         /// </summary>
         public void Destroy()
         {
+            SchematicHandler.OnSchematicDestroyed(new(this));
+
             foreach (KeyValuePair<LODZone, SchematicData> kvp in SchematicLoader.SchematicLODZones.Where(s => s.Value == this).ToArray())
             {
                 SchematicLoader.SchematicLODZones.Remove(kvp.Key);
@@ -243,6 +247,7 @@ namespace ThaumielMapEditor.API.Data
             }
 
             AnimationController.Remove(this);
+            ColliderHelper.SchematicColliders.Remove(this);
         }
     }
 }

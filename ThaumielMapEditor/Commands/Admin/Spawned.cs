@@ -5,6 +5,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 using CommandSystem;
@@ -31,7 +32,7 @@ namespace ThaumielMapEditor.Commands.Admin
 
         public string RequiredPermission => "tme.spawned";
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             StringBuilder sb = new();
             sb.AppendLine();

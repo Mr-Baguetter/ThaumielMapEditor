@@ -19,7 +19,7 @@ These commands are executed via the main Remote Admin command (`tme <subcommand>
 | `destroy` | `de, delete, remove, del` | <code>&lt;Schematic Id&gt;</code> | `tme.destroy` | Destroys the specified schematic |
 | `grab` | `gr` | <code>&lt;Schematic ID&gt;</code> | `tme.grab` | Grabs the specified schematic |
 | `list` | `li` | None | `tme.list` | Lists all schematics |
-| `position` | `pos` | <code>&lt;Schematic Id&gt;, &lt;Get&#124;Set&gt;, &lt;X&gt;, &lt;Y&gt;, &lt;Z&gt;</code> | `tme.position` | Changes the position of a schematic |
+| `position` | `pos` | <code>[Schematic Id], &lt;Get&#124;Set&gt;, [X], [Y], [Z]</code> | `tme.position` | Changes the position of a schematic |
 | `reload` | `re` | None | `tme.reload` | Reloads all schematics |
 | `rotate` | `rot` | <code>&lt;Schematic ID&gt;, &lt;X&gt;, &lt;Y&gt;, &lt;Z&gt;</code> | `tme.rotate` | Grabs the specified schematic |
 | `save` | None | <code>&lt;Map Name&gt;</code> | `tme.save` | Saves the current spawned schematics into a map file |

@@ -14,6 +14,7 @@ using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Extensions;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Serialization;
+using ThaumielMapEditor.Events.EventArgs.Handlers;
 using UnityEngine;
 
 namespace ThaumielMapEditor.API.Blocks.ClientSide
@@ -208,6 +209,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             if (player.IsHost)
                 return;
 
+            ObjectHandler.OnClientObjectDestroyed(new (this, player));
             player.Connection.Send(new ObjectDestroyMessage { netId = NetId });
             SpawnedPlayers.Remove(player);
         }

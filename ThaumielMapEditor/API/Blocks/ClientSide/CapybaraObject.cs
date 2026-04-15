@@ -8,9 +8,11 @@
 using LabApi.Features.Wrappers;
 using Mirror;
 using System;
+using System.Runtime.Remoting;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Helpers;
+using ThaumielMapEditor.Events.EventArgs.Handlers;
 
 namespace ThaumielMapEditor.API.Blocks.ClientSide
 {
@@ -165,6 +167,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                 payload = payload
             });
 
+            ObjectHandler.OnClientObjectSpawned(new(this, player));
             SpawnedPlayers.Add(player);
             Spawned = true;
         }

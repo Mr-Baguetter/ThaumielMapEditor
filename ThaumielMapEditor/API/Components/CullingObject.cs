@@ -19,6 +19,7 @@ namespace ThaumielMapEditor.API.Components
         public static readonly HashSet<CullingObject> AllInstances = [];
         public readonly HashSet<Player> PlayersInside = [];
 
+        public NetworkIdentity? NetworkIdentity;
         public ClientSideObjectBase? ClientObject;
         public ServerObject? ServerObject;
         public Vector3 Bounds;
@@ -33,6 +34,8 @@ namespace ThaumielMapEditor.API.Components
         {
             ServerObject = server;
             Bounds = bounds;
+
+            NetworkIdentity = ServerObject.Object!.GetComponent<NetworkIdentity>();
         }
 
         public void Setup()
@@ -88,15 +91,15 @@ namespace ThaumielMapEditor.API.Components
             }
             else if (ServerObject != null)
             {
-                if (!ServerObject.Object!.TryGetComponent<NetworkIdentity>(out var network))
+                if (NetworkIdentity == null)
                     return;
 
                 if (show)
                 {
-                    NetworkServer.ShowForConnection(network, player.Connection);
+                    NetworkServer.ShowForConnection(NetworkIdentity, player.Connection);
                 }
                 else
-                    NetworkServer.HideForConnection(network, player.Connection);
+                    NetworkServer.HideForConnection(NetworkIdentity, player.Connection);
             }
         }
     }

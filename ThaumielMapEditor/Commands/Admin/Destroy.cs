@@ -5,6 +5,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 using CommandSystem;
@@ -31,14 +32,14 @@ namespace ThaumielMapEditor.Commands.Admin
 
         public string RequiredPermission => "tme.destroy";
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             uint count = 0;
-            if (!SchematicLoader.SchematicsById.TryGetValue(uint.Parse(arguments[0]), out var data))
+            if (!SchematicLoader.SchematicsById.TryGetValue(uint.Parse(arguments.At(0)), out var data))
             {
                 StringBuilder sb = new();
                 sb.AppendLine();
-                sb.AppendLine($"No schematic with id {arguments[0]} was found.");
+                sb.AppendLine($"No schematic with id {arguments.At(0)} was found.");
                 sb.AppendLine($"Available schematics:");
                 foreach (KeyValuePair<uint, SchematicData> kvp in SchematicLoader.SchematicsById)
                     sb.AppendLine($"- [{kvp.Key}]: {kvp.Value.FileName}");
@@ -48,7 +49,7 @@ namespace ThaumielMapEditor.Commands.Admin
             }
 
             SchematicLoader.DestroySchematic(data);
-            response = $"Destroyed schematic {arguments[0]} for {count} players";
+            response = $"Destroyed schematic {arguments.At(0)} for {count} players";
             return true;
         }
     }

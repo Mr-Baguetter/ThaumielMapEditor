@@ -84,7 +84,7 @@ namespace ThaumielMapEditor.API.Components.Tools
         /// Gets the NetworkId.
         /// Required by <see cref="IDestructible"/>
         /// </summary>
-        public uint NetworkId => Object.NetId;
+        public uint NetworkId => Object!.NetId;
 
         /// <summary>
         /// Gets the center of mass of the <see cref="ObjectHealth"/> instance.
@@ -142,12 +142,12 @@ namespace ThaumielMapEditor.API.Components.Tools
             switch (State)
             {
                 case DestroyState.Animate:
-                    Schematic.AnimationController.Play(StateName, Object.Name);
-                    Timing.CallDelayed(DespawnTime, () => Object.DestroyObject(Schematic));
+                    Schematic?.AnimationController.Play(StateName, Object!.Name);
+                    Timing.CallDelayed(DespawnTime, () => Object!.DestroyObject(Schematic!));
                     break;
 
                 case DestroyState.ApplyPhysics:
-                    Object.MovementSmoothing = 0;
+                    Object?.MovementSmoothing = 0;
                     if (!gameObject.TryGetComponent<Rigidbody>(out var rigidbody))
                         rigidbody = gameObject.AddComponent<Rigidbody>();
 
@@ -158,11 +158,11 @@ namespace ThaumielMapEditor.API.Components.Tools
                         rigidbody.AddForce(Force, ForceMode.Impulse);
                     }
 
-                    Timing.CallDelayed(DespawnTime, () => Object.DestroyObject(Schematic));
+                    Timing.CallDelayed(DespawnTime, () => Object?.DestroyObject(Schematic!));
                     break;
 
                 case DestroyState.Destroy:
-                    Object.DestroyObject(Schematic);
+                    Object?.DestroyObject(Schematic!);
                     break;
             }
         }

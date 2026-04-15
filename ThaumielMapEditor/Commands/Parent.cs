@@ -80,9 +80,7 @@ namespace ThaumielMapEditor.Commands
                     return false;
                 }
 
-                List<string> args = [.. arguments];
-                args.RemoveAt(0);
-
+                ArraySegment<string> args = new(arguments.Array!, arguments.Offset + 1, arguments.Count - 1);
                 return cmd.Execute(args, sender, out response);
             }
             catch (Exception ex)

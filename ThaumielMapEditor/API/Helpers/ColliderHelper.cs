@@ -18,6 +18,11 @@ namespace ThaumielMapEditor.API.Helpers
     public class ColliderHelper
     {
         /// <summary>
+        /// 
+        /// </summary>
+        public static Dictionary<SchematicData, HashSet<Collider>> SchematicColliders = [];
+
+        /// <summary>
         /// Creates the colliders on the server for the client side objects.
         /// </summary>
         /// <param name="clientObject">The <see cref="ClientSideObjectBase"/> to create colliders for.</param>
@@ -57,8 +62,10 @@ namespace ThaumielMapEditor.API.Helpers
 
                 if (TryCopyCollider(col, colGo))
                 {
-                    colliders.Add(colGo.GetComponent<Collider>());
+                    Collider collider = colGo.GetComponent<Collider>();
+                    colliders.Add(collider);
                     colGo.transform.SetParent(schematic.Primitive?.Transform, worldPositionStays: true);
+                    SchematicColliders[schematic].Add(collider);
                     LogManager.Debug($"Created {col.GetType().Name} for '{clientObject.ObjectType}' at {colGo.transform.position}.");
                 }
                 else
@@ -215,6 +222,7 @@ namespace ThaumielMapEditor.API.Helpers
             if (mesh != null)
             {
                 primitive.ServerCollider = mesh;
+                SchematicColliders[primitive.Schematic].Add(mesh);
             }
             else
             {

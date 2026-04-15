@@ -38,11 +38,11 @@ namespace ThaumielMapEditor.Commands.Admin
 
         public string RequiredPermission => "tme.spawn";
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            if (!SchematicLoader.LoadedSchematics.TryGetValue(arguments[0], out SerializableSchematic schematic))
+            if (!SchematicLoader.LoadedSchematics.TryGetValue(arguments.At(0), out SerializableSchematic schematic))
             {
-                response = $"Schematic '{arguments[0]}' not found.";
+                response = $"Schematic '{arguments.At(0)}' not found.";
                 return false;
             }
 
@@ -50,19 +50,19 @@ namespace ThaumielMapEditor.Commands.Admin
 
             if (arguments.Count == 4)
             {
-                if (!float.TryParse(arguments[1], out var x))
+                if (!float.TryParse(arguments.At(1), out var x))
                 {
-                    response = $"Failed to parse X value. Invalid float: {arguments[1]}";
+                    response = $"Failed to parse X value. Invalid float: {arguments.At(1)}";
                     return false;
                 }
-                if (!float.TryParse(arguments[2], out var y))
+                if (!float.TryParse(arguments.At(2), out var y))
                 {
-                    response = $"Failed to parse Y value. Invalid float: {arguments[2]}";
+                    response = $"Failed to parse Y value. Invalid float: {arguments.At(2)}";
                     return false;
                 }
-                if (!float.TryParse(arguments[3], out var z))
+                if (!float.TryParse(arguments.At(3), out var z))
                 {
-                    response = $"Failed to parse Z value. Invalid float: {arguments[3]}";
+                    response = $"Failed to parse Z value. Invalid float: {arguments.At(3)}";
                     return false;
                 }
 
