@@ -16,7 +16,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
     public class CapybaraObjectServer : ServerObject
     {
+#pragma warning disable CS8618
         public CapybaraToy Base { get; private set; }
+#pragma warning restore CS8618
 
         public bool CollisionsEnabled
         {

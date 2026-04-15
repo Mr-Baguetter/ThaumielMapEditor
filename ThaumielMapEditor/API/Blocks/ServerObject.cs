@@ -122,7 +122,7 @@ namespace ThaumielMapEditor.API.Blocks
         /// </summary>
         public IEnumerable<ToolBase> Tools { get; internal set; } = [];
 
-        private AdminToy AdminToy;
+        private AdminToy? AdminToy;
 
         /// <summary>
         /// The ticks between the server sending a update to the client about this object's position. 0 means no delay, 1 means the server will send an update every tick, 2 means every other tick, and so on.
@@ -135,7 +135,7 @@ namespace ThaumielMapEditor.API.Blocks
                 if (field == value)
                     return;
 
-                if (AdminToy == null && Object.TryGetComponent<AdminToy>(out AdminToy))
+                if (AdminToy == null && Object != null && Object.TryGetComponent<AdminToy>(out AdminToy))
                     AdminToy.MovementSmoothing = value;
 
                 field = value;

@@ -45,7 +45,7 @@ namespace ThaumielMapEditor.API.Helpers
                 };
 
                 GameObject colliderobj = new($"{schematic.FileName}-LOD{data.Index}-ColliderObj");
-                colliderobj.transform.SetParent(schematic.Primitive.GameObject.transform);
+                colliderobj.transform.SetParent(schematic.Primitive?.GameObject.transform);
                 BoxCollider collider = colliderobj.AddComponent<BoxCollider>();
                 collider.size = data.Bounds;
                 collider.name = $"{schematic.FileName}-LOD{data.Index}-Collider";
@@ -78,7 +78,7 @@ namespace ThaumielMapEditor.API.Helpers
 
             List<Player> players = [];
             LODZone lod = null!;
-            foreach (LODZone lodzone in schematic.Primitive.GameObject.GetComponents<LODZone>())
+            foreach (LODZone lodzone in schematic.Primitive!.GameObject.GetComponents<LODZone>())
             {
                 if (lodzone.Index != index)
                     continue;

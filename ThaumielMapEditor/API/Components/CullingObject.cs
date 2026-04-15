@@ -88,7 +88,7 @@ namespace ThaumielMapEditor.API.Components
             }
             else if (ServerObject != null)
             {
-                if (!ServerObject.Object.TryGetComponent<NetworkIdentity>(out var network))
+                if (!ServerObject.Object!.TryGetComponent<NetworkIdentity>(out var network))
                     return;
 
                 if (show)

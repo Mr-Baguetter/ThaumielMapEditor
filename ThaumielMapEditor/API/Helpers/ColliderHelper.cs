@@ -191,7 +191,7 @@ namespace ThaumielMapEditor.API.Helpers
         /// <param name="primitive"></param>
         public static void CreateCollisionMesh(PrimitiveObject primitive)
         {
-            if (!primitive.PrimitiveFlags.HasFlag(PrimitiveFlags.Collidable))
+            if (!primitive.PrimitiveFlags.HasFlag(PrimitiveFlags.Collidable) || primitive.Schematic == null)
                 return;
 
             GameObject collider = new();

@@ -18,7 +18,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
     public class PrimitiveObjectServer : ServerObject
     {
+#pragma warning disable CS8618
         public PrimitiveObjectToy Base { get; private set; }
+#pragma warning restore CS8618
 
         public Color Color
         {

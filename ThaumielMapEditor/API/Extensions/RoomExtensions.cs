@@ -17,12 +17,12 @@ namespace ThaumielMapEditor.API.Extensions
         /// </summary>
         /// <param name="pos">The position to get the closest room from</param>
         /// <returns><see cref="RoomIdentifier"/> if a room was found else returns <see langword="null"/> if no room was found</returns>
-        public static RoomIdentifier GetClosestRoomToPosition(Vector3 pos)
+        public static RoomIdentifier? GetClosestRoomToPosition(Vector3 pos)
         {
             if (Room.List == null || Room.List.Count == 0)
                 return null;
 
-            RoomIdentifier closest = null;
+            RoomIdentifier closest = null!;
             float closestSqrDist = float.MaxValue;
 
             foreach (Room room in Room.List)

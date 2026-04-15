@@ -15,6 +15,7 @@ namespace ThaumielMapEditor.API.Data
 {
     public class PrefabCollidersData
     {
+#pragma warning disable CS8618
         /// <summary>
         /// Gets the prefab this collider data belongs to.
         /// </summary>
@@ -24,6 +25,7 @@ namespace ThaumielMapEditor.API.Data
         /// Gets the collection of <see cref="ColliderData"/> instances associated with this prefab.
         /// </summary>
         public IEnumerable<ColliderData> Colliders { get; internal set; }
+#pragma warning restore CS8618
     }
 
     public class ColliderData

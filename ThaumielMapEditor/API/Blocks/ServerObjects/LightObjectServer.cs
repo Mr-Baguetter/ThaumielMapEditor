@@ -18,7 +18,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
     public class LightObjectServer : ServerObject
     {
+#pragma warning disable CS8618
         public LightSourceToy Base { get; private set; }
+#pragma warning restore CS8618
 
         public float Intensity
         {

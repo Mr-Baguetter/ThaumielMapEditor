@@ -236,7 +236,7 @@ namespace ThaumielMapEditor.API.Data
 
             foreach (ServerObject serverobj in SpawnedServerObjects.ToArray())
             {
-                if (serverobj is DoorObject door && door.Object.TryGetComponent<DoorLink>(out var link))
+                if (serverobj is DoorObject door && door.Object!.TryGetComponent<DoorLink>(out var link))
                     link.Unregister();
 
                 serverobj.DestroyObject(this);

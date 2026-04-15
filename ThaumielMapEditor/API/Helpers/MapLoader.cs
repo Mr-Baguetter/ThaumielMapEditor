@@ -89,7 +89,7 @@ namespace ThaumielMapEditor.API.Helpers
             if (map == null)
                 LogManager.Warn($"Map name {name} is invalid!");
 
-            SchematicLoader.SpawnMap(map);
+            SchematicLoader.SpawnMap(map!);
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace ThaumielMapEditor.API.Helpers
             if (map == null)
                 LogManager.Warn($"Map name {name} is invalid!");
 
-            SchematicLoader.DestroyMap(map);
+            SchematicLoader.DestroyMap(map!);
         }
     }
 }

@@ -28,8 +28,10 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// <summary>
         /// The underlying in game camera toy instance.
         /// </summary>
+#pragma warning disable CS8618
         [YamlIgnore]
         public Scp079CameraToy Base { get; internal set; }
+#pragma warning restore CS8618
 
         /// <summary>
         /// The camera prefab type (mapped to a specific prefab via <see cref="GetCameraPrefab"/>).

@@ -24,7 +24,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// Reference to the instantiated <see cref="WaypointToy"/> on the server.
         /// </summary>
         [YamlIgnore]
+#pragma warning disable CS8618
         public WaypointToy Base { get; private set; }
+#pragma warning restore CS8618
 
         /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Waypoint;

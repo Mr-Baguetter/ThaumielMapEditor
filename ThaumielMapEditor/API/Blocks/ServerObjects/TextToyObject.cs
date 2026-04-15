@@ -28,7 +28,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// It will be null until <see cref="SpawnObject(SchematicData, SerializableObject)"/> successfully instantiates the prefab.
         /// </remarks>
         [YamlIgnore]
+#pragma warning disable CS8618
         public TextToy Base { get; private set; }
+#pragma warning restore CS8618
 
         /// <summary>
         /// The text format string used by the <see cref="TextToy"/> for rendering text.

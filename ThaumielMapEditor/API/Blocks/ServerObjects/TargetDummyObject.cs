@@ -24,7 +24,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// This value is null until <see cref="SpawnObject(SchematicData, SerializableObject)"/> is called.
         /// </summary>
         [YamlIgnore]
+#pragma warning disable CS8618
         public ShootingTarget Base { get; private set; }
+#pragma warning restore CS8618
 
         /// <summary>
         /// The configured <see cref="TargetType"/> for this target.
@@ -41,9 +43,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// <param name="type">The target variant to resolve a prefab for.</param>
         /// <returns>The matching <see cref="ShootingTarget"/> prefab.</returns>
         /// <exception cref="InvalidOperationException">Thrown when an unsupported <paramref name="type"/> is provided.</exception>
-        public ShootingTarget GetPrefab(TargetType type)
+        public ShootingTarget? GetPrefab(TargetType type)
         {
-			ShootingTarget prefab = type switch
+			ShootingTarget? prefab = type switch
 			{
 				TargetType.Binary => PrefabHelper.ShootingTargetBinary,
 				TargetType.ClassD => PrefabHelper.ShootingTargetDBoy,
@@ -58,7 +60,11 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
             ParseValues(serializable);
-            ShootingTarget target = UnityEngine.Object.Instantiate(GetPrefab(Type));
+            ShootingTarget? prefab = GetPrefab(Type);
+            if (prefab == null) 
+                return;
+                
+            ShootingTarget? target = UnityEngine.Object.Instantiate(prefab);
             NetworkServer.UnSpawn(target.gameObject);
             Object = target.gameObject;
             NetId = target.netId;

@@ -117,6 +117,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         /// <summary>
         /// Gets or sets the shape of the light.
         /// </summary>
+#pragma warning disable CS0618
         public LightShape Shape
         {
             get;
@@ -129,6 +130,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                 SyncToPlayers(2048uL, w => w.WriteInt((int)value));
             }
         } = LightShape.Cone;
+#pragma warning restore CS0618
 
         /// <summary>
         /// Gets or sets the outer spot angle of the light.

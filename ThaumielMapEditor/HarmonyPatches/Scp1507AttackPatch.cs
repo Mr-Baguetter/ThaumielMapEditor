@@ -14,7 +14,6 @@ namespace ThaumielMapEditor.HarmonyPatches
     [HarmonyPatch]
     public static class Scp1507AttackPatch
     {
-        ///
         private const float AttackDamage = 20f;
 
         [HarmonyPatch(typeof(Scp1507AttackAbility), nameof(Scp1507AttackAbility.TryAttackDoor))]

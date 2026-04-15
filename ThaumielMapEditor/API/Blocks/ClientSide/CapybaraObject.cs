@@ -158,7 +158,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                 isLocalPlayer = false,
                 isOwner = false,
                 sceneId = 0,
-                assetId = PrefabHelper.Capybara.netIdentity.assetId,
+                assetId = PrefabHelper.Capybara!.netIdentity.assetId,
                 position = Position,
                 rotation = Rotation,
                 scale = Scale,

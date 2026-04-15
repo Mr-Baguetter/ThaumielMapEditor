@@ -23,7 +23,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// <summary>
         /// Gets the <see cref="AudioPlayer"/> instance associated with this speaker.
         /// </summary>
+#pragma warning disable CS8618
         public AudioPlayer Player { get; private set; }
+#pragma warning restore CS8618
 
         /// <summary>
         /// Gets or sets the volume of the speaker, expressed as a percentage between 0 and 100.

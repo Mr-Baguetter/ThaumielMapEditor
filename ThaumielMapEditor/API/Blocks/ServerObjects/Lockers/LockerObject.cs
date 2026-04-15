@@ -26,13 +26,15 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
         /// <summary>
         /// The instantiated <see cref="Locker"/> component in the scene.
         /// </summary>
+#pragma warning disable CS8618
         [YamlIgnore]
         public Locker Base { get; private set; }
+#pragma warning restore CS8618
 
         /// <summary>
         /// Serialized chamber definitions that describe what items and permissions each chamber should have.
         /// </summary>
-        public List<LockerChamber> Chambers { get; private set; }
+        public List<LockerChamber> Chambers { get; private set; } = [];
 
         /// <inheritdoc/>
         public override ObjectType ObjectType { get; set; } = ObjectType.Locker;

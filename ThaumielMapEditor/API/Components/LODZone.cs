@@ -24,7 +24,9 @@ namespace ThaumielMapEditor.API.Components
         /// <summary>
         /// Gets the <see cref="SchematicData"/> this zone belongs to.
         /// </summary>
+#pragma warning disable CS8618
         public SchematicData Schematic { get; private set; }
+#pragma warning restore CS8618
 
         /// <summary>
         /// Gets the index of this <see cref="LODZone"/> within its <see cref="SchematicData"/>.

@@ -64,7 +64,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// The runtime instance of the underlying <see cref="InvisibleInteractableToy"/>.
         /// </summary>
         [YamlIgnore]
+#pragma warning disable CS8618
         public InvisibleInteractableToy Base { get; private set; }
+#pragma warning restore CS8618
 
         /// <summary>
         /// The type of this server object. Always <see cref="ObjectType.Interactable"/>.

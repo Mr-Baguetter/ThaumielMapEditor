@@ -55,7 +55,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         public override ObjectType ObjectType { get; set; } = ObjectType.Teleporter;
 
         [YamlIgnore]
+#pragma warning disable CS8618
         public TeleporterHandler TeleporterHandler { get; private set; }
+#pragma warning restore CS8618
 
         /// <inheritdoc/>
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)

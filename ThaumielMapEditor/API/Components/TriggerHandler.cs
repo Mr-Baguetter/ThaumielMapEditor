@@ -15,6 +15,7 @@ namespace ThaumielMapEditor.API.Components
 {
     public class TriggerHandler : MonoBehaviour
     {
+#pragma warning disable CS8618
         /// <summary>
         /// Gets the 
         /// </summary>
@@ -24,6 +25,7 @@ namespace ThaumielMapEditor.API.Components
         /// Gets the
         /// </summary>
         public Rigidbody Rigidbody { get; private set; }
+#pragma warning restore CS8618
 
         /// <summary>
         /// Fired when a <see cref="Player"/> enters the bounds of the <see cref="TriggerHandler"/>

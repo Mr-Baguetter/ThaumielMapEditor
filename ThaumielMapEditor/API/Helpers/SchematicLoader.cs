@@ -216,7 +216,7 @@ namespace ThaumielMapEditor.API.Helpers
             SchematicData? data = GetSchematicById(id);
             if (data == null)
             {
-                schematic = null;
+                schematic = null!;
                 return false;
             }
 
@@ -256,7 +256,7 @@ namespace ThaumielMapEditor.API.Helpers
             Dictionary<int, SerializableObject> objectsById = [];
             Dictionary<int, List<SerializableObject>> objectsByParent = [];
             Dictionary<int, List<SerializableObject>> serverObjectsByParent = [];
-            LODZone[] lodZones = schematicData.Primitive.GameObject.GetComponents<LODZone>();
+            LODZone[] lodZones = schematicData.Primitive!.GameObject.GetComponents<LODZone>();
 
             void CacheObject(SerializableObject obj, Dictionary<int, List<SerializableObject>> parentDict)
             {
@@ -355,7 +355,7 @@ namespace ThaumielMapEditor.API.Helpers
 
             foreach (SerializedMapSchematic ms in map.Schematics)
             {
-                Vector3 offset = data.Room.WorldPosition(ms.Position);
+                Vector3 offset = data.Room!.WorldPosition(ms.Position);
                 if (!LoadedSchematics.TryGetValue(ms.SchematicName, out SerializableSchematic schematic))
                 {
                     LogManager.Warn($"Schematic '{ms.SchematicName}' not found.");
@@ -904,7 +904,7 @@ namespace ThaumielMapEditor.API.Helpers
                             Position = serializable.Position,
                             Rotation = serializable.Rotation,
                             MovementSmoothing = serializable.MovementSmoothing,
-                            AssetId = PrefabHelper.PrimitiveObject.netIdentity.assetId,
+                            AssetId = PrefabHelper.PrimitiveObject!.netIdentity.assetId,
                             Schematic = schematicData
                         };
 
@@ -966,7 +966,7 @@ namespace ThaumielMapEditor.API.Helpers
                             Position = serializable.Position,
                             Rotation = serializable.Rotation,
                             MovementSmoothing = serializable.MovementSmoothing,
-                            AssetId = PrefabHelper.PrimitiveObject.netIdentity.assetId,
+                            AssetId = PrefabHelper.PrimitiveObject!.netIdentity.assetId,
                             Schematic = schematicData,
                             PrimitiveFlags = PrimitiveFlags.None,
                             PrimitiveType = PrimitiveType.Cube,
@@ -1060,7 +1060,7 @@ namespace ThaumielMapEditor.API.Helpers
                         {
                             ParentNetId = parentNetId,
                             NetId = NetworkIdentity.GetNextNetworkId(),
-                            AssetId = PrefabHelper.LightSource.netIdentity.assetId,
+                            AssetId = PrefabHelper.LightSource!.netIdentity.assetId,
                             Scale = serializable.Scale,
                             IsStatic = serializable.IsStatic,
                             Position = serializable.Position,
@@ -1265,7 +1265,7 @@ namespace ThaumielMapEditor.API.Helpers
             if (serializable.CullingSettings.Bounds != Vector3.zero)
             {
                 GameObject gameObject = new($"{obj.Name} - Culling Object");
-                gameObject.transform.SetParent(obj.Object.transform);
+                gameObject.transform.SetParent(obj.Object?.transform);
                 gameObject.AddComponent<CullingObject>().Init(obj, serializable.CullingSettings.Bounds);
             }
         }
@@ -1300,7 +1300,7 @@ namespace ThaumielMapEditor.API.Helpers
             SerializableMap map = new()
             {
                 FileName = data.FileName,
-                Room = data.Room.Name,
+                Room = data.Room!.Name,
                 Id = Guid.NewGuid()
             };
 

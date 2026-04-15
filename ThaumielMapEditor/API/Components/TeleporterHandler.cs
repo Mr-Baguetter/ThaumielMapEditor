@@ -24,7 +24,9 @@ namespace ThaumielMapEditor.API.Components
         /// <summary>
         /// Gets the <see cref="TeleporterObject"/> this handler is managing.
         /// </summary>
+#pragma warning disable CS8618
         public TeleporterObject Teleporter { get; private set; }
+#pragma warning restore CS8618
 
         /// <summary>
         /// Tracks per-player cooldown expiry times.
