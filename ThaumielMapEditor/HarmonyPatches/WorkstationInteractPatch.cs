@@ -25,9 +25,9 @@ namespace ThaumielMapEditor.HarmonyPatches
                 return true;
             }
 
-            foreach (SchematicData schematic in SchematicLoader.SpawnedSchematics.Where(s => !s.Workstations.IsEmpty()))
+            foreach (SchematicData schematic in SchematicLoader.SpawnedSchematics.Where(s => !s.GetServerObject<WorkstationObject>().IsEmpty()))
             {
-                foreach (WorkstationObject workstation in schematic.Workstations)
+                foreach (WorkstationObject workstation in schematic.GetServerObject<WorkstationObject>())
                 {
                     if (workstation.Base == __instance)
                     {

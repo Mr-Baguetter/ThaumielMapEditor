@@ -1,27 +1,25 @@
 // -----------------------------------------------------------------------
-// <copyright file="Effect.cs" company="Thaumiel Team">
+// <copyright file="Item.cs" company="Thaumiel Team">
 // Copyright (c) Thaumiel Team. All rights reserved.
 // Licensed under the GNU General Public License v3.0 (GPL-3.0).
 // </copyright>
 // -----------------------------------------------------------------------
 
 using System;
-using ThaumielMapEditor.API.Enums;
 
 namespace ThaumielMapEditor.API.Components.Tools.Helpers
 {
     [Serializable]
-    public class GiveEffect
+    public class GiveItem
     {
-        public int Intensity { get; set; }
-        public float Duration { get; set; }
-        public EffectType Effect { get; set; }
+        public ItemType Item { get; set; }
+        public uint Count { get; set; }
     }
 
     [Serializable]
-    public class RemoveEffect
+    public class RemoveItem
     {
-        public int Intensity { get; set; }
-        public EffectType Effect { get; set; }
+        public ItemType Item { get; set; }
+        public uint Count { get; set; }
     }
 }

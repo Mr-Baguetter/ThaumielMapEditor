@@ -42,7 +42,6 @@ namespace ThaumielMapEditor.HarmonyPatches
                 return false;
             }
 
-
             if (!keycard.Permissions.HasFlagAll(interactionobj.Permissions))
             {
                 OnDenied?.Invoke(interactionobj, player);

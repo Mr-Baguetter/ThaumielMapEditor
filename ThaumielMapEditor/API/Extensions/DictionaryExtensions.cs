@@ -9,6 +9,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using ThaumielMapEditor.API.Helpers;
 using UnityEngine;
 
 namespace ThaumielMapEditor.API.Extensions
@@ -24,96 +26,182 @@ namespace ThaumielMapEditor.API.Extensions
 
             try
             {
-                if (value is T direct)
+                return TryConvertToType(value, out result);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool TryConvertValue<T>(this Dictionary<string, object> dict, string key, out T result)
+            => dict.TryConvertValue<string, object, T>(key, out result);
+
+        public static T GetConvertValue<T>(this Dictionary<string, object> dict, string key)
+        {
+            dict.TryConvertValue<string, object, T>(key, out T result);
+            return result;
+        }
+
+        public static T GetConvertedValueOrDefault<TKey, TValue, T>(this Dictionary<TKey, TValue> dict, TKey key, T defaultValue = default!)
+            => dict.TryConvertValue(key, out T result) ? result : defaultValue;
+
+        public static bool TryConvertTo<T>(this Dictionary<string, object> dict, out T result) where T : new()
+        {
+            result = default!;
+
+            try
+            {
+                object? converted = ConvertFromDictionary(dict, typeof(T));
+                if (converted is T typed)
                 {
-                    result = direct;
+                    result = typed;
                     return true;
                 }
 
-                if (typeof(T) == typeof(Color))
-                {
-                    if (TryConvertToColor(value, out Color color))
-                    {
-                        result = (T)(object)color;
-                        return true;
-                    }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"TryConvertTo<{typeof(T).Name}> failed: {ex.Message}");
+                return false;
+            }
+        }
 
-                    return false;
+        public static T ConvertTo<T>(this Dictionary<string, object> dict) where T : new()
+        {
+            dict.TryConvertTo(out T result);
+            return result;
+        }
+
+        private static bool TryConvertToType<T>(object value, out T result)
+        {
+            result = default!;
+
+            if (value is T direct)
+            {
+                result = direct;
+                return true;
+            }
+
+            if (typeof(T) == typeof(Color))
+            {
+                if (TryConvertToColor(value, out Color color))
+                {
+                    result = (T)(object)color;
+                    return true;
                 }
 
-                if (typeof(T).IsEnum)
-                {
-                    try
-                    {
-                        string enumStr = value.ToString()!.Replace(" ", "");
-                        result = (T)Enum.Parse(typeof(T), enumStr, ignoreCase: true);
-                        return true;
-                    }
-                    catch
-                    {
-                        return false;
-                    }
-                }
+                return false;
+            }
 
-                if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(List<>))
-                {
-                    Type elementType = typeof(T).GetGenericArguments()[0];
+            if (typeof(T).IsEnum)
+                return TryConvertToEnum(value, out result);
 
-                    if (value is IEnumerable enumerable)
-                    {
-                        IList list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType))!;
-                        foreach (object? item in enumerable)
-                        {
-                            try
-                            {
-                                list.Add(ConvertFromDictionary(item, elementType));
-                            }
-                            catch
-                            {
-                                return false;
-                            }
-                        }
+            if (typeof(T) == typeof(Vector2) || typeof(T) == typeof(Vector3) || typeof(T) == typeof(Vector4))
+                return TryConvertToVector(value, out result);
 
-                        result = (T)list;
-                        return true;
-                    }
+            if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(List<>))
+                return TryConvertToList(value, out result);
 
-                    return false;
-                }
+            if (typeof(T).IsClass && typeof(T) != typeof(string))
+                return TryConvertToClass(value, out result);
 
-                if (typeof(T) == typeof(Vector2) || typeof(T) == typeof(Vector3) || typeof(T) == typeof(Vector4))
-                {
-                    try
-                    {
-                        if (value is Vector2 v2)
-                        {
-                            result = (T)(object)v2;
-                            return true;
-                        }
+            result = (T)Convert.ChangeType(value, typeof(T));
+            return true;
+        }
 
-                        if (value is Vector3 v3)
-                        {
-                            result = (T)(object)v3;
-                            return true;
-                        }
+        private static bool TryConvertToEnum<T>(object value, out T result)
+        {
+            result = default!;
 
-                        if (value is Vector4 v4)
-                        {
-                            result = (T)(object)v4;
-                            return true;
-                        }
-                    }
-                    catch
-                    {
-                        return false;
-                    }
-                }
-
-                result = (T)Convert.ChangeType(value, typeof(T));
+            try
+            {
+                string enumStr = value.ToString()!.Replace(" ", "");
+                result = (T)Enum.Parse(typeof(T), enumStr, ignoreCase: true);
                 return true;
             }
             catch
             {
+                return false;
+            }
+        }
+
+        private static bool TryConvertToVector<T>(object value, out T result)
+        {
+            result = default!;
+
+            try
+            {
+                if (value is Vector2 v2)
+                {
+                    result = (T)(object)v2;
+                    return true;
+                }
+
+                if (value is Vector3 v3)
+                {
+                    result = (T)(object)v3;
+                    return true;
+                }
+
+                if (value is Vector4 v4)
+                {
+                    result = (T)(object)v4;
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static bool TryConvertToList<T>(object value, out T result)
+        {
+            result = default!;
+            Type elementType = typeof(T).GetGenericArguments()[0];
+            if (value is not IEnumerable enumerable)
+                return false;
+
+            IList list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType))!;
+            foreach (object? item in enumerable)
+            {
+                try
+                {
+                    list.Add(ConvertFromDictionary(item, elementType));
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
+            result = (T)list;
+            return true;
+        }
+
+        private static bool TryConvertToClass<T>(object value, out T result)
+        {
+            result = default!;
+
+            try
+            {
+                object? converted = ConvertFromDictionary(value, typeof(T));
+
+                if (converted is T typed)
+                {
+                    result = typed;
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogManager.Warn($"TryConvertToClass<{typeof(T).Name}> failed: {ex.Message}");
                 return false;
             }
         }
@@ -162,18 +250,6 @@ namespace ThaumielMapEditor.API.Extensions
             return true;
         }
 
-        public static bool TryConvertValue<T>(this Dictionary<string, object> dict, string key, out T result) =>
-            dict.TryConvertValue<string, object, T>(key, out result);
-
-        public static T GetConvertValue<T>(this Dictionary<string, object> dict, string key)
-        {
-            dict.TryConvertValue<string, object, T>(key, out T result);
-            return result;
-        }
-
-        public static T GetConvertedValueOrDefault<TKey, TValue, T>(this Dictionary<TKey, TValue> dict, TKey key, T defaultValue = default!) =>
-            dict.TryConvertValue(key, out T result) ? result : defaultValue;
-
         private static object? ConvertFromDictionary(object? item, Type targetType)
         {
             if (item is null)
@@ -189,46 +265,58 @@ namespace ThaumielMapEditor.API.Extensions
             }
 
             if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(List<>))
-            {
-                Type elementType = targetType.GetGenericArguments()[0];
-                if (item is IEnumerable enumerable)
-                {
-                    IList list = (IList)Activator.CreateInstance(targetType)!;
-                    foreach (object? element in enumerable)
-                    {
-                        list.Add(ConvertFromDictionary(element, elementType));
-                    }
-
-                    return list;
-                }
-                return null;
-            }
+                return ConvertToListByType(item, targetType);
 
             if (item is Dictionary<object, object> untyped)
                 item = untyped.Where(k => k.Key != null).ToDictionary(k => k.Key.ToString()!, k => k.Value);
 
             if (item is Dictionary<string, object> dictItem)
-            {
-                object obj = Activator.CreateInstance(targetType)!;
-                foreach (var prop in targetType.GetProperties())
-                {
-                    if (!dictItem.TryGetValue(prop.Name, out var propValue))
-                        continue;
-
-                    try
-                    {
-                        prop.SetValue(obj, ConvertFromDictionary(propValue, prop.PropertyType));
-                    }
-                    catch
-                    {
-
-                    }
-                }
-
-                return obj;
-            }
+                return ConvertDictionaryToObject(dictItem, targetType);
 
             return Convert.ChangeType(item, targetType);
+        }
+
+        private static object? ConvertToListByType(object item, Type targetType)
+        {
+            Type elementType = targetType.GetGenericArguments()[0];
+            
+            if (item is not IEnumerable enumerable)
+                return null;
+
+            IList list = (IList)Activator.CreateInstance(targetType)!;
+
+            foreach (object? element in enumerable)
+            {
+                list.Add(ConvertFromDictionary(element, elementType));
+            }
+
+            return list;
+        }
+
+        private static object ConvertDictionaryToObject(Dictionary<string, object> dict, Type targetType)
+        {
+            object obj = Activator.CreateInstance(targetType)!;
+            PropertyInfo[] properties = targetType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (PropertyInfo prop in properties)
+            {
+                if (!prop.CanWrite)
+                    continue;
+
+                if (!dict.TryGetValue(prop.Name, out object? propValue))
+                    continue;
+
+                try
+                {
+                    prop.SetValue(obj, ConvertFromDictionary(propValue, prop.PropertyType));
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Warn($"Failed to set property '{prop.Name}' on {targetType.Name}: {ex.Message}");
+                }
+            }
+
+            return obj;
         }
     }
 }

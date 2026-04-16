@@ -55,7 +55,11 @@ namespace ThaumielMapEditor.API.Helpers.Networking
         /// </summary>
         /// <param name="onComplete">Runs when the <see cref="SendLogsCoroutine"/> has finished.</param>
         /// <returns>The <see cref="CoroutineHandle"/> of the ran <see cref="SendLogsCoroutine"/>.</returns>
-        public static CoroutineHandle SendRequest(Action<UploadResponse?> onComplete) => Timing.RunCoroutine(SendLogsCoroutine(onComplete));
+        public static CoroutineHandle SendRequest(Action<UploadResponse?> onComplete)
+        {
+            MECHelper.TryRunCoroutine(SendLogsCoroutine(onComplete), out var handle);
+            return handle;
+        }
 
         private static IEnumerator<float> SendLogsCoroutine(Action<UploadResponse?> onComplete)
         {

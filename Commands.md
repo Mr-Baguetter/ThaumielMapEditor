@@ -16,6 +16,7 @@ These commands are executed via the main Remote Admin command (`tme <subcommand>
 | :--- | :--- | :--- | :--- | :--- |
 | `thaumielmapeditor` | `tme` | None | None | Manage the features of Thaumiel Map Editor |
 | `convert` | `cv` | <code>&lt;Schematic Name&gt;</code> | `tme.convert` | Converts the PMER schematic with the specified name |
+| `coroutines` | `coro, cor` | None | `tme.coroutines` | Lists all the coroutines running or ran |
 | `destroy` | `de, delete, remove, del` | <code>&lt;Schematic Id&gt;</code> | `tme.destroy` | Destroys the specified schematic |
 | `grab` | `gr` | <code>&lt;Schematic ID&gt;</code> | `tme.grab` | Grabs the specified schematic |
 | `list` | `li` | None | `tme.list` | Lists all schematics |

@@ -254,22 +254,31 @@ namespace ThaumielMapEditor.API.Helpers
         // Hopefuly this will stop clients from crashing when spawning large schematics.
         private static IEnumerator<float> SpawnObjectsBatched(SerializableSchematic schematic, SchematicData schematicData, uint rootNetId)
         {
-            Dictionary<int, SerializableObject> objectsById = [];
+            Dictionary<int, (SerializableObject, bool)> objectsById = [];
             Dictionary<int, List<SerializableObject>> objectsByParent = [];
             Dictionary<int, List<SerializableObject>> serverObjectsByParent = [];
             LODZone[] lodZones = schematicData.Primitive!.GameObject.GetComponents<LODZone>();
 
-            void CacheObject(SerializableObject obj, Dictionary<int, List<SerializableObject>> parentDict)
+            void CacheObject(SerializableObject obj, Dictionary<int, List<SerializableObject>> parentDict, bool serverside = false)
             {
-                objectsById[obj.ObjectId] = obj;
+                if (objectsById.ContainsKey(obj.ObjectId))
+                    return;
+
+                objectsById.Add(obj.ObjectId, (obj, serverside));
 
                 if (!parentDict.TryGetValue(obj.ParentId, out var list))
                 {
                     list = [];
-                    parentDict[obj.ParentId] = list;
+                    parentDict.Add(obj.ParentId, list);
                 }
 
                 list.Add(obj);
+                parentDict[obj.ParentId] = list;
+            }
+
+            foreach (SerializableObject obj in schematic.ServerSideObjects)
+            {
+                CacheObject(obj, serverObjectsByParent, true);
             }
 
             foreach (SerializableObject obj in schematic.Objects)
@@ -277,46 +286,48 @@ namespace ThaumielMapEditor.API.Helpers
                 CacheObject(obj, objectsByParent);
             }
 
-            foreach (SerializableObject obj in schematic.ServerSideObjects)
-            {
-                CacheObject(obj, serverObjectsByParent);
-            }
-
             Queue<(int id, uint parentNetId)> spawnQueue = new();
             HashSet<int> visited = [];
             spawnQueue.Enqueue((schematic.RootObjectId, rootNetId));
-            
+
             int objectsProcessed = 0;
 
             while (spawnQueue.Count > 0)
             {
-                (int currentId, uint parentNetId) = spawnQueue.Dequeue();
-
-                if (!visited.Add(currentId))
-                    continue;
-
-                uint currentNetId = parentNetId;
-
-                if (objectsById.TryGetValue(currentId, out var obj))
+                try
                 {
-                    currentNetId = SpawnSerializableObject(obj, schematicData, parentNetId, lodZones);
-                    objectsProcessed++;
-                }
+                    (int currentId, uint parentNetId) = spawnQueue.Dequeue();
 
-                if (objectsByParent.TryGetValue(currentId, out var children))
-                {
-                    foreach (SerializableObject child in children)
+                    if (!visited.Add(currentId))
+                        continue;
+
+                    uint currentNetId = parentNetId;
+
+                    if (objectsById.TryGetValue(currentId, out var obj))
                     {
-                        spawnQueue.Enqueue((child.ObjectId, currentNetId));
+                        currentNetId = SpawnSerializableObject(obj.Item1, schematicData, parentNetId, lodZones, serverside: obj.Item2);
+                        objectsProcessed++;
+                    }
+
+                    if (objectsByParent.TryGetValue(currentId, out var children))
+                    {
+                        foreach (SerializableObject child in children)
+                        {
+                            spawnQueue.Enqueue((child.ObjectId, currentNetId));
+                        }
+                    }
+
+                    if (serverObjectsByParent.TryGetValue(currentId, out var serverChildren))
+                    {
+                        foreach (SerializableObject child in serverChildren)
+                        {
+                            spawnQueue.Enqueue((child.ObjectId, currentNetId));
+                        }
                     }
                 }
-
-                if (serverObjectsByParent.TryGetValue(currentId, out var serverChildren))
+                catch (Exception ex)
                 {
-                    foreach (SerializableObject child in serverChildren)
-                    {
-                        spawnQueue.Enqueue((child.ObjectId, currentNetId));
-                    }
+                    LogManager.Error($"Exception during object spawning {ex}");
                 }
 
                 if (objectsProcessed >= 50)
@@ -419,7 +430,7 @@ namespace ThaumielMapEditor.API.Helpers
                 }
             }
         }
-        
+
         private static SerializableSchematic? TryLoadSchematicFromDirectory(string directory, string schematicName)
         {
             if (!Directory.Exists(directory))
@@ -904,6 +915,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                         serverprim.Name = serializable.Name;
                         SetupCulling(serializable, serverprim, schematicData);
+                        LogManager.Debug($"[SERVER] {serverprim.Name} - {serverprim.Color} - {serverprim.PrimitiveType} - {serverprim.PrimitiveFlags}");
                         return serverprim.NetId;
                     }
                     else
@@ -923,6 +935,7 @@ namespace ThaumielMapEditor.API.Helpers
                         };
 
                         primitive.DeserializeValues(serializable);
+                        LogManager.Debug($"[CLIENT] {primitive.Name} - {primitive.Color} - {primitive.PrimitiveType} - {primitive.PrimitiveFlags}");
                         schematicData.SpawnedClientObjects.Add(primitive);
                         if (lodZones.IsEmpty())
                         {

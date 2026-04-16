@@ -28,7 +28,7 @@ namespace ThaumielMapEditor.API.Conversion
             options.Converters.Add(new ObjectDictionaryConverter());
             options.Converters.Add(new Vector3Converter());
 
-            return JsonSerializer.Deserialize<PMERRoot>(json, options);
+            return JsonSerializer.Deserialize<PMERRoot>(json, options) ?? new();
         }
     }
 }

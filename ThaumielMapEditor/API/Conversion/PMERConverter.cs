@@ -143,8 +143,10 @@ namespace ThaumielMapEditor.API.Conversion
                     if (dict.TryGetValue("Range", out var range))
                         dict["LightRange"] = Convert.ToSingle(range);
 
+#pragma warning disable CS0618
                     if (dict.TryGetValue("Shape", out var shape))
                         dict["LightShape"] = (LightShape)Convert.ToInt32(shape);
+#pragma warning restore CS0618
 
                     if (dict.TryGetValue("SpotAngle", out var spotangle))
                         dict["SpotAngle"] = Convert.ToSingle(spotangle);
@@ -206,7 +208,7 @@ namespace ThaumielMapEditor.API.Conversion
                         dict["Text"] = Convert.ToString(text);
 
                     if (dict.TryGetValue("DisplaySize", out var displaysize))
-                        dict["DisplaySize"] = ConvertExtensions.ToVector2(displaysize);
+                        dict["DisplaySize"] = ConvertExtensions.ToVector2(displaysize) ?? TextToy.DefaultDisplaySize;
                         
                     break;
             }

@@ -7,7 +7,7 @@
 
 using System;
 using CommandSystem;
-using MEC;
+using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Helpers.Networking;
 
 namespace ThaumielMapEditor.Commands.Console
@@ -41,7 +41,7 @@ namespace ThaumielMapEditor.Commands.Console
                 }
             }
 
-            Timing.WaitUntilDone(Timing.RunCoroutine(Updater.UpdatePluginCoroutine(Force, Prerelease)));
+            MECHelper.TryRunCoroutine(Updater.UpdatePluginCoroutine(Force, Prerelease));
             response = "Request ran";
             return true;
         }

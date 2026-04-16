@@ -33,12 +33,12 @@ namespace ThaumielMapEditor.API.Conversion
                 if (reader.TokenType == JsonTokenType.EndObject)
                     break;
 
-                string key = reader.GetString();
+                string key = reader.GetString() ?? string.Empty;
 
                 reader.Read();
                 JsonElement element = JsonDocument.ParseValue(ref reader).RootElement;
 
-                dict[key] = element.ToObject();
+                dict[key] = element.ToObject()!;
             }
 
             return dict;

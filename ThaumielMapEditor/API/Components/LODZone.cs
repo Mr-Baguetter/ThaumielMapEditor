@@ -57,7 +57,7 @@ namespace ThaumielMapEditor.API.Components
 
         private void OnTriggerEnter(Player player, Collider other)
         {
-            foreach (PrimitiveObject prim in Schematic.Primitives)
+            foreach (PrimitiveObject prim in Schematic.GetClientObject<PrimitiveObject>())
             {
                 if (!PrimitivestoUnload.Contains(prim.PrimitiveType))
                     continue;
@@ -73,7 +73,7 @@ namespace ThaumielMapEditor.API.Components
 
         private void OnTriggerExit(Player player, Collider other)
         {
-            foreach (PrimitiveObject prim in Schematic.Primitives)
+            foreach (PrimitiveObject prim in Schematic.GetClientObject<PrimitiveObject>())
             {
                 if (!PrimitivestoUnload.Contains(prim.PrimitiveType))
                     continue;

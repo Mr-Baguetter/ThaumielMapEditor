@@ -221,7 +221,7 @@ namespace ThaumielMapEditor.API.Blocks
         /// server objects.
         /// </summary>
         /// <param name="schematic">The schematic data instance from which the object will be removed.</param>
-        public void DestroyObject(SchematicData schematic)
+        public virtual void DestroyObject(SchematicData schematic)
         {
             if (Object == null)
             {

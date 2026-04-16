@@ -21,7 +21,6 @@ namespace ThaumielMapEditor.API.Components.Tools
         private static readonly Dictionary<string, List<DoorLink>> Groups = [];
         
         private static readonly List<DoorLink> ActiveLinks = [];
-        private static CoroutineHandle PollHandle;
         private static float waitTime = 0.1f;
 
         private DoorObject? door;
@@ -61,9 +60,7 @@ namespace ThaumielMapEditor.API.Components.Tools
             group.Add(this);
             ActiveLinks.Add(this);
             LogManager.Debug($"DoorLink registered door '{obj.Name}' to group '{GroupId}' in '{schem.FileName}'.");
-
-            if (!PollHandle.IsRunning)
-                PollHandle = Timing.RunCoroutine(GlobalPollRoutine());
+            MECHelper.TryRunCoroutine(GlobalPollRoutine());
 
             if (Main.Instance.Config!.DoorPollingDelay == 0)
             {

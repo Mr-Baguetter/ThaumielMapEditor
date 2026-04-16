@@ -222,7 +222,14 @@ namespace ThaumielMapEditor.API.Helpers
             if (mesh != null)
             {
                 primitive.ServerCollider = mesh;
-                SchematicColliders[primitive.Schematic].Add(mesh);
+                if (!SchematicColliders.TryGetValue(primitive.Schematic, out var value))
+                {
+                    value = [];
+                    SchematicColliders.Add(primitive.Schematic, value);
+                }
+
+                value.Add(mesh);
+                SchematicColliders[primitive.Schematic] = value;
             }
             else
             {

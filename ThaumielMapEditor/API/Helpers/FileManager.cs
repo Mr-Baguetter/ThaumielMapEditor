@@ -5,7 +5,9 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.IO;
+using System.Threading.Tasks;
 using LabApi.Loader.Features.Paths;
 
 namespace ThaumielMapEditor.API.Helpers
@@ -45,5 +47,29 @@ namespace ThaumielMapEditor.API.Helpers
         /// <returns>An array of file paths matching the <paramref name="filter"/> in the resolved directory.</returns>
         public static string[] GetFilesInDirectory(string name, string filter = "*") =>
             Directory.GetFiles(Dir([name]), filter);
+
+        /// <summary>
+        /// Reads the specified file at the file path in the background.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="onComplete">Fired when the reading is complete with the read text</param>
+        public static void ReadFileInBackground(string path, Action<string> onComplete)
+        {
+            if (!File.Exists(path))
+                return;
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    string content = File.ReadAllText(path);
+                    onComplete?.Invoke(content);
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Error($"Exception reading file: {ex}");
+                }
+            });
+        }
     }
 }

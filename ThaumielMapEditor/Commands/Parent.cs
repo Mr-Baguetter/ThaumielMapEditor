@@ -42,6 +42,7 @@ namespace ThaumielMapEditor.Commands
             Subcommands.Add(new Grab());
             Subcommands.Add(new Rotation());
             Subcommands.Add(new Admin.Convert());
+            Subcommands.Add(new Coroutines());
         }
 
         private List<ISubCommand> Subcommands { get; } = [];

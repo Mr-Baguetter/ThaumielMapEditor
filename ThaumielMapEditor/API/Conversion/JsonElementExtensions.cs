@@ -11,7 +11,7 @@ namespace ThaumielMapEditor.API.Conversion
 {
     public static class JsonElementExtensions
     {
-        public static object ToObject(this JsonElement element)
+        public static object? ToObject(this JsonElement element)
         {
             return element.ValueKind switch
             {

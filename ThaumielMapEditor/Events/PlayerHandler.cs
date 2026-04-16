@@ -11,6 +11,7 @@ using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using MEC;
 using ThaumielMapEditor.API.Blocks.ClientSide;
+using ThaumielMapEditor.API.Blocks.ServerObjects;
 using ThaumielMapEditor.API.Components;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Helpers;
@@ -29,6 +30,7 @@ namespace ThaumielMapEditor.Events
         {
             PlayerEvents.Joined += OnPlayerJoined;
             PlayerEvents.ChangedSpectator += OnPlayerChangedSpectator;
+            PlayerEvents.Spawned += PlayerSpawnPoint.OnPlayerSpawned;
             ReferenceHub.OnBeforePlayerDestroyed += OnPlayerLeft;
         }
 
@@ -36,6 +38,7 @@ namespace ThaumielMapEditor.Events
         {
             PlayerEvents.Joined -= OnPlayerJoined;
             PlayerEvents.ChangedSpectator -= OnPlayerChangedSpectator;
+            PlayerEvents.Spawned -= PlayerSpawnPoint.OnPlayerSpawned;
             ReferenceHub.OnBeforePlayerDestroyed -= OnPlayerLeft;
         }
 
@@ -101,7 +104,7 @@ namespace ThaumielMapEditor.Events
                 if (!SchematicLoader.SchematicLODZones.TryGetValue(zone, out var schematic))
                     continue;
 
-                foreach (PrimitiveObject primitive in schematic.Primitives)
+                foreach (PrimitiveObject primitive in schematic.GetClientObject<PrimitiveObject>())
                 {
                     if (zone.PrimitivestoUnload.Contains(primitive.PrimitiveType))
                     {

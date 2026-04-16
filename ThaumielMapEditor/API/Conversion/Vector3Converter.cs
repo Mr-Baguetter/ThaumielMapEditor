@@ -28,7 +28,7 @@ namespace ThaumielMapEditor.API.Conversion
                 if (reader.TokenType != JsonTokenType.PropertyName)
                     throw new JsonException("Expected PropertyName token.");
 
-                string propName = reader.GetString();
+                string propName = reader.GetString() ?? string.Empty;
                 reader.Read();
 
                 switch (propName?.ToLowerInvariant())

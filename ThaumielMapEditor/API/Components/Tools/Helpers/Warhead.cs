@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="Effect.cs" company="Thaumiel Team">
+// <copyright file="Warhead.cs" company="Thaumiel Team">
 // Copyright (c) Thaumiel Team. All rights reserved.
 // Licensed under the GNU General Public License v3.0 (GPL-3.0).
 // </copyright>
@@ -11,17 +11,9 @@ using ThaumielMapEditor.API.Enums;
 namespace ThaumielMapEditor.API.Components.Tools.Helpers
 {
     [Serializable]
-    public class GiveEffect
+    public class Warhead
     {
-        public int Intensity { get; set; }
-        public float Duration { get; set; }
-        public EffectType Effect { get; set; }
-    }
-
-    [Serializable]
-    public class RemoveEffect
-    {
-        public int Intensity { get; set; }
-        public EffectType Effect { get; set; }
+        public WarheadAction Action { get; set; }
+        public bool SuppressSubtitles { get; set; }
     }
 }

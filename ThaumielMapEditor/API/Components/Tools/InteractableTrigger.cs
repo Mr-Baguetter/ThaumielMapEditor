@@ -5,11 +5,9 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using Interactables.Interobjects.DoorUtils;
 using LabApi.Features.Wrappers;
 using SecretLabNAudio.Core;
 using SecretLabNAudio.Core.Extensions;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using ThaumielMapEditor.API.Blocks;
@@ -23,22 +21,29 @@ using ThaumielMapEditor.Commands;
 using ThaumielMapEditor.HarmonyPatches;
 using static AdminToys.InvisibleInteractableToy;
 using static ThaumielMapEditor.API.Components.Tools.Helpers.RunCommand;
+using Warhead = ThaumielMapEditor.API.Components.Tools.Helpers.Warhead;
+using LabWarhead = LabApi.Features.Wrappers.Warhead;
+using CustomPlayerEffects;
+using MEC;
+using System.Linq;
 
 namespace ThaumielMapEditor.API.Components.Tools
 {
     public class InteractableTrigger : ToolBase
     {
+        private static Dictionary<Player, HashSet<StatusEffectBase>> PlayerEffectCache = [];
+
         public Vector3 Bounds;
 
         public float InteractionTime;
-
-        public DoorPermissionFlags Permission;
 
         public ColliderShape Shape;
 #pragma warning disable CS8618
         public InteractableClasses OnInteracted;
 
         public InteractableClasses OnInteractionDenied;
+        
+        public Permission Permissions;
 
         public InteractionObject Interactable;
 #pragma warning restore CS8618
@@ -55,7 +60,7 @@ namespace ThaumielMapEditor.API.Components.Tools
                 Rotation = obj.Rotation,
                 Shape = Shape,
                 InteractionDuration = InteractionTime,
-                Permissions = Permission
+                Permissions = Permissions.KeycardPermissions
             };
 
             Interactable.SpawnObject(schem);
@@ -78,10 +83,15 @@ namespace ThaumielMapEditor.API.Components.Tools
             if (obj != Interactable)
                 return;
 
+            if (!Permissions.AllowedRoles.IsEmpty() && !Permissions.AllowedRoles.Contains(player.Role))
+                return;
+
             HandleAnimation(OnInteractionDenied, player);
             HandleEffect(OnInteractionDenied, player);
             HandleCommand(OnInteractionDenied, player);
             HandleAudio(OnInteractionDenied, player);
+            HandleWarhead(OnInteractionDenied, player);
+            HandleCassie(OnInteracted, player);
         }
 
         public void Interacted(InteractionObject obj, Player player)
@@ -89,10 +99,61 @@ namespace ThaumielMapEditor.API.Components.Tools
             if (obj != Interactable)
                 return;
 
+            if (!Permissions.AllowedRoles.IsEmpty() && !Permissions.AllowedRoles.Contains(player.Role))
+                return;
+
             HandleAnimation(OnInteracted, player);
             HandleEffect(OnInteracted, player);
             HandleCommand(OnInteracted, player);
             HandleAudio(OnInteracted, player);
+            HandleWarhead(OnInteracted, player);
+            HandleCassie(OnInteracted, player);
+        }
+
+        private void HandleCassie(InteractableClasses classes, Player player)
+        {
+            foreach (SendCassieMessage message in classes.SendCassieMessage)
+            {
+                message.ValidateLines();
+                Announcer.Message(message.Message, message.CustomSubtitles, message.PlayBackground, message.Priority, message.GlitchScale);
+            }
+        }
+
+        private void HandleWarhead(InteractableClasses classes, Player player)
+        {
+            foreach (Warhead warhead in classes.Warhead)
+            {
+                switch (warhead.Action)
+                {
+                    case WarheadAction.Start:
+                        LabWarhead.Start(suppressSubtitles: warhead.SuppressSubtitles, activator: player);
+                        break;
+
+                    case WarheadAction.Stop:
+                        LabWarhead.Stop(activator: player);
+                        break;
+                    
+                    case WarheadAction.Detonate:
+                        LabWarhead.Detonate();
+                        break;
+
+                    case WarheadAction.Lock:
+                        LabWarhead.IsLocked = true;
+                        break;
+
+                    case WarheadAction.Unlock:
+                        LabWarhead.IsLocked = false;
+                        break;
+
+                    case WarheadAction.Disable:
+                        LabWarhead.LeverStatus = false;
+                        break;
+
+                    case WarheadAction.Enable:
+                        LabWarhead.LeverStatus = true;
+                        break;
+                }
+            }
         }
 
         private void HandleAnimation(InteractableClasses classes, Player player)
@@ -107,30 +168,38 @@ namespace ThaumielMapEditor.API.Components.Tools
         {
             foreach (GiveEffect give in classes.GiveEffect)
             {
-                if (!Enum.TryParse<EffectType>(give.EffectName, true, out var effect))
-                    continue;
-
-                if (!player.ReferenceHub.playerEffectsController.TryGetEffect(effect.ToString(), out var effectBase))
+                if (!player.TryGetEffect(give.Effect.ToString(), out var effectBase))
                 {
-                    LogManager.Warn($"Invalid EffectType {effect} for player {player.DisplayName} - {player.PlayerId}");
+                    LogManager.Warn($"Invalid EffectType {give.Effect} for player {player.DisplayName} - {player.PlayerId}");
                     continue;
                 }
+
+                if (effectBase.IsEnabled)
+                    PlayerEffectCache[player].Add(effectBase);
 
                 player.EnableEffect(effectBase, (byte)give.Intensity, give.Duration, true);
             }
 
             foreach (RemoveEffect remove in classes.RemoveEffect)
             {
-                if (!Enum.TryParse<EffectType>(remove.EffectName, true, out var effect))
-                    continue;
-
-                if (!player.ReferenceHub.playerEffectsController.TryGetEffect(effect.ToString(), out var effectBase))
+                if (!player.TryGetEffect(remove.Effect.ToString(), out var effectBase))
                 {
-                    LogManager.Warn($"Invalid EffectType {effect} for player {player.DisplayName} - {player.PlayerId}");
+                    LogManager.Warn($"Invalid EffectType {remove.Effect} for player {player.DisplayName} - {player.PlayerId}");
                     continue;
                 }
 
                 player.DisableEffect(effectBase);
+                if (PlayerEffectCache.TryGetValue(player, out var effects))
+                {
+                    Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+                    {
+                        StatusEffectBase? status = effects.FirstOrDefault(e => e == effectBase);
+                        if (status == null)
+                            return;
+                        
+                        player.EnableEffect(status, status._intensity, status._duration);
+                    });
+                }
             }
         }
 
@@ -184,29 +253,23 @@ namespace ThaumielMapEditor.API.Components.Tools
 
         public void ParseValues(Dictionary<string, object> properties)
         {
-            if (properties.TryGetValue("OnInteracted", out var interacted))
-                OnInteracted = MapToObject<InteractableClasses>(interacted) ?? new();
+            if (properties.TryConvertValue<InteractableClasses>("OnInteracted", out var interacted))
+                OnInteracted = interacted;
 
-            if (properties.TryGetValue("OnInteractionDenied", out var denied))
-                OnInteractionDenied = MapToObject<InteractableClasses>(denied) ?? new();
+            if (properties.TryConvertValue<InteractableClasses>("OnInteractionDenied", out var denied))
+                OnInteractionDenied = denied;
 
             if (properties.TryConvertValue<ColliderShape>("Shape", out var shape))
                 Shape = shape;
 
-            if (properties.TryConvertValue<DoorPermissionFlags>("Permission", out var perms))
-                Permission = perms;
+            if (properties.TryConvertValue<Permission>("Permission", out var perms))
+                Permissions = perms;
 
-            if (properties.TryGetValue("InteractionTime", out var time))
-                InteractionTime = Convert.ToSingle(time);
+            if (properties.TryConvertValue<float>("InteractionTime", out var time))
+                InteractionTime = time;
 
-            if (properties.TryGetValue("Bounds", out var raw) && raw is IDictionary<object, object> dict)
-            {
-                float x = Convert.ToSingle(dict["x"]);
-                float y = Convert.ToSingle(dict["y"]);
-                float z = Convert.ToSingle(dict["z"]);
-
-                Bounds = new(x, y, z);
-            }
+            if (properties.TryConvertValue<Vector3>("Bounds", out var bounds))
+                Bounds = bounds;
         }
     }
 }

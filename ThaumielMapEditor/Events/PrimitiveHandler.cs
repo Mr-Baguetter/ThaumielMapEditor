@@ -60,7 +60,7 @@ namespace ThaumielMapEditor.Events
 
         private static void OnSchematicPositionUpdated(SchematicData schematic)
         {
-            foreach (PrimitiveObject primitive in schematic.Primitives)
+            foreach (PrimitiveObject primitive in schematic.GetClientObject<PrimitiveObject>())
             {
                 if (!primitive.PrimitiveFlags.HasFlag(PrimitiveFlags.Collidable) || primitive.ServerCollider == null || schematic.Primitive == null)
                     continue;
@@ -72,7 +72,7 @@ namespace ThaumielMapEditor.Events
 
         private static void OnSchematicRotationUpdated(SchematicData schematic)
         {
-            foreach (PrimitiveObject primitive in schematic.Primitives)
+            foreach (PrimitiveObject primitive in schematic.GetClientObject<PrimitiveObject>())
             {
                 if (!primitive.PrimitiveFlags.HasFlag(PrimitiveFlags.Collidable) || primitive.ServerCollider == null)
                     continue;

@@ -9,10 +9,11 @@ using System.Linq;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Events.Arguments.WarheadEvents;
 using LabApi.Events.Handlers;
-using MEC;
+using PlayerRoles;
 using ThaumielMapEditor.API.Blocks.ClientSide;
 using ThaumielMapEditor.API.Blocks.ServerObjects;
 using ThaumielMapEditor.API.Data;
+using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Helpers.Networking;
 
@@ -25,9 +26,11 @@ namespace ThaumielMapEditor.Events
             ServerEvents.WaitingForPlayers += OnWaitingForPlayers;
             ServerEvents.RoundStarted += OnRoundStart;
             ServerEvents.LczDecontaminationStarted += OnDecom;
+            ServerEvents.WaveRespawned += OnWaveSpawned;
             WarheadEvents.Started += OnWarheadStarting;
             WarheadEvents.Detonated += OnWarheadDetonated;
             ServerEvents.RoomLightChanged += OnRoomLightChanged;
+            ServerEvents.DeadmanSequenceActivating += OnDMSActived;
         }
 
         public static void Unregister()
@@ -35,9 +38,39 @@ namespace ThaumielMapEditor.Events
             ServerEvents.WaitingForPlayers -= OnWaitingForPlayers;
             ServerEvents.RoundStarted -= OnRoundStart;
             ServerEvents.LczDecontaminationStarted -= OnDecom; 
+            ServerEvents.WaveRespawned -= OnWaveSpawned;
             WarheadEvents.Started -= OnWarheadStarting;
             WarheadEvents.Detonated -= OnWarheadDetonated;
             ServerEvents.RoomLightChanged -= OnRoomLightChanged;
+            ServerEvents.DeadmanSequenceActivating -= OnDMSActived;
+        }
+
+        private static void OnDMSActived(DeadmanSequenceActivatingEventArgs ev)
+        {
+            foreach (PlayerSpawnPoint point in PlayerSpawnPoint.Instances.Where(p => p.HasFlagFast(DisableFlags.DeadmanSequenceActivated)))
+            {
+                point.Disabled = true;
+            }
+        }
+
+        private static void OnWaveSpawned(WaveRespawnedEventArgs ev)
+        {
+            switch (ev.Wave.Faction)
+            {
+                case Faction.FoundationStaff:
+                    foreach (PlayerSpawnPoint point in PlayerSpawnPoint.Instances.Where(p => p.HasFlagFast(DisableFlags.NTFWaveSpawned)))
+                    {
+                        point.Disabled = true;
+                    }
+                    break;
+
+                case Faction.FoundationEnemy:
+                    foreach (PlayerSpawnPoint point in PlayerSpawnPoint.Instances.Where(p => p.HasFlagFast(DisableFlags.ChaosWaveSpawned)))
+                    {
+                        point.Disabled = true;
+                    }
+                    break;
+            }
         }
 
         // TODO Test.
@@ -45,10 +78,10 @@ namespace ThaumielMapEditor.Events
         {
             foreach (SchematicData schematic in SchematicLoader.SpawnedSchematics.Where(s => s.Room != null && s.Room == ev.Room))
             {
-                if (schematic.Lights.IsEmpty() && schematic.ServerLights.IsEmpty())
+                if (schematic.GetClientObject<LightObject>().IsEmpty() && schematic.GetServerObject<LightObjectServer>().IsEmpty())
                     continue;
 
-                foreach (LightObjectServer serverLight in schematic.ServerLights)
+                foreach (LightObjectServer serverLight in schematic.GetServerObject<LightObjectServer>())
                 {
                     float Intensity = 0;
                     Intensity = serverLight.Intensity;
@@ -61,7 +94,7 @@ namespace ThaumielMapEditor.Events
                         serverLight.Intensity = Intensity;
                 }
 
-                foreach (LightObject light in schematic.Lights)
+                foreach (LightObject light in schematic.GetClientObject<LightObject>())
                 {
                     float Intensity = 0;
                     Intensity = light.Intensity;
@@ -79,7 +112,7 @@ namespace ThaumielMapEditor.Events
         private static void OnWaitingForPlayers()
         {
             PrefabHelper.RegisterPrefabs();
-            Timing.RunCoroutine(Updater.CheckForUpdatesCoroutine(false));
+            MECHelper.TryRunCoroutine(Updater.CheckForUpdatesCoroutine(false), "WaitingForPlayers - Update Check");
 
             foreach (string name in Main.Instance.Config!.WaitingForPlayers)
             {
@@ -101,6 +134,11 @@ namespace ThaumielMapEditor.Events
             {
                 MapLoader.ParseInput(name);
             }
+
+            foreach (PlayerSpawnPoint point in PlayerSpawnPoint.Instances.Where(p => p.HasFlagFast(DisableFlags.Decontamination)))
+            {
+                point.Disabled = true;
+            }
         }
 
         private static void OnWarheadStarting(WarheadStartedEventArgs ev)
@@ -116,6 +154,11 @@ namespace ThaumielMapEditor.Events
             foreach (string name in Main.Instance.Config!.WarheadDetonated)
             {
                 MapLoader.ParseInput(name);
+            }
+
+            foreach (PlayerSpawnPoint point in PlayerSpawnPoint.Instances.Where(p => p.HasFlagFast(DisableFlags.WarheadDetonated)))
+            {
+                point.Disabled = true;
             }
         }
     }

@@ -18,5 +18,9 @@ namespace ThaumielMapEditor.API.Components.Tools.Helpers
         public List<GiveEffect> GiveEffect { get; set; } = [];
         public List<RemoveEffect> RemoveEffect { get; set; } = [];
         public List<PlayAnimation> PlayAnimation { get; set; } = [];
+        public List<GiveItem> GiveItem { get; set; } = [];
+        public List<RemoveItem> RemoveItem { get; set; } = [];
+        public List<Warhead> Warhead { get; set; } = [];
+        public List<SendCassieMessage> SendCassieMessage { get; set; } = [];
     }
 }
