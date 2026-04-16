@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Northwood.LabAPI" Version="1.1.5" Publicize="true" />
+    <PackageReference Include="Northwood.LabAPI" Version="1.1.6.1" Publicize="true" />
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.*" />
     <PackageReference Include="System.Text.Json" Version="10.0.1" />
     <PackageReference Include="Costura.Fody" Version="6.0.0">
@@ -118,6 +118,6 @@
   </Target>
   <Target Name="DocumentCommands" AfterTargets="PostBuildCopy">
     <Message Text="Parsing commands to markdown" Importance="high" />
-    <Exec Command='python ..\parsecommands.py --base-dir "$(MSBuildProjectDirectory)\.."' />
+    <Exec Command="python ..\parsecommands.py --base-dir &quot;$(MSBuildProjectDirectory)\..&quot;" />
   </Target>
 </Project>
