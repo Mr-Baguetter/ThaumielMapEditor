@@ -1,11 +1,7 @@
-﻿using Discord;
-using HarmonyLib;
+﻿using HarmonyLib;
 using System;
 using System.Text.RegularExpressions;
-using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Helpers.Networking;
-using UnityEngine.Windows;
-using static Subtitles.SubtitleCategory;
 
 namespace ThaumielMapEditor.HarmonyPatches
 {

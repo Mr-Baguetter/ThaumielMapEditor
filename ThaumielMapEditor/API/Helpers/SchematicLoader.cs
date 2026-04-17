@@ -79,10 +79,8 @@ namespace ThaumielMapEditor.API.Helpers
         /// </summary>
         public static List<SerializableMap> LoadedMaps = [];
 
-        /// <summary>
-        /// dodad
-        /// </summary>
-        public static Dictionary<int, Transform> ServerSideTransforms = [];
+        [Obsolete($"Unused, Use {nameof(SchematicData)}::ServerSideTransforms now")]
+        public static Dictionary<int, Transform> ServerSideTransforms = []; 
 
         /// <summary>
         /// dodad2
@@ -757,7 +755,7 @@ namespace ThaumielMapEditor.API.Helpers
                 {
                     GameObject dummyNode = new($"[SchematicNode] {obj.Name}");
 
-                    if (ServerSideTransforms.TryGetValue(obj.ParentId, out Transform parentTransform))
+                    if (schematicData.ServerSideTransforms.TryGetValue(obj.ParentId, out Transform parentTransform))
                     {
                         dummyNode.transform.SetParent(parentTransform, false);
                     }
@@ -769,7 +767,7 @@ namespace ThaumielMapEditor.API.Helpers
                     dummyNode.transform.localScale = obj.Scale;
 
                     LogManager.Info($"Added transform with local position: {dummyNode.transform.localPosition}");
-                    ServerSideTransforms[obj.ObjectId] = dummyNode.transform;
+                    schematicData.ServerSideTransforms[obj.ObjectId] = dummyNode.transform;
                 }
             }
         }

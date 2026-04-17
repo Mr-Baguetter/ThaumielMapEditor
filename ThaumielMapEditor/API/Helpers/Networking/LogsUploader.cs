@@ -11,7 +11,6 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Discord;
 using LabApi.Features;
 using LabApi.Features.Wrappers;
 using MEC;

@@ -18,6 +18,7 @@ using ThaumielMapEditor.API.Components.Tools;
 using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Components;
 using ThaumielMapEditor.Events.EventArgs.Handlers;
+using UnityEngine;
 
 namespace ThaumielMapEditor.API.Data
 {
@@ -85,6 +86,8 @@ namespace ThaumielMapEditor.API.Data
         /// Gets or sets the scale of this <see cref="SchematicData"/> instance.
         /// </summary>
         public Vector3 Scale { get; set; }
+
+        public Dictionary<int, Transform> ServerSideTransforms = [];
 
         /// <summary>
         /// Gets the base <see cref="LabPrimitive"/> that all client primtives will be parented to.

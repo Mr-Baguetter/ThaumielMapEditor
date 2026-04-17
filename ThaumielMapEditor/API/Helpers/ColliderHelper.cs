@@ -240,7 +240,7 @@ namespace ThaumielMapEditor.API.Helpers
 
         internal static Transform ResolveServerParentTransform(int parentId, SchematicData schematic)
         {
-            if (SchematicLoader.ServerSideTransforms.TryGetValue(parentId, out Transform transform))
+            if (schematic.ServerSideTransforms.TryGetValue(parentId, out Transform transform))
                 return transform;
 
             if (schematic?.Primitive?.Transform != null)
