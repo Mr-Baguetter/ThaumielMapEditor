@@ -55,6 +55,19 @@ namespace ThaumielMapEditor.API.Animation
         }
 
         /// <summary>
+        /// Plays an animation state by name on the animator at the given index.
+        /// </summary>
+        /// <param name="stateName">The state to play.</param>
+        /// <param name="animatorIndex">The index of the animator to use.</param>
+        /// <param name="speed">The speed to play the animation at.</param>
+        public void Play(string stateName, float speed, int animatorIndex = 0)
+        {
+            Animator animator = Animators[animatorIndex];
+            animator.Play(stateName);
+            animator.speed = speed;
+        }
+
+        /// <summary>
         /// Sets a boolean parameter on the animator at the given index.
         /// </summary>
         /// <param name="animParam">The animator parameter name.</param>
@@ -68,6 +81,20 @@ namespace ThaumielMapEditor.API.Animation
         }
 
         /// <summary>
+        /// Sets a boolean parameter on the animator at the given index.
+        /// </summary>
+        /// <param name="animParam">The animator parameter name.</param>
+        /// <param name="state">The boolean value to set.</param>
+        /// <param name="animatorIndex">The index of the animator to use.</param>
+        /// <param name="speed">The speed to play the animation at.</param>
+        public void Play(string animParam, bool state, float speed, int animatorIndex = 0)
+        {
+            Animator animator = Animators[animatorIndex];
+            animator.SetBool(animParam, state);
+            animator.speed = speed;
+        }
+
+        /// <summary>
         /// Plays an animation state on the animator matching the given name.
         /// </summary>
         /// <param name="stateName">The state to play.</param>
@@ -77,6 +104,19 @@ namespace ThaumielMapEditor.API.Animation
             Animator animator = Animators.FirstOrDefault(a => a.name == animatorName);
             animator.Play(stateName);
             animator.speed = 1f;
+        }
+
+        /// <summary>
+        /// Plays an animation state on the animator matching the given name.
+        /// </summary>
+        /// <param name="stateName">The state to play.</param>
+        /// <param name="animatorName">The name of the animator GameObject to target.</param>
+        /// <param name="speed">The speed to play the animation at.</param>
+        public void Play(string stateName, string animatorName, float speed)
+        {
+            Animator animator = Animators.FirstOrDefault(a => a.name == animatorName);
+            animator.Play(stateName);
+            animator.speed = speed;
         }
 
         /// <summary>
