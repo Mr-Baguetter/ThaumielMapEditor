@@ -1275,6 +1275,19 @@ namespace ThaumielMapEditor.API.Helpers
                     speaker.Name = serializable.Name;
                     return speaker.NetId;
 
+                case ObjectType.PlayerSpawnPoint:
+                    PlayerSpawnPoint spawn = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    spawn.SpawnObject(schematicData, serializable);
+                    spawn.Name = serializable.Name;
+                    return spawn.NetId;
+
                 default:
                     LogManager.Warn($"Unhandled ObjectType '{serializable.ObjectType}' on object '{serializable.Name}', skipping.");
                     return 0;

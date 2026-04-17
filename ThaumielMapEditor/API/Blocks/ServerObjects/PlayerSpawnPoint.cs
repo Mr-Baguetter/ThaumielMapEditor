@@ -54,6 +54,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             base.SpawnObject(schematic, serializable);
             SetWorldTransform(schematic);
             Schematic = schematic;
+            NetId = 0;
             Instances.Add(this);
         }
 
