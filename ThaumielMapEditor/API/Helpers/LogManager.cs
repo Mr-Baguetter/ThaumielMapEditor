@@ -5,11 +5,12 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using Discord;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using Discord;
+using System.Text.RegularExpressions;
 
 namespace ThaumielMapEditor.API.Helpers
 {
@@ -73,7 +74,8 @@ namespace ThaumielMapEditor.API.Helpers
         public static void Error(string message)
         {
             string formattedMessage = FormatLogMessage(message);
-            Logger.Error(formattedMessage);
+            string msg = formattedMessage += "\n An error has occured! Please run the command 'tmelogs' and share the issued code in our discord";
+            Logger.Error(msg);
             Log log = new()
             {
                 LogLevel = LogLevel.Error,
@@ -113,7 +115,7 @@ namespace ThaumielMapEditor.API.Helpers
             LogCreated?.Invoke(log);
         }
 
-        private static string FormatLogMessage(string message)
+        internal static string FormatLogMessage(string message)
         {
             StackTrace stackTrace = new(true);
             StackFrame? frame = stackTrace.GetFrame(2);
@@ -130,10 +132,12 @@ namespace ThaumielMapEditor.API.Helpers
                     else
                         className = method.DeclaringType.FullName + $"::{method.Name}()" ?? method.DeclaringType.Name + $"::{method.Name}()";
 
+                    message = Regex.Replace(message, @"_Patch\d+", "");
                     return $"[{className}] {message}";
                 }
             }
 
+            message = Regex.Replace(message, @"_Patch\d+", "");
             return $"[Unknown] {message}";
         }
     }

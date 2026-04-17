@@ -15,6 +15,9 @@ namespace ThaumielMapEditor
     public class Config
     {
         public bool Debug { get; set; }
+
+        [Description("If true whenever you get an error from TME it will be automatically uploaded to our API. No identifiable information is uploaded alongside this besides whats in the log.")]
+        public bool AutomaticErrorUpload { get; set; } = true;
         public bool EnableCreditTags { get; set; } = true;
         public bool EnableServerTracking { get; set; } = true;
 
