@@ -16,6 +16,7 @@ using PlayerRoles;
 using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Extensions;
 using System.Linq;
+using Interactables.Interobjects.DoorUtils;
 
 namespace ThaumielMapEditor.API.Helpers
 {
@@ -636,6 +637,36 @@ namespace ThaumielMapEditor.API.Helpers
                     V = ParseValue(dict.GetValueOrDefault("V"))
                 },
 
+                "door_find_by_name" => new FindDoorByNameBlock
+                {
+                    Name = GetString(dict, "name")
+                },
+
+                "door_create" => new CreateDoorBlock
+                {
+                    DoorType = Enum.TryParse(GetString(dict, "doorType"), out DoorType doorType) ? doorType : default,
+                    DoorPermissionFlags = Enum.TryParse(GetString(dict, "doorPermissionFlags"), out DoorPermissionFlags doorPerms) ? doorPerms : default,
+                    IsOpen = ParseBool(dict, "isOpen"),
+                    IsLocked = ParseBool(dict, "isLocked"),
+                    RequireAllPermissions = ParseBool(dict, "requireAllPermissions"),
+                    Bypass2176 = ParseBool(dict, "bypass2176")
+                },
+
+                "door_set_permissions" => new SetDoorPermsBlock
+                {
+                    Perms = Enum.TryParse(GetString(dict, "perms"), out DoorPermissionFlags perms) ? perms : default
+                },
+
+                "door_open" => new OpenDoorBlock(),
+                "door_close" => new CloseDoorBlock(),
+                "door_lock" => new LockDoorBlock(),
+                "door_unlock" => new UnlockDoorBlock(),
+
+                "get_door_property" => new DoorGetPropertyBlock
+                {
+                    Property = GetString(dict, "Property")
+                },
+
                 _ => new UnknownBlock { Raw = dict }
             };
         }
@@ -672,19 +703,26 @@ namespace ThaumielMapEditor.API.Helpers
 
         private static Vector3 ParseVector3(object? obj)
         {
-            if (obj is Dictionary<string, object> dict)
+            try
             {
-                return new Vector3(
-                    ParseFloat(dict, "X"),
-                    ParseFloat(dict, "Y"),
-                    ParseFloat(dict, "Z")
-                );
+                if (obj is Dictionary<string, object> dict)
+                {
+                    return new Vector3(
+                        ParseFloat(dict, "X"),
+                        ParseFloat(dict, "Y"),
+                        ParseFloat(dict, "Z")
+                    );
+                }
+
+                if (obj is Vector3 v)
+                    return v;
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"Exception while parsing Vector3 {ex}");
             }
 
-            if (obj is Vector3 v)
-                return v;
-
-            throw new Exception($"Cannot convert {obj?.GetType().Name} to Vector3");
+            return Vector3.zero;
         }
 
         private static List<string> ParseParams(object obj)
