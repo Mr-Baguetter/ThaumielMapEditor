@@ -76,6 +76,22 @@ namespace ThaumielMapEditor.API.Helpers
                     Value = ParseBool(dict, "BOOL")
                 },
 
+                "timing_wait_for_frames" => new WaitForFrames
+                {
+                    WaitTime = (uint)ParseFloat(dict, "WaitTime")
+                },
+
+                "timing_wait_for_seconds" => new WaitForSeconds
+                {
+                    WaitTime = (uint)ParseFloat(dict, "WaitTime")
+                },
+
+                "timing_wait_until_true" => new WaitUntilBlock
+                {
+                    Condition = ParseBlockBase(dict),
+                    Stack = dict.TryGetValue("DO", out object? evtStack) ? ParseStatementList(evtStack).Select(ParseBlock).Where(x => x != null).ToList()! : []
+                },
+
                 "procedures_callnoreturn" => new ProcedureCallNoReturnBlock
                 {
                     Name = GetString(dict, "NAME")
@@ -512,6 +528,16 @@ namespace ThaumielMapEditor.API.Helpers
 
                 _ => new UnknownBlock { Raw = dict }
             };
+        }
+
+        private static BlockBase? ParseBlockBase(Dictionary<string, object> dict)
+        {
+            object? parsed = ParseBlock(dict);
+
+            if (parsed is not BlockBase block)
+                return null;
+
+            return block;
         }
 
         private static Dictionary<string, object?> ParseCallArgs(Dictionary<string, object> dict)

@@ -44,7 +44,7 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
         public override object ReturnExecute()
         {
             float seconds = BlockValueResolver.ResolveFloat(T, null, 1f);
-            return new WaitForSeconds(seconds);
+            return new UnityEngine.WaitForSeconds(seconds);
         }
 
         public override object ReturnExecute(object obj)

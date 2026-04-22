@@ -69,6 +69,17 @@ namespace ThaumielMapEditor.API.Helpers
             FlushCurrent();
         }
 
+        internal void ExecuteStack(List<object> stack, Player player)
+        {
+            foreach (object? block in stack)
+            {
+                if (block == null)
+                    continue;
+
+                ExecuteBlock(block, player);
+            }
+        }
+
         private void ExecuteBlock(object block, Player player)
         {
             switch (block)

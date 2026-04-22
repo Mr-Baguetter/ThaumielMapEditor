@@ -33,7 +33,7 @@ namespace ThaumielMapEditor.API.Components.Tools
 {
     public class InteractableTrigger : ToolBase
     {
-        private static Dictionary<Player, HashSet<StatusEffectBase>> PlayerEffectCache = [];
+        private static readonly Dictionary<Player, HashSet<StatusEffectBase>> PlayerEffectCache = [];
 
         public Vector3 Bounds;
 
@@ -58,7 +58,7 @@ namespace ThaumielMapEditor.API.Components.Tools
             ParseValues(properties);
             Interactable = new()
             {
-                Rotation = obj.Object.transform.localRotation,
+                Rotation = obj.Object!.transform.localRotation,
                 Shape = Shape,
                 IsLocked = false,
                 InteractionDuration = InteractionTime,

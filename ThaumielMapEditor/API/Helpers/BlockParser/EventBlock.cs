@@ -31,19 +31,7 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
 
             Executor.PushScope();
             Executor.SetVariable(ParamName, player);
-
-            foreach (object? item in Stack)
-            {
-                if (item == null)
-                    continue;
-
-                if (item is BlockBase block)
-                {
-                    block.Executor = Executor;
-                    block.Execute(player);
-                }
-            }
-
+            Executor.ExecuteStack(Stack!, player);
             Executor.PopScope();
         }
     }
