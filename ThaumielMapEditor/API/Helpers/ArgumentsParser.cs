@@ -250,6 +250,13 @@ namespace ThaumielMapEditor.API.Helpers
                     Duration = (ushort)ParseFloat(dict, "Duration", 5f)
                 },
 
+                "set_player_scale" => new PlayerSetScaleBlock
+                {
+                    X = ParseFloat(dict, "x"),
+                    Y = ParseFloat(dict, "y"),
+                    Z = ParseFloat(dict, "z")
+                },
+
                 "texttoy_create" => new TextToyCreateBlock
                 {
                     Name = GetString(dict, "name")

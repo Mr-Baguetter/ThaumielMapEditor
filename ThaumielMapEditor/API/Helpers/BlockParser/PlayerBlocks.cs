@@ -85,6 +85,19 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
         }
     }
 
+    public class PlayerSetScaleBlock : BlockBase
+    {
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
+
+        public override void Execute(Player player)
+        {
+            player.Scale = new Vector3(X, Y, Z);
+            LogManager.Debug($"Set scale of player '{player.DisplayName}' to ({X}, {Y}, {Z}).");
+        }
+    }
+
     public class PlayerGetByIdBlock : BlockBase
     {
         public int PlayerId { get; set; }
