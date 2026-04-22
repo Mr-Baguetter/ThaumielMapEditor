@@ -60,14 +60,15 @@ namespace ThaumielMapEditor.API.Components.Tools
             {
                 Rotation = obj.Object!.transform.localRotation,
                 Shape = Shape,
+                Scale = Bounds,
                 IsLocked = false,
                 InteractionDuration = InteractionTime,
-                Permissions = Permissions.KeycardPermissions
+                Permissions = Permissions.KeycardPermissions,
+                AllowedRoles = Permissions.AllowedRoles
             };
 
             Interactable.SpawnObject(schem);
             Interactable.Object?.transform.SetParent(obj.Object?.transform, false);
-            Interactable.Scale = Bounds;
             Interactable.Object?.transform.localPosition = Vector3.zero;
             InteractionObject.OnInteracted += Interacted;
             InteractionObject.OnSearched += Interacted;
@@ -86,9 +87,6 @@ namespace ThaumielMapEditor.API.Components.Tools
             if (obj != Interactable)
                 return;
 
-            if (!Permissions.AllowedRoles.IsEmpty() && !Permissions.AllowedRoles.Contains(player.Role))
-                return;
-
             HandleAnimation(OnInteractionDenied, player);
             HandleEffect(OnInteractionDenied, player);
             HandleCommand(OnInteractionDenied, player);
@@ -101,9 +99,6 @@ namespace ThaumielMapEditor.API.Components.Tools
         public void Interacted(InteractionObject obj, Player player)
         {
             if (obj != Interactable)
-                return;
-
-            if (!Permissions.AllowedRoles.IsEmpty() && !Permissions.AllowedRoles.Contains(player.Role))
                 return;
 
             HandleAnimation(OnInteracted, player);

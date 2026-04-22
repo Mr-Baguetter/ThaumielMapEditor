@@ -56,6 +56,14 @@ namespace ThaumielMapEditor.HarmonyPatches
                 return false;
             }
 
+            if (!interactionobj.AllowedRoles.IsEmpty() && !interactionobj.AllowedRoles.Contains(player.Role))
+            {
+                LogManager.Debug($"Denied player from interacting with {interactionobj.Name}. Incorrect role. {player.Role}");
+                OnDenied?.Invoke(interactionobj, player);
+                __result = false;
+                return false;
+            }
+
             return true;
         }
 
@@ -86,6 +94,13 @@ namespace ThaumielMapEditor.HarmonyPatches
             if (!keycard.Permissions.HasFlagAll(interactionobj.Permissions))
             {
                 LogManager.Debug($"Denied player from interacting with {interactionobj.Name}. Insufficient keycard permissions.");
+                OnDenied?.Invoke(interactionobj, player);
+                return false;
+            }
+
+            if (!interactionobj.AllowedRoles.IsEmpty() && !interactionobj.AllowedRoles.Contains(player.Role))
+            {
+                LogManager.Debug($"Denied player from interacting with {interactionobj.Name}. Incorrect role. {player.Role}");
                 OnDenied?.Invoke(interactionobj, player);
                 return false;
             }
