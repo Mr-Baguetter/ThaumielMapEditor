@@ -381,6 +381,8 @@ namespace ThaumielMapEditor.API.Helpers
                     Z = ParseFloat(dict, "z")
                 },
 
+                "player_list" => new PlayerListBlock(),
+
                 "texttoy_create" => new TextToyCreateBlock
                 {
                     Name = GetString(dict, "name")

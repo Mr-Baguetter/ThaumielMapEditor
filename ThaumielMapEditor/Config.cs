@@ -24,12 +24,27 @@ namespace ThaumielMapEditor
         [Description("The delay for the DoorLink coroutine (In seconds) if 0 it will run every frame.")]
         public float DoorPollingDelay { get; set; } = 0.1f;
 
-        public List<string> SchematiclodBlacklist { get; set; } = [];
-
         public string GithubToken { get; set; } = string.Empty;
         public string AudioPath { get; set; } = string.Empty;
 
-        [Description("Use || to randomly load a map use && to load all inline maps. Example: 'Load::MAPNAME||MAPNAME1' will load either MAPNAME or MAPNAME1 but not both. 'Load::MAPNAME&&MAPNAME1' will load both MAPNAME and MAPNAME1")]
+        [Description(
+            "\n" +
+            "# ------------------------------Map Loading Logic------------------------------\n" +
+            "# Below are the operators used to handle map loading randomization and batching.\n" +
+            "# ----------------------------------------------------------------------------\n" +
+            "# \n" +
+            "# Random Loading (||)\n" +
+            "# Use this to load exactly ONE random map from a provided list.\n" +
+            "# \n" +
+            "# - Load:MAPNAME||MAPNAME1\n" +
+            "#   Will load either MAPNAME or MAPNAME1, but not both.\n" +
+            "# \n" +
+            "# Batch Loading (&&)\n" +
+            "# Use this to load ALL maps specified in the line simultaneously.\n" +
+            "# \n" +
+            "# - Load:MAPNAME&&MAPNAME1\n" +
+            "#   Will load both MAPNAME and MAPNAME1 at the same time."
+        )]
         public List<string> WaitingForPlayers { get; set; } = [];
         public List<string> RoundStarted { get; set; } = [];
         public List<string> DecontaminationStarted { get; set; } = [];

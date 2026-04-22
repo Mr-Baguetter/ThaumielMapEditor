@@ -889,7 +889,6 @@ namespace ThaumielMapEditor.API.Helpers
                         case ToolType.BlockyRuntime:
                             BlockyRuntime blocky = match.Object.AddComponent<BlockyRuntime>();
                             blocky.Init(match, schematicData, tool.Properties);
-                            
                             schematicData.Executor?.Execute(ArgumentsParser.Load(blocky.Blocky!), null!, EventType.OnSpawned);
                             match.Tools.AddItem(blocky);
                             break;

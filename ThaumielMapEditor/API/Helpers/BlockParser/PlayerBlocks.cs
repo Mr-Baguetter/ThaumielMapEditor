@@ -93,6 +93,12 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
         }
     }
 
+    public class PlayerListBlock : BlockBase
+    {
+        public override object ReturnExecute()
+            => Player.ReadyList;
+    }
+
     public class PlayerSetGravityBlock : BlockBase
     {
         public float X { get; set; }
