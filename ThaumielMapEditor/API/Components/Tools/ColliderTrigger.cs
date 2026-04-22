@@ -25,6 +25,7 @@ using LabWarhead = LabApi.Features.Wrappers.Warhead;
 using CustomPlayerEffects;
 using MEC;
 using System.Linq;
+using ThaumielMapEditor.API.Serialization;
 
 namespace ThaumielMapEditor.API.Components.Tools
 {
@@ -91,6 +92,7 @@ namespace ThaumielMapEditor.API.Components.Tools
             HandleAnimation(OnEntered, player);
             HandleWarhead(OnEntered, player);
             HandleCassie(OnEntered, player);
+            HandleBlocks(OnEntered, player, EventType.OnTriggerEntered);
         }
 
         private void OnTriggerExit(Collider other)
@@ -111,6 +113,16 @@ namespace ThaumielMapEditor.API.Components.Tools
             HandleAnimation(OnExited, player);
             HandleWarhead(OnExited, player);
             HandleCassie(OnExited, player);
+            HandleBlocks(OnExited, player, EventType.OnTriggerExited);
+        }
+
+        private void HandleBlocks(ColliderClasses classes, Player player, EventType eventType)
+        {
+            foreach (BlockyPayload blocky in classes.Blocky)
+            {
+                List<object> blocks = ArgumentsParser.Load(blocky);
+                Schematic?.Executor?.Execute(blocks, player, eventType);
+            }
         }
 
         private void HandleCassie(ColliderClasses classes, Player player)
@@ -250,7 +262,7 @@ namespace ThaumielMapEditor.API.Components.Tools
                     audioPlayer.UseFile(Path.Combine(Main.Instance.Config?.AudioPath, play.Path), volume: play.Volume);
                 }
                 else
-                    audioPlayer.UseFile(play.Path, volume: play.Volume);   
+                    audioPlayer.UseFile(play.Path, volume: play.Volume);
             }
         }
     }

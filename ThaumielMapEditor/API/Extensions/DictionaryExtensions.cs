@@ -15,8 +15,11 @@ using UnityEngine;
 
 namespace ThaumielMapEditor.API.Extensions
 {
-    internal static class DictionaryExtensions
+    public static class DictionaryExtensions
     {
+        public static object? GetValueOrDefault(this Dictionary<string, object> dict, string key)
+            => dict.TryGetValue(key, out var value) ? value : null;
+
         public static bool TryConvertValue<TKey, TValue, T>(this Dictionary<TKey, TValue> dict, TKey key, out T result)
         {
             result = default!;

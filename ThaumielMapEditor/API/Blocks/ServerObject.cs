@@ -84,7 +84,7 @@ namespace ThaumielMapEditor.API.Blocks
         /// <summary>
         /// Gets or sets the Scale of the ServerObject
         /// </summary>
-        public Vector3 Scale
+        public virtual Vector3 Scale
         {
             get;
             set

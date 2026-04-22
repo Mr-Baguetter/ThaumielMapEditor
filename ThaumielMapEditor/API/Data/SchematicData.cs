@@ -19,6 +19,7 @@ using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Components;
 using ThaumielMapEditor.Events.EventArgs.Handlers;
 using UnityEngine;
+using ThaumielMapEditor.API.Enums;
 
 namespace ThaumielMapEditor.API.Data
 {
@@ -108,6 +109,11 @@ namespace ThaumielMapEditor.API.Data
         /// A list of all spawned <see cref="ServerObject"/> instances.
         /// </summary>
         public List<ServerObject> SpawnedServerObjects = [];
+
+        /// <summary>
+        /// The <see cref="BlockExecutor"/> of this schematic.
+        /// </summary>
+        public BlockExecutor? Executor { get; internal set; }
 
         /// <summary>
         /// Retrieves all spawned <see cref="ClientSideObjectBase"/>s of the specified type.
@@ -275,9 +281,13 @@ namespace ThaumielMapEditor.API.Data
                 if (serverobj is DoorObject door && door.Object!.TryGetComponent<DoorLink>(out var link))
                     link.Unregister();
 
+                if (serverobj.Object!.TryGetComponent<BlockyRuntime>(out var blocky))
+                    Executor?.Execute(ArgumentsParser.Load(blocky.Blocky!), null!, EventType.OnDestroyed);
+
                 serverobj.DestroyObject(this);
             }
 
+            Executor = null;
             AnimationController.Remove(this);
             ColliderHelper.SchematicColliders.Remove(this);
         }

@@ -5,11 +5,15 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using CustomPlayerEffects;
+using Interactables;
 using LabApi.Features.Wrappers;
+using MEC;
 using SecretLabNAudio.Core;
 using SecretLabNAudio.Core.Extensions;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using ThaumielMapEditor.API.Blocks;
 using ThaumielMapEditor.API.Blocks.ServerObjects;
 using ThaumielMapEditor.API.Components.Tools.Helpers;
@@ -17,15 +21,13 @@ using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Extensions;
 using ThaumielMapEditor.API.Helpers;
+using ThaumielMapEditor.API.Serialization;
 using ThaumielMapEditor.Commands;
 using ThaumielMapEditor.HarmonyPatches;
 using static AdminToys.InvisibleInteractableToy;
 using static ThaumielMapEditor.API.Components.Tools.Helpers.RunCommand;
-using Warhead = ThaumielMapEditor.API.Components.Tools.Helpers.Warhead;
 using LabWarhead = LabApi.Features.Wrappers.Warhead;
-using CustomPlayerEffects;
-using MEC;
-using System.Linq;
+using Warhead = ThaumielMapEditor.API.Components.Tools.Helpers.Warhead;
 
 namespace ThaumielMapEditor.API.Components.Tools
 {
@@ -56,16 +58,17 @@ namespace ThaumielMapEditor.API.Components.Tools
             ParseValues(properties);
             Interactable = new()
             {
-                Position = obj.Position,
-                Rotation = obj.Rotation,
+                Rotation = obj.Object.transform.localRotation,
                 Shape = Shape,
+                IsLocked = false,
                 InteractionDuration = InteractionTime,
                 Permissions = Permissions.KeycardPermissions
             };
 
             Interactable.SpawnObject(schem);
-            Interactable.Object?.transform.SetParent(obj.Object?.transform, true);
-            Interactable.Object?.transform.localScale = Bounds;
+            Interactable.Object?.transform.SetParent(obj.Object?.transform, false);
+            Interactable.Scale = Bounds;
+            Interactable.Object?.transform.localPosition = Vector3.zero;
             InteractionObject.OnInteracted += Interacted;
             InteractionObject.OnSearched += Interacted;
             InteractToyValidatePatch.OnDenied += Denied;
@@ -91,7 +94,8 @@ namespace ThaumielMapEditor.API.Components.Tools
             HandleCommand(OnInteractionDenied, player);
             HandleAudio(OnInteractionDenied, player);
             HandleWarhead(OnInteractionDenied, player);
-            HandleCassie(OnInteracted, player);
+            HandleCassie(OnInteractionDenied, player);
+            HandleBlocks(OnInteractionDenied, player, EventType.OnInteractionDenied);
         }
 
         public void Interacted(InteractionObject obj, Player player)
@@ -108,6 +112,16 @@ namespace ThaumielMapEditor.API.Components.Tools
             HandleAudio(OnInteracted, player);
             HandleWarhead(OnInteracted, player);
             HandleCassie(OnInteracted, player);
+            HandleBlocks(OnInteracted, player, EventType.OnInteraction);
+        }
+
+        private void HandleBlocks(InteractableClasses classes, Player player, EventType eventType)
+        {
+            foreach (BlockyPayload blocky in classes.Blocky)
+            {
+                List<object> blocks = ArgumentsParser.Load(blocky);
+                Schematic?.Executor?.Execute(blocks, player, eventType);
+            }
         }
 
         private void HandleCassie(InteractableClasses classes, Player player)

@@ -735,6 +735,7 @@ namespace ThaumielMapEditor.API.Helpers
             GetGameObjectTransforms(schematic, schematicData);
             yield return Timing.WaitUntilDone(Timing.RunCoroutine(SpawnObjectsBatched(schematic, schematicData, schematicData.Primitive.Base.netId)));
 
+            schematicData.Executor = new(schematicData);
             ApplyAnimators(schematic, schematicData);
             ApplyTools(schematic, schematicData);
 
@@ -883,6 +884,14 @@ namespace ThaumielMapEditor.API.Helpers
                             InteractableTrigger interactable = match.Object.AddComponent<InteractableTrigger>();
                             interactable.Init(match, schematicData, tool.Properties);
                             match.Tools.AddItem(interactable);
+                            break;
+
+                        case ToolType.BlockyRuntime:
+                            BlockyRuntime blocky = match.Object.AddComponent<BlockyRuntime>();
+                            blocky.Init(match, schematicData, tool.Properties);
+                            
+                            schematicData.Executor?.Execute(ArgumentsParser.Load(blocky.Blocky!), null!, EventType.OnSpawned);
+                            match.Tools.AddItem(blocky);
                             break;
                     }
                 }

@@ -86,6 +86,25 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             base.SpawnObject(schematic, serializable);
         }
 
+        public void SpawnObject(SchematicData schematic)
+        {
+            PrimitiveObjectToy? primitive = UnityEngine.Object.Instantiate(PrefabHelper.PrimitiveObject);
+            if (primitive == null)
+                return;
+
+            NetworkServer.UnSpawn(primitive.gameObject);
+            Base = primitive;
+            Object = primitive.gameObject;
+            NetId = primitive.netId;
+            primitive.PrimitiveFlags = PrimitiveFlags;
+            primitive.PrimitiveType = PrimitiveType;
+            primitive.MaterialColor = Color;
+            primitive.gameObject.transform.position = Position;
+            primitive.gameObject.transform.rotation = Rotation;
+            primitive.gameObject.transform.localScale = Scale;
+            NetworkServer.Spawn(primitive.gameObject);
+        }
+
         public void ParseValues(SerializableObject serializable)
         {
             if (serializable.ObjectType != ObjectType.Primitive)

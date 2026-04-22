@@ -12,6 +12,7 @@ using Interactables.Interobjects.DoorUtils;
 using LabApi.Features.Wrappers;
 using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Blocks.ServerObjects;
+using ThaumielMapEditor.API.Helpers;
 using static AdminToys.InvisibleInteractableToy;
 
 namespace ThaumielMapEditor.HarmonyPatches
@@ -27,16 +28,21 @@ namespace ThaumielMapEditor.HarmonyPatches
         public static bool SearchingPrefix(InteractableToySearchCompletor __instance, ref bool __result)
         {
             if (!InteractionObject.TryGetInteractionObject(__instance._target, out var interactionobj))
+            {
+                LogManager.Debug($"Failed to get interaction object for {__instance._target.name}.");
                 return true;
-            
+            }
+
             Player player = Player.Get(__instance.Hub);
             if (interactionobj.Permissions == DoorPermissionFlags.None || player.IsBypassEnabled)
             {
+                LogManager.Debug($"Allowed player to interact with {interactionobj.Name}. Had keycard permissions.");
                 return true;
             }
             
             if (player.CurrentItem == null || player.CurrentItem is not KeycardItem keycard)
             {
+                LogManager.Debug($"Denied player from interacting with {interactionobj.Name}. No valid keycard.");
                 OnDenied?.Invoke(interactionobj, player);
                 __result = false;
                 return false;
@@ -44,6 +50,7 @@ namespace ThaumielMapEditor.HarmonyPatches
 
             if (!keycard.Permissions.HasFlagAll(interactionobj.Permissions))
             {
+                LogManager.Debug($"Denied player from interacting with {interactionobj.Name}. Insufficient keycard permissions.");
                 OnDenied?.Invoke(interactionobj, player);
                 __result = false;
                 return false;
@@ -57,22 +64,28 @@ namespace ThaumielMapEditor.HarmonyPatches
         public static bool InteractingPrefix(InvisibleInteractableToy __instance, ReferenceHub ply, byte colliderId)
         {
             if (!InteractionObject.TryGetInteractionObject(__instance, out var interactionobj))
+            {
+                LogManager.Debug($"Failed to get interaction object for {__instance.name}.");
                 return true;
-            
+            }
+
             Player player = Player.Get(ply);
             if (interactionobj.Permissions == DoorPermissionFlags.None || player.IsBypassEnabled)
             {
+                LogManager.Debug($"Allowed player to interact with {interactionobj.Name}. Had keycard permissions.");
                 return true;
             }
             
             if (player.CurrentItem == null || player.CurrentItem is not KeycardItem keycard)
             {
+                LogManager.Debug($"Denied player from interacting with {interactionobj.Name}. No valid keycard.");
                 OnDenied?.Invoke(interactionobj, player);
                 return false;
             }
 
             if (!keycard.Permissions.HasFlagAll(interactionobj.Permissions))
             {
+                LogManager.Debug($"Denied player from interacting with {interactionobj.Name}. Insufficient keycard permissions.");
                 OnDenied?.Invoke(interactionobj, player);
                 return false;
             }
