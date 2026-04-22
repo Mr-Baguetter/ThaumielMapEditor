@@ -107,16 +107,16 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
         public override void Execute()
         {
             LogManager.Debug($"Playing audio '{Path}' vol={Volume} spatial={IsSpatial} min={MinDistance} max={MaxDistance}.");
-                AudioPlayer audioPlayer = AudioPlayer.CreateDefault();
-                audioPlayer.WithMinDistance(MinDistance);
-                audioPlayer.WithMaxDistance(MaxDistance);
-                audioPlayer.WithSpatial(IsSpatial);
-                if (IsLocalFile(Path))
-                {
-                    audioPlayer.UseFile(System.IO.Path.Combine(Main.Instance.Config?.AudioPath, Path), volume: Volume);
-                }
-                else
-                    audioPlayer.UseFile(Path, volume: Volume);
+            AudioPlayer audioPlayer = AudioPlayer.CreateDefault();
+            audioPlayer.WithMinDistance(MinDistance);
+            audioPlayer.WithMaxDistance(MaxDistance);
+            audioPlayer.WithSpatial(IsSpatial);
+            if (IsLocalFile(Path))
+            {
+                audioPlayer.UseFile(System.IO.Path.Combine(Main.Instance.Config?.AudioPath, Path), volume: Volume);
+            }
+            else
+                audioPlayer.UseFile(Path, volume: Volume);
         }
 
         internal bool IsLocalFile(string path = null!)
@@ -162,12 +162,15 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
                 case "RemoteAdmin":
                     Server.RunCommand($"/{Command}");
                     break;
+
                 case "Client":
                     Server.RunCommand($".{Command}");
                     break;
+
                 case "Console":
                     Server.RunCommand(Command);
                     break;
+                    
                 default:
                     LogManager.Warn($"Unknown command type '{CommandType}'.");
                     break;
@@ -256,18 +259,23 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
                 case WarheadAction.Start:
                     AlphaWarheadController.Singleton.StartDetonation(false, SuppressSubtitles);
                     break;
+
                 case WarheadAction.Stop:
                     AlphaWarheadController.Singleton.CancelDetonation();
                     break;
+
                 case WarheadAction.Detonate:
                     AlphaWarheadController.Singleton.Detonate();
                     break;
+
                 case WarheadAction.Lock:
                     AlphaWarheadController.Singleton.IsLocked = true;
                     break;
+
                 case WarheadAction.Unlock:
                     AlphaWarheadController.Singleton.IsLocked = false;
                     break;
+
                 default:
                     LogManager.Warn($"Unknown warhead action '{Action}'.");
                     break;

@@ -6,6 +6,8 @@
 // -----------------------------------------------------------------------
 
 using System.Linq;
+using System.Reflection;
+using HarmonyLib;
 using LabApi.Features.Wrappers;
 using PlayerRoles;
 
@@ -67,8 +69,27 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
 
         private static object LogUnknownProperty(string property)
         {
-            LogManager.Warn($"PlayerGetPropertyBlock: Unknown property '{property}'.");
+            LogManager.Warn($"Unknown property '{property}'.");
             return null!;
+        }
+    }
+
+    // Unused
+    public class PlayerSetPropertyBlock : BlockBase
+    {
+        public string Property { get; set; } = string.Empty;
+        public object? Value { get; set; }
+
+        public override void Execute(Player player)
+        {
+            PropertyInfo property = AccessTools.Property(typeof(Player), Property);
+            if (!property.CanWrite)
+            {
+                LogManager.Warn($"Tried to write to a read only property on player {player.DisplayName}");
+                return;
+            }
+
+            property.SetValue(player, Value);
         }
     }
 
@@ -107,7 +128,7 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
             Player? player = Player.Get(PlayerId);
             if (player == null)
             {
-                LogManager.Warn($"PlayerGetByIdBlock: No player found with id '{PlayerId}'.");
+                LogManager.Warn($"No player found with id '{PlayerId}'.");
                 return null!;
             }
 
@@ -124,7 +145,7 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
             Player? player = Player.Get(UserId);
             if (player == null)
             {
-                LogManager.Warn($"PlayerGetByUserIdBlock: No player found with user id '{UserId}'.");
+                LogManager.Warn($"No player found with user id '{UserId}'.");
                 return null!;
             }
 
@@ -200,27 +221,35 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
                 case "health":
                     player.Health = Value;
                     break;
+
                 case "max_health":
                     player.MaxHealth = Value;
                     break;
+
                 case "artificial_health":
                     player.ArtificialHealth = Value;
                     break;
+
                 case "max_artificial_health":
                     player.MaxArtificialHealth = Value;
                     break;
+
                 case "hume_shield":
                     player.HumeShield = Value;
                     break;
+
                 case "max_hume_shield":
                     player.MaxHumeShield = Value;
                     break;
+
                 case "hume_shield_regen_rate":
                     player.HumeShieldRegenRate = Value;
                     break;
+                    
                 case "hume_shield_regen_cooldown":
                     player.HumeShieldRegenCooldown = Value;
                     break;
+
                 default:
                     LogManager.Warn($"Unknown health type '{HealthType}'.");
                     break;
@@ -242,9 +271,11 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
                 case "name":
                     player.GroupName = Value;
                     break;
+                    
                 case "color":
                     player.GroupColor = Value;
                     break;
+
                 default:
                     LogManager.Warn($"Unknown group type '{GroupType}'.");
                     break;

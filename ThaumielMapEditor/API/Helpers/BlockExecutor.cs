@@ -85,6 +85,7 @@ namespace ThaumielMapEditor.API.Helpers
             switch (block)
             {
                 case ProcedureCallNoReturnBlock callBlock:
+                    callBlock.Executor = this;
                     ExecuteProcedureCall(callBlock.Name, [], player);
                     break;
 
