@@ -136,6 +136,28 @@ namespace ThaumielMapEditor.API.Helpers
                     Text = GetString(dict, "TEXT")
                 },
 
+                "controls_repeat_ext" => new RepeatBlock
+                {
+                    Times = ParseValue(dict.GetValueOrDefault("TIMES")),
+                    Stack = dict.TryGetValue("DO", out object? stack) ? ParseStatementList(stack).Select(ParseBlock).Where(x => x != null).ToList()! : []
+                },
+
+                "controls_whileUntil" => new WhileUntilBlock
+                {
+                    Mode = GetString(dict, "MODE"),
+                    Condition = ParseBlockBase(dict.GetValueOrDefault("BOOL") as Dictionary<string, object>),
+                    Stack = dict.TryGetValue("DO", out object? stack) ? ParseStatementList(stack).Select(ParseBlock).Where(x => x != null).ToList()! : []
+                },
+
+                "controls_for" => new ForLoopBlock
+                {
+                    VarName = GetString(dict, "VAR"),
+                    From = ParseValue(dict.GetValueOrDefault("FROM")),
+                    To = ParseValue(dict.GetValueOrDefault("TO")),
+                    By = ParseValue(dict.GetValueOrDefault("BY")),
+                    Stack = dict.TryGetValue("DO", out object? stack) ? ParseStatementList(stack).Select(ParseBlock).Where(x => x != null).ToList()! : []
+                },
+
                 "timing_wait_for_frames" => new WaitForFrames
                 {
                     WaitTime = (uint)ParseFloat(dict, "WaitTime")
@@ -590,8 +612,14 @@ namespace ThaumielMapEditor.API.Helpers
             };
         }
 
-        private static BlockBase? ParseBlockBase(Dictionary<string, object> dict)
+        private static BlockBase? ParseBlockBase(Dictionary<string, object>? dict)
         {
+            if (dict == null)
+            {
+                LogManager.Warn("Dictionary was null. Returning.");
+                return null;
+            }
+
             object? parsed = ParseBlock(dict);
 
             if (parsed is not BlockBase block)
