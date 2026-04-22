@@ -5,7 +5,9 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace System.Diagnostics.CodeAnalysis
+using System;
+
+namespace ThaumielMapEditor.API.Attributes
 {
     [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
     public sealed class NotNullWhenAttribute : Attribute

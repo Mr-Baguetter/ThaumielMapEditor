@@ -7,10 +7,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using MEC;
 using System.Linq;
+using ThaumielMapEditor.API.Attributes;
 
 namespace ThaumielMapEditor.API.Helpers
 {
