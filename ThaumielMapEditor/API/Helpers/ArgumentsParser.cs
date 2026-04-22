@@ -158,6 +158,32 @@ namespace ThaumielMapEditor.API.Helpers
                     Stack = dict.TryGetValue("DO", out object? stack) ? ParseStatementList(stack).Select(ParseBlock).Where(x => x != null).ToList()! : []
                 },
 
+                "logic_compare" => new LogicCompareBlock
+                {
+                    OP = GetString(dict, "OP"),
+                    A = ParseValue(dict.GetValueOrDefault("A")),
+                    B = ParseValue(dict.GetValueOrDefault("B"))
+                },
+
+                "logic_operation" => new LogicOperationBlock
+                {
+                    OP = GetString(dict, "OP"),
+                    A = ParseValue(dict.GetValueOrDefault("A")),
+                    B = ParseValue(dict.GetValueOrDefault("B"))
+                },
+
+                "logic_negate" => new LogicNegateBlock
+                {
+                    Bool = ParseValue(dict.GetValueOrDefault("BOOL"))
+                },
+
+                "controls_if" => new ControlsIfBlock
+                {
+                    Condition = ParseBlockBase(dict.GetValueOrDefault("IF0") as Dictionary<string, object>),
+                    IfStack = dict.TryGetValue("DO0", out object? doStack) ? ParseStatementList(doStack).Select(ParseBlock).Where(x => x != null).ToList()! : [],
+                    ElseStack = dict.TryGetValue("ELSE", out object? elseStack) ? ParseStatementList(elseStack).Select(ParseBlock).Where(x => x != null).ToList()! : []
+                },
+
                 "timing_wait_for_frames" => new WaitForFrames
                 {
                     WaitTime = (uint)ParseFloat(dict, "WaitTime")
