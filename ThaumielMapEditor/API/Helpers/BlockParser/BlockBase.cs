@@ -43,5 +43,28 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
         {
             return null!;
         }
+
+        /// <summary>
+        /// Resolves a value to a float. If the value is a <see cref="BlockBase"/>, its <see cref="ReturnExecute()"/> is called first.
+        /// </summary>
+        protected static float ResolveFloat(object? value, float defaultVal = 0f)
+        {
+            if (value is BlockBase block)
+                value = block.ReturnExecute();
+ 
+            if (value is float f)
+                return f;
+ 
+            if (value is double d)
+                return (float)d;
+ 
+            if (value is int i)
+                return i;
+ 
+            if (float.TryParse(value?.ToString(), out float parsed))
+                return parsed;
+ 
+            return defaultVal;
+        }
     }
 }

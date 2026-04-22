@@ -76,6 +76,46 @@ namespace ThaumielMapEditor.API.Helpers
                     Value = ParseBool(dict, "BOOL")
                 },
 
+                "math_arithmetic" => new MathArithmeticBlock
+                {
+                    OP = GetString(dict, "OP"),
+                    A  = ParseValue(dict.GetValueOrDefault("A")),
+                    B  = ParseValue(dict.GetValueOrDefault("B"))
+                },
+                
+                "math_single" => new MathSingleBlock
+                {
+                    OP  = GetString(dict, "OP"),
+                    NUM = ParseValue(dict.GetValueOrDefault("NUM"))
+                },
+                
+                "math_trig" => new MathTrigBlock
+                {
+                    OP  = GetString(dict, "OP"),
+                    NUM = ParseValue(dict.GetValueOrDefault("NUM"))
+                },
+                
+                "math_round" => new MathRoundBlock
+                {
+                    OP  = GetString(dict, "OP"),
+                    NUM = ParseValue(dict.GetValueOrDefault("NUM"))
+                },
+                
+                "math_modulo" => new MathModuloBlock
+                {
+                    DIVIDEND = ParseValue(dict.GetValueOrDefault("DIVIDEND")),
+                    DIVISOR  = ParseValue(dict.GetValueOrDefault("DIVISOR"))
+                },
+                
+                "math_constrain" => new MathConstrainBlock
+                {
+                    VALUE = ParseValue(dict.GetValueOrDefault("VALUE")),
+                    LOW   = ParseValue(dict.GetValueOrDefault("LOW")),
+                    HIGH  = ParseValue(dict.GetValueOrDefault("HIGH"))
+                },
+                
+                "math_random_float" => new MathRandomFloatBlock(),
+
                 "timing_wait_for_frames" => new WaitForFrames
                 {
                     WaitTime = (uint)ParseFloat(dict, "WaitTime")
