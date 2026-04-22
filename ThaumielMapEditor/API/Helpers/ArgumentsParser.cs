@@ -116,6 +116,26 @@ namespace ThaumielMapEditor.API.Helpers
                 
                 "math_random_float" => new MathRandomFloatBlock(),
 
+                "text_join" => new TextJoinBlock
+                {
+                    Strings = dict.Keys
+                        .Where(k => k.StartsWith("ADD"))
+                        .OrderBy(k => k)
+                        .Select(k => {
+                            if (dict[k] is Dictionary<string, object> subDict)
+                            {
+                                return GetString(subDict, "TEXT");
+                            }
+
+                            return string.Empty;
+                        }).ToList()
+                },
+
+                "text_length" => new TextLengthBlock
+                {
+                    Text = GetString(dict, "TEXT")
+                },
+
                 "timing_wait_for_frames" => new WaitForFrames
                 {
                     WaitTime = (uint)ParseFloat(dict, "WaitTime")
