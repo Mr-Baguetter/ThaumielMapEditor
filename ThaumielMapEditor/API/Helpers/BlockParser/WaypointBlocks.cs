@@ -31,7 +31,7 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
         {
             if (obj is not WaypointObject server)
             {
-                LogManager.Warn("WaypointSetVisualizeBoundsBlock: obj is not a WaypointObject.");
+                LogManager.Warn("obj is not a WaypointObject.");
                 return;
             }
 
@@ -101,7 +101,7 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
 
         private static object LogUnknownProperty(string property)
         {
-            LogManager.Warn($"WaypointGetPropertyBlock: Unknown property '{property}'.");
+            LogManager.Warn($"Unknown property '{property}'.");
             return null!;
         }
     }

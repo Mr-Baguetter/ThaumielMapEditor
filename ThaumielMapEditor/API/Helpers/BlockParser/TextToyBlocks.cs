@@ -32,7 +32,7 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
         {
             if (obj is not TextToyObject server)
             {
-                LogManager.Warn("obj is not a TextToyObjectServer.");
+                LogManager.Warn("obj is not a TextToyObject.");
                 return;
             }
 
@@ -49,7 +49,7 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
         {
             if (obj is not TextToyObject server)
             {
-                LogManager.Warn("obj is not a TextToyObjectServer.");
+                LogManager.Warn("obj is not a TextToyObject.");
                 return;
             }
 
@@ -65,7 +65,7 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
         {
             if (obj is not TextToyObject server)
             {
-                LogManager.Warn("obj is not a TextToyObjectServer.");
+                LogManager.Warn("obj is not a TextToyObject.");
                 return null!;
             }
 
