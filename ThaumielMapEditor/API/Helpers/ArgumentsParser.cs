@@ -468,7 +468,7 @@ namespace ThaumielMapEditor.API.Helpers
                 "run_method_instance" => new RunMethodInstanceBlock
                 {
                     Instance = dict.TryGetValue("Instance", out object? inst) ? inst : null,
-                    FullMethodName = GetString(dict, "Full Method Name (namespace + method)"),
+                    MethodName = GetString(dict, "Full Method Name (namespace + method)"),
                     Args =
                     [
                         dict.TryGetValue("Argument 1", out object? ra1) ? ra1 : null,

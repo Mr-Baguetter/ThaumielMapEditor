@@ -12,6 +12,7 @@ using ThaumielMapEditor.API.Enums;
 using SecretLabNAudio.Core;
 using SecretLabNAudio.Core.Extensions;
 using System.Linq;
+using HarmonyLib;
 
 namespace ThaumielMapEditor.API.Helpers.BlockParser
 {
@@ -22,44 +23,23 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
 
         public override void Execute()
         {
-            InvokeMethod(null);
-        }
+            MethodInfo method = AccessTools.Method(FullMethodName);
 
-        private void InvokeMethod(object? instance)
-        {
-            int lastDot = FullMethodName.LastIndexOf('.');
-            if (lastDot < 0)
-            {
-                LogManager.Warn($"'{FullMethodName}' is not a valid fully-qualified method name.");
-                return;
-            }
-
-            string typeName = FullMethodName.Substring(0, lastDot);
-            string methodName = FullMethodName.Substring(lastDot + 1);
-            Type? type = Type.GetType(typeName);
-
-            if (type == null)
-            {
-                LogManager.Warn($"Could not find type '{typeName}'.");
-                return;
-            }
-
-            MethodInfo? method = type.GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
             if (method == null)
             {
-                LogManager.Warn($"Could not find method '{methodName}' on type '{typeName}'.");
+                LogManager.Warn($"Could not find method: '{FullMethodName}'. Ensure it is 'Type:MethodName'.");
                 return;
             }
 
-            LogManager.Debug($"Invoking '{FullMethodName}' with {Args.Length} arg(s).");
-            method.Invoke(instance, Args);
+            LogManager.Debug($"Invoking '{method.Name}'.");
+            method.Invoke(null, Args);
         }
     }
 
     public class RunMethodInstanceBlock : BlockBase
     {
         public object? Instance { get; set; }
-        public string FullMethodName { get; set; } = string.Empty;
+        public string MethodName { get; set; } = string.Empty;
         public object?[] Args { get; set; } = [];
 
         public override void Execute()
@@ -70,17 +50,14 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
                 return;
             }
 
-            int lastDot = FullMethodName.LastIndexOf('.');
-            string methodName = lastDot >= 0 ? FullMethodName.Substring(lastDot + 1) : FullMethodName;
-            MethodInfo? method = Instance.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
+            MethodInfo method = AccessTools.Method(Instance.GetType(), MethodName);
             if (method == null)
             {
-                LogManager.Warn($"Could not find method '{methodName}' on '{Instance.GetType().Name}'.");
+                LogManager.Warn($"Could not find method '{MethodName}' on '{Instance.GetType().FullName}'.");
                 return;
             }
 
-            LogManager.Debug($"Invoking instance method '{methodName}' on '{Instance.GetType().Name}' with {Args.Length} arg(s).");
+            LogManager.Debug($"Invoking instance method '{method.Name}' with {Args.Length} arg(s).");
             method.Invoke(Instance, Args);
         }
     }
