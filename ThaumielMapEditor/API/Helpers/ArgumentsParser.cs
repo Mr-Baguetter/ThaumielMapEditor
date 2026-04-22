@@ -228,6 +228,13 @@ namespace ThaumielMapEditor.API.Helpers
                     Stack = dict.TryGetValue("DO", out object? evtStack) ? ParseStatementList(evtStack).Select(ParseBlock).Where(x => x != null).ToList()! : []
                 },
 
+                "destroyed_event" => new EventBlock
+                {
+                    EventType = EventType.OnDestroyed,
+                    ParamName = "ignore",
+                    Stack = dict.TryGetValue("DO", out object? evtStack) ? ParseStatementList(evtStack).Select(ParseBlock).Where(x => x != null).ToList()! : []
+                },
+
                 "trigger_enter_event" => new EventBlock
                 {
                     EventType = EventType.OnTriggerEntered,

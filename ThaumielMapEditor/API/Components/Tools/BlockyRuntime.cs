@@ -10,6 +10,7 @@ using ThaumielMapEditor.API.Blocks;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
 using ThaumielMapEditor.API.Extensions;
+using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.API.Serialization;
 
 namespace ThaumielMapEditor.API.Components.Tools
@@ -26,6 +27,11 @@ namespace ThaumielMapEditor.API.Components.Tools
 
             if (properties.TryConvertValue<BlockyPayload>("Payload", out var payload))
                 Blocky = payload;
+        }
+
+        private void OnDestroy()
+        {
+            Schematic?.Executor?.Execute(ArgumentsParser.Load(Blocky!), null!, EventType.OnDestroyed);
         }
     }
 }

@@ -1,3 +1,10 @@
+// -----------------------------------------------------------------------
+// <copyright file="DoorBlocks.cs" company="Thaumiel Team">
+// Copyright (c) Thaumiel Team. All rights reserved.
+// Licensed under the GNU General Public License v3.0 (GPL-3.0).
+// </copyright>
+// -----------------------------------------------------------------------
+
 using System;
 using System.Collections.Generic;
 using Interactables.Interobjects.DoorUtils;
@@ -33,6 +40,9 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
         public override object ReturnExecute(object obj)
         {
             if (obj is not DoorObject door)
+                return null!;
+
+            if (string.IsNullOrEmpty(Property))
                 return null!;
 
             return Property switch

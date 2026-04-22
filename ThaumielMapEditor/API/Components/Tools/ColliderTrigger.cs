@@ -59,6 +59,25 @@ namespace ThaumielMapEditor.API.Components.Tools
             Collider.isTrigger = true;
         }
 
+        private void OnDestroy()
+        {
+            if (!OnExited.Blocky.IsEmpty())
+            {
+                foreach (BlockyPayload blocky in OnExited.Blocky)
+                {
+                    Schematic?.Executor?.Execute(ArgumentsParser.Load(blocky), null!, EventType.OnDestroyed);
+                }
+            }
+
+            if (!OnEntered.Blocky.IsEmpty())
+            {
+                foreach (BlockyPayload blocky in OnEntered.Blocky)
+                {
+                    Schematic?.Executor?.Execute(ArgumentsParser.Load(blocky), null!, EventType.OnDestroyed);
+                }
+            }
+        }
+
         public void ParseValues(Dictionary<string, object> properties)
         {
             if (properties.TryConvertValue<ColliderClasses>("OnEntered", out var entered))

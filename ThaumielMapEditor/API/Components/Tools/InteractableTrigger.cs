@@ -80,6 +80,21 @@ namespace ThaumielMapEditor.API.Components.Tools
             InteractionObject.OnInteracted -= Interacted;
             InteractionObject.OnSearched -= Interacted;
             InteractToyValidatePatch.OnDenied -= Denied;
+            if (!OnInteracted.Blocky.IsEmpty())
+            {
+                foreach (BlockyPayload blocky in OnInteracted.Blocky)
+                {
+                    Schematic?.Executor?.Execute(ArgumentsParser.Load(blocky), null!, EventType.OnDestroyed);
+                }
+            }
+
+            if (!OnInteractionDenied.Blocky.IsEmpty())
+            {
+                foreach (BlockyPayload blocky in OnInteractionDenied.Blocky)
+                {
+                    Schematic?.Executor?.Execute(ArgumentsParser.Load(blocky), null!, EventType.OnDestroyed);
+                }
+            }
         }
 
         private void Denied(InteractionObject obj, Player player)
