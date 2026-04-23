@@ -1,3 +1,10 @@
+// -----------------------------------------------------------------------
+// <copyright file="FloatTypeConverter.cs" company="Thaumiel Team">
+// Copyright (c) Thaumiel Team. All rights reserved.
+// Licensed under the GNU General Public License v3.0 (GPL-3.0).
+// </copyright>
+// -----------------------------------------------------------------------
+
 using System;
 using System.Globalization;
 using YamlDotNet.Core;
@@ -8,15 +15,13 @@ namespace ThaumielMapEditor.API.Serialization.Converters
 {
     public class FloatTypeConverter : IYamlTypeConverter
     {
-        public bool Accepts(Type type)
-        {
-            return type == typeof(float);
-        }
+        public bool Accepts(Type type) => type == typeof(float);
 
         public object ReadYaml(IParser parser, Type type)
         {
             Scalar scalar = parser.Consume<Scalar>();
-            return float.Parse(scalar.Value, CultureInfo.InvariantCulture);
+            string normalized = scalar.Value.Replace(',', '.');
+            return float.Parse(normalized, CultureInfo.InvariantCulture);
         }
 
         public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)

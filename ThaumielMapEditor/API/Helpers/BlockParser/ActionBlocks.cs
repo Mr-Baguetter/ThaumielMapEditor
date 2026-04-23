@@ -5,7 +5,6 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System;
 using System.Reflection;
 using LabApi.Features.Wrappers;
 using ThaumielMapEditor.API.Enums;

@@ -6,7 +6,6 @@
 // -----------------------------------------------------------------------
 
 using CustomPlayerEffects;
-using Interactables;
 using LabApi.Features.Wrappers;
 using MEC;
 using SecretLabNAudio.Core;
