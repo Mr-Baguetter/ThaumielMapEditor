@@ -5,6 +5,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System.Collections;
 using System.Collections.Generic;
 using LabApi.Features.Wrappers;
 
@@ -67,6 +68,35 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
                     Executor.Scopes.Peek()[VarName] = i;
 
                 Executor?.Execute(Stack!, player);
+            }
+        }
+    }
+
+    public class ForeachBlock : BlockBase
+    {
+        public string VarName { get; set; } = "item";
+        public object? ListInput { get; set; }
+        public List<object?> Stack { get; set; } = [];
+
+        public override void Execute(Player player)
+        {
+            if (Executor == null)
+                return;
+
+            object? collection = ListInput is BlockBase block ? block.ReturnExecute() : ListInput;
+
+            if (collection is not IEnumerable enumerable)
+            {
+                LogManager.Warn($"Input is not an enumerable collection.");
+                return;
+            }
+
+            foreach (object? item in enumerable)
+            {
+                Executor.PushScope();
+                Executor.SetVariable(VarName, item);
+                Executor.ExecuteStack(Stack!, player);
+                Executor.PopScope();
             }
         }
     }

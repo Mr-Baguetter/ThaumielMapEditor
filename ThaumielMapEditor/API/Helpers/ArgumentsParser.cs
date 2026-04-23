@@ -43,10 +43,33 @@ namespace ThaumielMapEditor.API.Helpers
 
             foreach (Dictionary<string, object> dict in values)
             {
-                object? parsedBlock = ParseBlock(dict);
-                if (parsedBlock != null)
+                object? result = null;
+
+                foreach (string key in dict.Keys)
                 {
-                    parsedBlocks.Add(parsedBlock);
+                    if (BlockParsers.TryGetValue(key, out var parser))
+                    {
+                        result = parser(dict);
+                        break; 
+                    }
+                }
+
+                if (result == null)
+                {
+                    string? enumKey = dict.Keys.FirstOrDefault(k => k.StartsWith("enum_"));
+
+                    if (enumKey != null)
+                    {
+                        result = new EnumBlock
+                        {
+                            Value = dict[enumKey]
+                        };
+                    }
+                }
+
+                if (result != null)
+                {
+                    parsedBlocks.Add(result);
                 }
             }
 
@@ -520,6 +543,57 @@ namespace ThaumielMapEditor.API.Helpers
             },
 
             ["unity_normalize"] = d => new UnityNormalizeBlock { V = ParseValue(d.GetValueOrDefault("V")) },
+
+            ["list_create"] = d => new ListCreateBlock(),
+
+            ["list_add"] = d => new ListAddBlock
+            {
+                List = ParseValue(d.GetValueOrDefault("LIST")),
+                Item = ParseValue(d.GetValueOrDefault("ITEM"))
+            },
+
+            ["list_remove"] = d => new ListRemoveBlock
+            {
+                List = ParseValue(d.GetValueOrDefault("LIST")),
+                Item = ParseValue(d.GetValueOrDefault("ITEM"))
+            },
+
+            ["list_remove_at"] = d => new ListRemoveBlock
+            {
+                List = ParseValue(d.GetValueOrDefault("LIST")),
+                Item = ParseFloat(d, "INDEX")
+            },
+
+            ["list_get"] = d => new ListGetBlock
+            {
+                List = ParseValue(d.GetValueOrDefault("LIST")),
+                Index = (int)ParseFloat(d, "INDEX")
+            },
+
+            ["list_count"] = d => new ListCountBlock
+            {
+                List = ParseValue(d.GetValueOrDefault("LIST"))
+            },
+
+            ["list_contains"] = d => new ListContainsBlock
+            {
+                List = ParseValue(d.GetValueOrDefault("LIST")),
+                Item = ParseValue(d.GetValueOrDefault("ITEM"))
+            },
+
+            ["list_clear"] = d =>
+            {
+                List<object>? list = ParseValue(d.GetValueOrDefault("LIST")) as List<object>;
+                list?.Clear();
+                return null;
+            },
+
+            ["foreach_loop"] = d => new ForeachBlock
+            {
+                VarName = GetString(d, "VAR"),
+                ListInput = ParseValue(d.GetValueOrDefault("LIST")), 
+                Stack = ParseStack(d, "DO")
+            },
         };
 
         internal static object? ParseBlock(Dictionary<string, object> dict)
