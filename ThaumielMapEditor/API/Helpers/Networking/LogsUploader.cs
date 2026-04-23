@@ -123,7 +123,20 @@ namespace ThaumielMapEditor.API.Helpers.Networking
 
             try
             {
-                IEnumerable<string> filteredLines = File.ReadLines(logPath)
+                List<string> lines = [];
+
+                using (FileStream fs = new(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (StreamReader reader = new(fs))
+                {
+                    while (!reader.EndOfStream)
+                    {
+                        string? line = reader.ReadLine();
+                        if (line != null)
+                            lines.Add(line);
+                    }
+                }
+
+                IEnumerable<string> filteredLines = lines
                     .Where(line => !Keywords.Any(spam => line.Contains(spam)))
                     .Select(line => Regex.Replace(line, ipPattern, "[REDACTED IP]"));
 
