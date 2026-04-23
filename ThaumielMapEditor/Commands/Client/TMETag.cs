@@ -35,10 +35,9 @@ namespace ThaumielMapEditor.Commands.Client
                 return false;
             }
 
-            player.GroupName = tag.Name;
-            player.GroupColor = tag.Color;
+            PlayerHandler.SetTag(player);
 
-            response = $"Applied tag <color={tag.Color}>{tag.Name}</color>";
+            response = $"Applied credit tag {tag}";
             return true;
         }
     }

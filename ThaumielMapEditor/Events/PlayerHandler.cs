@@ -20,10 +20,11 @@ namespace ThaumielMapEditor.Events
 {
     internal class PlayerHandler
     {
-        public class CreditTag
+        public enum TagType
         {
-            public string Name { get; set; } = string.Empty;
-            public string Color { get; set; } = string.Empty;
+            LeadDeveloper = 1,
+            Developer = 2,
+            Contributor = 3,
         }
 
         public static void Register()
@@ -43,29 +44,47 @@ namespace ThaumielMapEditor.Events
         }
 
         // If you contribute and want a CreditTag add your own steamid to this.
-        internal static readonly Dictionary<string, CreditTag> Credits = new()
+        internal static readonly Dictionary<string, TagType> Credits = new()
         {
             // MrBaguetter
-            ["76561199150506472@steam"] = new CreditTag()
-            {
-                Name = "TME Lead Developer",
-                Color = "pumpkin"
-            },
+            ["76561199150506472@steam"] = TagType.LeadDeveloper,
 
             // Example developer badge
-            ["EXAMPLE99@steam"] = new CreditTag()
-            {
-                Name = "TME Developer",
-                Color = "purple"
-            },
+            ["EXAMPLE99@steam"] = TagType.Developer,
 
             // Example contributor badge
-            ["EXAMPLE99@steam"] = new CreditTag()
-            {
-                Name = "TME Contributor",
-                Color = "red"
-            }
+            ["EXAMPLE99@steam"] = TagType.Contributor
         };
+
+        internal static void SetTag(Player player)
+        {
+            if (!Main.Instance.Config!.EnableCreditTags)
+                return;
+
+            if (!Credits.TryGetValue(player.UserId, out var type))
+            {
+                LogManager.Debug($"Player {player.DisplayName} is not in the Credits dictionary.");
+                return;
+            }
+
+            switch (type)
+            {
+                case TagType.LeadDeveloper:
+                    player.GroupName = "TME Lead Developer";
+                    player.GroupColor = "pumpkin";
+                    break;
+
+                case TagType.Developer:
+                    player.GroupName = "TME Developer";
+                    player.GroupColor = "purple";
+                    break;
+
+                case TagType.Contributor:
+                    player.GroupName = "TME Contributor";
+                    player.GroupColor = "red";
+                    break;
+            };
+        }
         
         private static void OnPlayerChangedSpectator(PlayerChangedSpectatorEventArgs ev)
         {
@@ -158,11 +177,7 @@ namespace ThaumielMapEditor.Events
                     data.SyncWithPlayer(ev.Player);
                 }
 
-                if (Main.Instance.Config!.EnableCreditTags && Credits.TryGetValue(ev.Player.UserId, out var credittag) && ev.Player.UserGroup == null)
-                {
-                    ev.Player.GroupColor = credittag.Color;
-                    ev.Player.GroupName = credittag.Name;
-                }
+                SetTag(ev.Player);
             });
         }
     }
