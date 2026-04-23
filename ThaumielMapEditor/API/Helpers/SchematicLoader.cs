@@ -32,6 +32,7 @@ using ThaumielMapEditor.API.Blocks;
 using HarmonyLib;
 using ThaumielMapEditor.API.Components;
 using ThaumielMapEditor.Events.EventArgs.Handlers;
+using ThaumielMapEditor.API.Serialization.Converters;
 
 namespace ThaumielMapEditor.API.Helpers
 {
@@ -98,6 +99,7 @@ namespace ThaumielMapEditor.API.Helpers
             .WithTypeConverter(new CustomColor32Converter())
             .WithTypeConverter(new CustomColorConverter())
             .WithTypeConverter(new CustomQuaternionConverter())
+            .WithTypeConverter(new FloatTypeConverter())
             .Build();
 
         /// <summary>
@@ -110,6 +112,7 @@ namespace ThaumielMapEditor.API.Helpers
             .WithTypeConverter(new CustomColor32Converter())
             .WithTypeConverter(new CustomColorConverter())
             .WithTypeConverter(new CustomQuaternionConverter())
+            .WithTypeConverter(new FloatTypeConverter())
             .Build();
 
         /// <summary>
