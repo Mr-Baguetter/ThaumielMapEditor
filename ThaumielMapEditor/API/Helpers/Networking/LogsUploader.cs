@@ -15,10 +15,13 @@ using LabApi.Features;
 using LabApi.Features.Wrappers;
 using MEC;
 using UnityEngine.Networking;
+using System.IO;
+using LabApi.Loader.Features.Paths;
+using System.Text.RegularExpressions;
 
 namespace ThaumielMapEditor.API.Helpers.Networking
 {
-    public class LogsUploader
+    internal class LogsUploader
     {
         private class AutoPayload
         {
@@ -42,6 +45,9 @@ namespace ThaumielMapEditor.API.Helpers.Networking
 
             [JsonPropertyName("log_data")]
             public string LogData { get; set; } = string.Empty;
+
+            [JsonPropertyName("local_admin_log_data")]
+            public string LocalAdminLog { get; set; } = string.Empty;
         }
 
         public class LogUploadResponse
@@ -59,11 +65,76 @@ namespace ThaumielMapEditor.API.Helpers.Networking
             public string CreatedAt { get; set; } = string.Empty;
         }
 
-        /// <summary>
-        /// Runs the <see cref="SendLogsCoroutine"/>.
-        /// </summary>
-        /// <param name="onComplete">Runs when the <see cref="SendLogsCoroutine"/> has finished.</param>
-        /// <returns>The <see cref="CoroutineHandle"/> of the ran <see cref="SendLogsCoroutine"/>.</returns>
+        public static bool GetLocalAdminConfig()
+        {
+            string portPath = Path.Combine(PathManager.SecretLab.ToString(), "config", Server.Port.ToString(), "config_localadmin.txt");
+            string globalPath = Path.Combine(PathManager.SecretLab.ToString(), "config", "config_localadmin_global.txt");
+
+            if (File.Exists(portPath))
+            {
+                if (IsLoggingEnabled(portPath))
+                    return true;
+            }
+
+            if (File.Exists(globalPath))
+            {
+                if (IsLoggingEnabled(globalPath))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsLoggingEnabled(string filePath)
+        {
+            foreach (string line in File.ReadLines(filePath))
+            {
+                if (line.Trim().ToLower().StartsWith("enable_la_logs: true"))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static string GetLocalAdminLogs()
+        {
+            if (!Main.Instance.Config.AllowLocalAdminLogUpload || !GetLocalAdminConfig())
+                return "Disabled";
+
+            DirectoryInfo directory = new(Path.Combine(PathManager.SecretLab.ToString(), "LocalAdminLogs", Server.Port.ToString()));
+            FileInfo latestFile = directory.GetFiles().OrderByDescending(f => f.LastWriteTime).FirstOrDefault();
+            return latestFile?.FullName ?? string.Empty;
+        }
+        
+        public static string ProcessLocalAdminLogs()
+        {
+            string logPath = GetLocalAdminLogs();
+            if (string.IsNullOrEmpty(logPath) || !File.Exists(logPath))
+                return "No logs found.";
+
+            string[] Keywords =
+            [
+                "The referenced script on this Behaviour",
+                "Trying to access a shader",
+                "The referenced script (Unknown) on this Behaviour"
+            ];
+
+            string ipPattern = @"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b";
+
+            try
+            {
+                IEnumerable<string> filteredLines = File.ReadLines(logPath)
+                    .Where(line => !Keywords.Any(spam => line.Contains(spam)))
+                    .Select(line => Regex.Replace(line, ipPattern, "[REDACTED IP]"));
+
+                return string.Join(Environment.NewLine, filteredLines);
+            }
+            catch (Exception ex)
+            {
+                return $"Error processing logs: {ex.Message}";
+            }
+        }
+        
         public static CoroutineHandle SendRequest(Action<LogUploadResponse?> onComplete)
         {
             MECHelper.TryRunCoroutine(SendLogsCoroutine(onComplete), out var handle);
@@ -101,7 +172,8 @@ namespace ThaumielMapEditor.API.Helpers.Networking
                 Port = Server.Port,
                 LabApiVersion = LabApiProperties.CompiledVersion,
                 PluginVersion = Main.Instance.Version.ToString(),
-                LogData = string.Join("\n", LogManager.Logs.Select(l => $"[{l.LogTime}] [{l.LogLevel}] {l.Message}"))
+                LogData = string.Join("\n", LogManager.Logs.Select(l => $"[{l.LogTime}] [{l.LogLevel}] {l.Message}")),
+                LocalAdminLog = ProcessLocalAdminLogs()
             };
 
             using UnityWebRequest request = new("https://tmelogs.thaumiel-servers.workers.dev/upload", "POST");

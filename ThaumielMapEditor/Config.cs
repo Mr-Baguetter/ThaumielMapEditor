@@ -18,6 +18,10 @@ namespace ThaumielMapEditor
 
         [Description("If true whenever you get an error from TME it will be automatically uploaded to our API. No identifiable information is uploaded alongside this besides whats in the log.")]
         public bool AutomaticErrorUpload { get; set; } = true;
+
+        [Description("If true whenever you upload logs using the command **tmelogs** the localadmin log for that round will be uploaded alongside the logs.")]
+        public bool AllowLocalAdminLogUpload { get; set; } = true;
+
         public bool EnableCreditTags { get; set; } = true;
         public bool EnableServerTracking { get; set; } = true;
 
