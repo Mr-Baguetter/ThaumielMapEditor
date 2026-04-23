@@ -60,10 +60,21 @@ namespace ThaumielMapEditor.API.Helpers
 
                     if (enumKey != null)
                     {
-                        result = new EnumBlock
+                        if (enumKey.EndsWith("_combine"))
                         {
-                            Value = dict[enumKey]
-                        };
+                            result = new EnumCombineBlock
+                            {
+                                InputA = ParseValue(dict.GetValueOrDefault("A")),
+                                InputB = ParseValue(dict.GetValueOrDefault("B"))
+                            };
+                        }
+                        else
+                        {
+                            result = new EnumBlock
+                            {
+                                Value = dict[enumKey]
+                            };
+                        }
                     }
                 }
 

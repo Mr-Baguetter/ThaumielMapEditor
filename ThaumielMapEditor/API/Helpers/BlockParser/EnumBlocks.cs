@@ -21,4 +21,29 @@ namespace ThaumielMapEditor.API.Helpers.BlockParser
             return enum1.ToString();
         }
     }
+
+    public class EnumCombineBlock : BlockBase
+    {
+        public object? InputA { get; set; }
+        public object? InputB { get; set; }
+
+        public override object ReturnExecute()
+        {
+            object valA = ResolveValue(InputA!);
+            object valB = ResolveValue(InputB!);
+
+            if (valA is Enum a && valB is Enum b)
+                return Enum.ToObject(a.GetType(), Convert.ToInt64(a) | Convert.ToInt64(b));
+
+            return valA ?? valB;
+        }
+
+        private object ResolveValue(object input)
+        {
+            if (input is BlockBase block)
+                return block.ReturnExecute();
+
+            return input;
+        }
+    }
 }
