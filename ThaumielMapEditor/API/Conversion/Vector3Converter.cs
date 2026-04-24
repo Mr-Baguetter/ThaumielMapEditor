@@ -6,6 +6,7 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -33,9 +34,14 @@ namespace ThaumielMapEditor.API.Conversion
 
                 switch (propName?.ToLowerInvariant())
                 {
-                    case "x": x = reader.GetSingle(); break;
-                    case "y": y = reader.GetSingle(); break;
-                    case "z": z = reader.GetSingle(); break;
+                    case "x": x = float.Parse(reader.GetString(), CultureInfo.InvariantCulture);
+                        break;
+
+                    case "y": y = float.Parse(reader.GetString(), CultureInfo.InvariantCulture);
+                        break;
+
+                    case "z": z = float.Parse(reader.GetString(), CultureInfo.InvariantCulture);
+                        break;
                 }
             }
 
