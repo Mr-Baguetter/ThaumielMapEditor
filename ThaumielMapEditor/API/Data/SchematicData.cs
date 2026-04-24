@@ -20,6 +20,7 @@ using ThaumielMapEditor.API.Components;
 using ThaumielMapEditor.Events.EventArgs.Handlers;
 using UnityEngine;
 using ThaumielMapEditor.API.Enums;
+using Mirror;
 
 namespace ThaumielMapEditor.API.Data
 {
@@ -116,6 +117,11 @@ namespace ThaumielMapEditor.API.Data
         public BlockExecutor? Executor { get; internal set; }
 
         /// <summary>
+        /// Gets the <see cref="GameObject"/> of the base <see cref="PrimitiveObject"/> of this Schematic
+        /// </summary>
+        public GameObject? GameObject => Primitive?.GameObject;
+
+        /// <summary>
         /// Retrieves all spawned <see cref="ClientSideObjectBase"/>s of the specified type.
         /// </summary>
         /// <typeparam name="T">The type of <see cref="ClientSideObjectBase"/> to filter.</typeparam>
@@ -128,6 +134,11 @@ namespace ThaumielMapEditor.API.Data
         /// <typeparam name="T">The type of <see cref="ServerObject"/> to filter.</typeparam>
         /// <returns>An <see cref="IEnumerable{T}"/> containing all <see cref="ServerObject"/>s that match type <typeparamref name="T"/>.</returns>
         public IEnumerable<T> GetServerObject<T>() where T : ServerObject => SpawnedServerObjects.OfType<T>();
+
+        /// <summary>
+        /// Gets all of the <see cref="SpawnedServerObjects"/> that have a <see cref="NetworkIdentity"/> as a component.
+        /// </summary>
+        public IEnumerable<NetworkIdentity> ServerNetworkIdentities => SpawnedServerObjects.Select(o => o.Object.GetComponent<NetworkIdentity>()).Where(identity => identity != null);
 
 #region ClientObjects
         /// <summary>
