@@ -78,16 +78,32 @@ namespace ThaumielMapEditor.API.Data
         }
 
         /// <summary>
+        /// Gets or sets the global euler angles of this <see cref="SchematicData"/> instance.
+        /// </summary>
+        public Vector3 EulerAngles
+        {
+            get => Rotation.eulerAngles;
+            set => Rotation = Quaternion.Euler(value);
+        }
+
+        /// <summary>
+        /// Gets or sets the scale of this <see cref="SchematicData"/> instance.
+        /// </summary>
+        public Vector3 Scale
+        {
+            get => GameObject!.transform.localScale;
+            set
+            {
+                GameObject!.transform.localScale = value;
+            }
+        }
+
+        /// <summary>
         /// Gets the room this <see cref="SchematicData"/> instance was spawned in.
         /// </summary>
         public Room? Room { get; internal set; }
 
         public AnimationController AnimationController => AnimationController.Get(this);
-
-        /// <summary>
-        /// Gets or sets the scale of this <see cref="SchematicData"/> instance.
-        /// </summary>
-        public Vector3 Scale { get; set; }
 
         public Dictionary<int, Transform> ServerSideTransforms = [];
 
@@ -138,124 +154,7 @@ namespace ThaumielMapEditor.API.Data
         /// <summary>
         /// Gets all of the <see cref="SpawnedServerObjects"/> that have a <see cref="NetworkIdentity"/> as a component.
         /// </summary>
-        public IEnumerable<NetworkIdentity> ServerNetworkIdentities => SpawnedServerObjects.Select(o => o.Object!.GetComponent<NetworkIdentity>()).Where(identity => identity != null);
-
-#region ClientObjects
-        /// <summary>
-        /// Gets all spawned <see cref="PrimitiveObject"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetClientObject)}<PrimitiveObject>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<PrimitiveObject> Primitives =>
-            SpawnedClientObjects.OfType<PrimitiveObject>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="CapybaraObject"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetClientObject)}<CapybaraObject>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<CapybaraObject> Capybaras =>
-            SpawnedClientObjects.OfType<CapybaraObject>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="LightObject"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetClientObject)}<LightObject>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<LightObject> Lights =>
-            SpawnedClientObjects.OfType<LightObject>();
-            
-#endregion
-
-#region ServerObjects
-        /// <summary>
-        /// Gets all spawned <see cref="CameraObject"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetServerObject)}<CameraObject>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<CameraObject> Cameras =>
-            SpawnedServerObjects.OfType<CameraObject>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="DoorObject"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetServerObject)}<DoorObject>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<DoorObject> Doors =>
-            SpawnedServerObjects.OfType<DoorObject>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="ClutterObject"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetServerObject)}<ClutterObject>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<ClutterObject> Clutter =>
-            SpawnedServerObjects.OfType<ClutterObject>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="InteractionObject"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetServerObject)}<InteractionObject>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<InteractionObject> Interactables =>
-            SpawnedServerObjects.OfType<InteractionObject>();
-            
-        /// <summary>
-        /// Gets all spawned <see cref="PickupObject"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetServerObject)}<PickupObject>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<PickupObject> Pickups =>
-            SpawnedServerObjects.OfType<PickupObject>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="TargetDummyObject"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetServerObject)}<TargetDummyObject>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<TargetDummyObject> TargetDummies =>
-            SpawnedServerObjects.OfType<TargetDummyObject>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="TextToyObject"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetServerObject)}<TextToyObject>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<TextToyObject> TextToys =>
-            SpawnedServerObjects.OfType<TextToyObject>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="WaypointObject"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetServerObject)}<WaypointObject>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<WaypointObject> Waypoints =>
-            SpawnedServerObjects.OfType<WaypointObject>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="WorkstationObject"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetServerObject)}<WorkstationObject>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<WorkstationObject> Workstations =>
-            SpawnedServerObjects.OfType<WorkstationObject>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="TeleporterObject"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetServerObject)}<TeleporterObject>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<TeleporterObject> Teleporters =>
-            SpawnedServerObjects.OfType<TeleporterObject>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="CapybaraObjectServer"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetServerObject)}<CapybaraObjectServer>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<CapybaraObjectServer> ServerCapybaras =>
-            SpawnedServerObjects.OfType<CapybaraObjectServer>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="LightObjectServer"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetServerObject)}<LightObjectServer>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<LightObjectServer> ServerLights =>
-            SpawnedServerObjects.OfType<LightObjectServer>();
-
-        /// <summary>
-        /// Gets all spawned <see cref="PrimitiveObjectServer"/>s belonging to this schematic.
-        /// </summary>
-        [Obsolete($"Use {nameof(GetServerObject)}<PrimitiveObjectServer>() instead of this. This property will be removed in version 0.6.0")]
-        public IEnumerable<PrimitiveObjectServer> ServerPrimitives =>
-            SpawnedServerObjects.OfType<PrimitiveObjectServer>();
-#endregion
+        public IReadOnlyList<NetworkIdentity> ServerNetworkIdentities => SpawnedServerObjects.Select(o => o.Object!.GetComponent<NetworkIdentity>()).Where(identity => identity != null).ToList();
 
         /// <summary>
         /// Syncs the <see cref="ClientSideObjectBase"/> of this <see cref="SchematicData"/> with the specified <see cref="Player"/>.
