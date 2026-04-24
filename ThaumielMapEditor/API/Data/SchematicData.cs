@@ -138,7 +138,7 @@ namespace ThaumielMapEditor.API.Data
         /// <summary>
         /// Gets all of the <see cref="SpawnedServerObjects"/> that have a <see cref="NetworkIdentity"/> as a component.
         /// </summary>
-        public IEnumerable<NetworkIdentity> ServerNetworkIdentities => SpawnedServerObjects.Select(o => o.Object.GetComponent<NetworkIdentity>()).Where(identity => identity != null);
+        public IEnumerable<NetworkIdentity> ServerNetworkIdentities => SpawnedServerObjects.Select(o => o.Object!.GetComponent<NetworkIdentity>()).Where(identity => identity != null);
 
 #region ClientObjects
         /// <summary>
