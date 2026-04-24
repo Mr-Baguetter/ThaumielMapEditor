@@ -198,13 +198,5 @@ namespace ThaumielMapEditor.Events
                 SetTag(ev.Player);
             });
         }
-
-        private static IEnumerator<float> Scp079CameraCheckCoroutine(Player player)
-        {
-            if (player.RoleBase is not Scp079Role role)
-                yield break;
-
-            role.
-        }
     }
 }
