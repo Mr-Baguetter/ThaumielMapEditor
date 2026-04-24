@@ -24,6 +24,11 @@ using Mirror;
 
 namespace ThaumielMapEditor.API.Data
 {
+    /// <summary>
+    /// Transition layer class from PMER.
+    /// </summary>
+    public class SchematicObject : SchematicData;
+
     public class SchematicData
     {
         /// <summary>

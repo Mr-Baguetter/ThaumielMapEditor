@@ -7,9 +7,12 @@
 
 using System.Collections.Generic;
 using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Arguments.Scp079Events;
 using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using MEC;
+using PlayerRoles;
+using PlayerRoles.PlayableScps.Scp079;
 using ThaumielMapEditor.API.Blocks.ClientSide;
 using ThaumielMapEditor.API.Blocks.ServerObjects;
 using ThaumielMapEditor.API.Components;
@@ -32,6 +35,7 @@ namespace ThaumielMapEditor.Events
             PlayerEvents.Joined += OnPlayerJoined;
             PlayerEvents.ChangedSpectator += OnPlayerChangedSpectator;
             PlayerEvents.Spawned += PlayerSpawnPoint.OnPlayerSpawned;
+            Scp079Events.ChangedCamera += OnScp079ChangedCamera;
             ReferenceHub.OnBeforePlayerDestroyed += OnPlayerLeft;
         }
 
@@ -40,6 +44,7 @@ namespace ThaumielMapEditor.Events
             PlayerEvents.Joined -= OnPlayerJoined;
             PlayerEvents.ChangedSpectator -= OnPlayerChangedSpectator;
             PlayerEvents.Spawned -= PlayerSpawnPoint.OnPlayerSpawned;
+            Scp079Events.ChangedCamera += OnScp079ChangedCamera;
             ReferenceHub.OnBeforePlayerDestroyed -= OnPlayerLeft;
         }
 
@@ -84,6 +89,19 @@ namespace ThaumielMapEditor.Events
                     player.GroupColor = "red";
                     break;
             };
+        }
+
+        private static void OnScp079ChangedCamera(Scp079ChangedCameraEventArgs ev)
+        {
+            foreach (CullingObject cullingZone in CullingObject.AllInstances)
+            {
+                if (cullingZone.IsInsideCollider(ev.Camera.Position))
+                {
+                    cullingZone.ToggleVisibility(ev.Player, true);
+                }
+                else
+                    cullingZone.ToggleVisibility(ev.Player, false);
+            }
         }
         
         private static void OnPlayerChangedSpectator(PlayerChangedSpectatorEventArgs ev)
@@ -179,6 +197,14 @@ namespace ThaumielMapEditor.Events
 
                 SetTag(ev.Player);
             });
+        }
+
+        private static IEnumerator<float> Scp079CameraCheckCoroutine(Player player)
+        {
+            if (player.RoleBase is not Scp079Role role)
+                yield break;
+
+            role.
         }
     }
 }
