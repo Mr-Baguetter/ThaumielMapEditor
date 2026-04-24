@@ -770,7 +770,7 @@ namespace ThaumielMapEditor.API.Helpers
                     dummyNode.transform.localRotation = obj.Rotation;
                     dummyNode.transform.localScale = obj.Scale;
 
-                    LogManager.Info($"Added transform with local position: {dummyNode.transform.localPosition}");
+                    LogManager.Debug($"Added transform with local position: {dummyNode.transform.localPosition}");
                     schematicData.ServerSideTransforms[obj.ObjectId] = dummyNode.transform;
                 }
             }
