@@ -3,8 +3,8 @@ from pathlib import Path
 
 BASE = Path(__file__).resolve().parent
 
-MAINFILE = BASE / r"ThaumielMapEditor\Main.cs"
-ASSEMBLYFILE = BASE / r"ThaumielMapEditor\Properties\AssemblyInfo.cs"
+MAINFILE = BASE / r"ThaumielMapEditor/Main.cs"
+ASSEMBLYFILE = BASE / r"ThaumielMapEditor/Properties/AssemblyInfo.cs"
 
 maincontent = MAINFILE.read_text()
 versionmatch = re.search(r'Version\s*=>\s*new\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)', maincontent)
