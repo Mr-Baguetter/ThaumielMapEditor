@@ -89,6 +89,12 @@ namespace ThaumielMapEditor.Commands.Admin
                     return false;
                 }
 
+                if (schematic == null)
+                {
+                    response = "The schematic is null!";
+                    return false;
+                }
+
                 if (schematic.Primitive == null)
                 {
                     response = $"Main schematic primitive is null!";
