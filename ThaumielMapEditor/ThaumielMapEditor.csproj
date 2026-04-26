@@ -51,36 +51,20 @@
     <Reference Include="UnityEngine.UnityWebRequestModule" HintPath="$(SL_REFERENCES)/UnityEngine.UnityWebRequestModule.dll"/>
     <Reference Include="UnityEngine.UnityWebRequestWWWModule" HintPath="$(SL_REFERENCES)/UnityEngine.UnityWebRequestWWWModule.dll"/>
   </ItemGroup>
-
-  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
-    <AppDataPath>$(APPDATA)</AppDataPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
-    <AppDataPath>$(HOME)/.config/</AppDataPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
-    <AppDataPath>$(HOME)/Library/Application Support/</AppDataPath>
-  </PropertyGroup>
-
   <Target Name="SyncVersion" BeforeTargets="BeforeBuild">
     <Message Text="Syncing version..." Importance="high" />
-    <Exec Command="python $(SolutionDir)syncversion.py" />
+    <Exec Command="python ..\syncversion.py" />
   </Target>
-
   <Target Name="EnsureCopyright" BeforeTargets="BeforeBuild">
     <Message Text="Running copyright script on $(ProjectDir)..." Importance="high" />
-    <Exec Command="python $(SolutionDir)addcopyright.py &quot;$(ProjectDir)&quot;" />
+    <Exec Command="python ..\addcopyright.py &quot;$(ProjectDir).&quot;" />
   </Target>
-
   <Target Name="PostBuildCopy" AfterTargets="Build">
     <Message Text="Copying dll to LabAPI plugin folder..." Importance="high" />
-    <Copy SourceFiles="$(OutputPath)ThaumielMapEditor.dll" DestinationFolder="$(AppDataPath)/SCP Secret Laboratory/LabAPI/plugins/global" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(OutputPath)ThaumielMapEditor.dll" DestinationFolder="$(APPDATA)\SCP Secret Laboratory\LabAPI\plugins\global" SkipUnchangedFiles="true" />
   </Target>
-
   <Target Name="DocumentCommands" AfterTargets="PostBuildCopy">
     <Message Text="Parsing commands to markdown" Importance="high" />
-    <Exec Command="python $(SolutionDir)parsecommands.py --base-dir &quot;$(SolutionDir)&quot;" />
+    <Exec Command="python ..\parsecommands.py --base-dir &quot;$(MSBuildProjectDirectory)\..&quot;" />
   </Target>
 </Project>
