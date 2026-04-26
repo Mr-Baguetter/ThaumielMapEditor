@@ -102,7 +102,7 @@ namespace ThaumielMapEditor.API.Helpers.Networking
                 return "Disabled";
 
             DirectoryInfo directory = new(Path.Combine(PathManager.SecretLab.ToString(), "LocalAdminLogs", Server.Port.ToString()));
-            FileInfo? latestFile = directory.GetFiles().OrderByDescending(f => f.LastWriteTime).FirstOrDefault();
+            FileInfo latestFile = directory.GetFiles().OrderByDescending(f => f.LastWriteTime).FirstOrDefault();
             return latestFile?.FullName ?? string.Empty;
         }
         
@@ -112,7 +112,7 @@ namespace ThaumielMapEditor.API.Helpers.Networking
             if (string.IsNullOrEmpty(logPath) || !File.Exists(logPath))
                 return "No logs found.";
 
-            string[] keywords =
+            string[] Keywords =
             [
                 "The referenced script on this Behaviour",
                 "Trying to access a shader",
@@ -137,7 +137,7 @@ namespace ThaumielMapEditor.API.Helpers.Networking
                 }
 
                 IEnumerable<string> filteredLines = lines
-                    .Where(line => !keywords.Any(spam => line.Contains(spam)))
+                    .Where(line => !Keywords.Any(spam => line.Contains(spam)))
                     .Select(line => Regex.Replace(line, ipPattern, "[REDACTED IP]"));
 
                 return string.Join(Environment.NewLine, filteredLines);

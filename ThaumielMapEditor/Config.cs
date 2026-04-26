@@ -15,8 +15,6 @@ namespace ThaumielMapEditor
     public class Config
     {
         public bool Debug { get; set; }
-        [Description("If true, will output extra debugging logs, in repetitive functions.")]
-        public bool ExtraDebug { get; set; }
 
         [Description("If true whenever you get an error from TME it will be automatically uploaded to our API. No identifiable information is uploaded alongside this besides whats in the log.")]
         public bool AutomaticErrorUpload { get; set; } = true;
@@ -25,8 +23,6 @@ namespace ThaumielMapEditor
         public bool AllowLocalAdminLogUpload { get; set; } = true;
 
         public bool EnableCreditTags { get; set; } = true;
-        
-        [Description("if true, will append an invisible tag to your server name. This setting does not track your server in any other way.")]
         public bool EnableServerTracking { get; set; } = true;
 
         [Description("The delay for the DoorLink coroutine (In seconds) if 0 it will run every frame.")]

@@ -21,9 +21,9 @@ namespace ThaumielMapEditor.API.Helpers
         public static string Dir() => Path.Combine(PathManager.Configs.ToString(), "Thaumiel");
 
         /// <summary>
-        /// Gets the combination of the Thaumiel directory and the provided directory.
+        /// Gets the Thaumiel directory plus the inputed directories
         /// </summary>
-        /// <param name="path">Directory path to append to the base Thaumiel directory.</param>
+        /// <param name="path">The path of directories</param>
         /// <returns>Directory path to the Thaumiel directory plus the inputed directories</returns>
         public static string Dir(string[] path) => Path.Combine([Dir(), .. path]);
 

@@ -83,26 +83,28 @@ namespace ThaumielMapEditor.Events
 
                 foreach (LightObjectServer serverLight in schematic.GetServerObject<LightObjectServer>())
                 {
-                    var intensity = serverLight.Intensity;
+                    float Intensity = 0;
+                    Intensity = serverLight.Intensity;
 
                     if (!ev.NewState)
                     {
                         serverLight.Intensity = 0;
                     }
                     else
-                        serverLight.Intensity = intensity;
+                        serverLight.Intensity = Intensity;
                 }
 
                 foreach (LightObject light in schematic.GetClientObject<LightObject>())
                 {
-                    var intensity = light.Intensity;
+                    float Intensity = 0;
+                    Intensity = light.Intensity;
 
                     if (!ev.NewState)
                     {
                         light.Intensity = 0;
                     }
                     else
-                        light.Intensity = intensity;
+                        light.Intensity = Intensity;
                 }
             }
         }
