@@ -56,6 +56,21 @@ namespace ThaumielMapEditor.API.Helpers
             LogCreated?.Invoke(log);
         }
 
+        public static void ExtraDebug(string message)
+        {
+            var formattedMessage = FormatLogMessage(message);
+            Logger.Debug(formattedMessage, Main.Instance.Config.Debug);
+            Log log = new()
+            {
+                LogLevel = LogLevel.Debug,
+                Message = formattedMessage,
+                LogTime = DateTime.Now
+            };
+            
+            Logs.Add(log);
+            LogCreated?.Invoke(log);
+        }
+
         public static void Warn(string message)
         {
             string formattedMessage = FormatLogMessage(message);

@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using CommandSystem;
+using LabApi.Features.Wrappers;
 using LabApi.Loader.Features.Paths;
 using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Conversion;
@@ -31,7 +32,7 @@ namespace ThaumielMapEditor.Commands.Admin
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            if (arguments == null || arguments.Count == 0)
+            if (arguments.Count == 0)
             {
                 response = "No schematic name provided.";
                 return false;
@@ -39,16 +40,19 @@ namespace ThaumielMapEditor.Commands.Admin
 
             string merDir = Path.Combine(PathManager.Configs.ToString(), "ProjectMER", "Schematics");
 
-            foreach (string file in Directory.GetFiles(merDir, "*.json", SearchOption.AllDirectories))
+            foreach (string filePath in Directory.GetFiles(merDir, "*.json", SearchOption.AllDirectories))
             {
-                string filename = Path.GetFileNameWithoutExtension(file);
+                string filename = Path.GetFileNameWithoutExtension(filePath);
 
                 if (filename.Contains("-Rigidbodies"))
+                {
+                    LogManager.ExtraDebug($"Found RigidBodies while attempting to parse {filePath}.");
                     continue;
+                }
                 if (!filename.Equals(arguments.At(0), StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                string content = File.ReadAllText(file);
+                string content = File.ReadAllText(filePath);
                 if (!content.TrimStart().StartsWith("{"))
                     continue;
 
@@ -58,27 +62,41 @@ namespace ThaumielMapEditor.Commands.Admin
                 {
                     try
                     {
-                        PMERRoot root = PMERLoader.Load(file);
+                        LogManager.ExtraDebug($"Converting '{schematicName}'. Requested by \"{Player.Get(sender)?.Nickname ?? "Console/Null"}\" - Loading file through PMER.");
+                        PMERRoot root = PMERLoader.Load(filePath);
+                        LogManager.ExtraDebug($"'{schematicName}' + \"{Player.Get(sender)?.Nickname ?? "Console/Null"}\" - Converting schematic");
                         SerializableSchematic schematic = await PMERConverter.ConvertSchematicAsync(root);
                         string yaml = SchematicLoader.Serializer.Serialize(schematic);
                         string outputPath = ThaumFileManager.Dir(["Schematics", $"{schematicName}.yml"]);
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        LogManager.ExtraDebug($"'{schematicName}' + \"{Player.Get(sender)?.Nickname ?? "Console/Null"}\" - Creating directory at {outputPath}");
+
+                        var directoryPath = Path.GetDirectoryName(outputPath);
+                        if (directoryPath == null)
+                        {
+                            LogManager.Error($"NRE caught while attempting to create directory at {outputPath}.");
+                            return;
+                        }
+                        
+                        Directory.CreateDirectory(directoryPath);
+                        LogManager.ExtraDebug($"'{schematicName}' + \"{Player.Get(sender)?.Nickname ?? "Console/Null"}\" - Writing text to {outputPath}");
                         File.WriteAllText(outputPath, yaml);
 
                         LogManager.Info($"Conversion of '{schematicName}' completed successfully.");
+                        sender.Respond($"Conversion of '{schematicName}' completed successfully.");
                         SchematicLoader.ReloadSchematics();
                     }
                     catch (Exception e)
                     {
                         LogManager.Error($"Conversion of '{schematicName}' failed: {e}");
+                        sender.Respond($"Conversion of {schematicName} failed. Please check your server console.", false);
                     }
                 });
 
-                response = $"Conversion of '{schematicName}' started. Check logs for completion.";
+                response = $"<color=yellow>Conversion of '{schematicName}' started. Check logs for completion.</color>";
                 return true;
             }
 
-            response = $"Failed to find file with name {arguments.At(0)}";
+            response = $"<color=red>Failed to find file with name</color> \"{arguments.At(0)}\"";
             return true;
         }
     }
