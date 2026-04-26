@@ -23,6 +23,7 @@ using MEC;
 using ThaumielMapEditor.API.Blocks.ClientSide;
 using System.Linq;
 using YamlDotNet.Core;
+using Utils.NonAllocLINQ;
 using ThaumielMapEditor.API.Blocks.ServerObjects;
 using ThaumielMapEditor.API.Blocks.ServerObjects.Lockers;
 using ThaumielMapEditor.API.Extensions;
@@ -139,21 +140,15 @@ namespace ThaumielMapEditor.API.Helpers
         /// Destroys the specified <see cref="SchematicData"/>
         /// </summary>
         /// <param name="data">The schematic to be destroyed</param>
-        public static void DestroySchematic(SchematicData? data)
+        public static void DestroySchematic(SchematicData data)
         {
-            if (data == null)
-            {
-                LogManager.Error("Error whilst attempting to destroy schematic. Schematic was null.");
-                return;
-            }
-            
             SchematicDestroyed?.Invoke(data);
             SchematicsById.Remove(data.Id);
             data.Destroy();
         }
 
         /// <summary>
-        /// Loads all schematics in the TME Schematics folder.
+        /// Loads the schematics
         /// </summary>
         public static void LoadSchematics()
         {
@@ -167,21 +162,23 @@ namespace ThaumielMapEditor.API.Helpers
                     SerializableSchematic schematic = Deserializer.Deserialize<SerializableSchematic>(File.ReadAllText(filename));
                     schematic.FileName = Path.GetFileNameWithoutExtension(filename);
                     LoadedSchematics[schematic.FileName] = schematic;
-                    LogManager.Debug($"Loaded schematic \"{Path.GetFileNameWithoutExtension(filename)}\"");
+                    LogManager.Debug($"Loaded schematic {Path.GetFileNameWithoutExtension(filename)}");
                 }
                 catch (YamlException yamlex)
                 {
-                    LogManager.Warn($"Failed to parse schematic \"{Path.GetFileNameWithoutExtension(filename)}\". \n\n {yamlex}");
+                    LogManager.Warn($"Failed to parse Schematic {Path.GetFileNameWithoutExtension(filename)}. \n\n {yamlex}");
+                    continue;
                 }
                 catch (Exception ex)
                 {
-                    LogManager.Warn($"Exception when trying to parse schematic \"{Path.GetFileNameWithoutExtension(filename)}\". \n\n {ex}");
+                    LogManager.Warn($"Exception when trying to parse Schematic {Path.GetFileNameWithoutExtension(filename)}. \n\n {ex}");
+                    continue;
                 }
             }
         }
 
         /// <summary>
-        /// Loads all maps in the TME Maps folder.
+        /// Loads the maps
         /// </summary>
         public static void LoadMaps()
         {
@@ -195,30 +192,33 @@ namespace ThaumielMapEditor.API.Helpers
                     SerializableMap map = Deserializer.Deserialize<SerializableMap>(File.ReadAllText(filename));
                     map.FileName = Path.GetFileNameWithoutExtension(filename);
                     LoadedMaps.Add(map);
-                    LogManager.Debug($"Loaded map \"{Path.GetFileNameWithoutExtension(filename)}\"");
+                    LogManager.Debug($"Loaded map {Path.GetFileNameWithoutExtension(filename)}");
                 }
                 catch (YamlException yamlex)
                 {
-                    LogManager.Warn($"Failed to parse schematic \"{Path.GetFileNameWithoutExtension(filename)}\". \n\n {yamlex}");
+                    LogManager.Warn($"Failed to parse Schematic {Path.GetFileNameWithoutExtension(filename)}. \n\n {yamlex}");
+                    continue;
                 }
                 catch (Exception ex)
                 {
-                    LogManager.Warn($"Exception when trying to parse schematic \"{Path.GetFileNameWithoutExtension(filename)}\". \n\n {ex}");
+                    LogManager.Warn($"Exception when trying to parse Schematic {Path.GetFileNameWithoutExtension(filename)}. \n\n {ex}");
+                    continue;
                 }
             }
         }
 
         /// <summary>
-        /// Tries to get the <see cref="SchematicData"/> by its ID.
+        /// Tries to get the <see cref="SchematicData"/> by its Id.
         /// </summary>
-        /// <param name="id">Provided ID to attempt.</param>
-        /// <param name="schematic">The <see cref="SchematicData"/>, if found.</param>
-        public static bool TryGetSchematicById(uint id, out SchematicData? schematic)
+        /// <param name="id">The id to get</param>
+        /// <param name="schematic">The <see cref="SchematicData"/> if found</param>
+        /// <returns><see langword="true"/> if found else returns <see langword="false"/> if not</returns>
+        public static bool TryGetSchematicById(uint id, out SchematicData schematic)
         {
             SchematicData? data = GetSchematicById(id);
             if (data == null)
             {
-                schematic = null;
+                schematic = null!;
                 return false;
             }
 
@@ -258,15 +258,12 @@ namespace ThaumielMapEditor.API.Helpers
             Dictionary<int, (SerializableObject, bool)> objectsById = [];
             Dictionary<int, List<SerializableObject>> objectsByParent = [];
             Dictionary<int, List<SerializableObject>> serverObjectsByParent = [];
-            var lodZones = schematicData.Primitive!.GameObject.GetComponents<LODZone>();
+            LODZone[] lodZones = schematicData.Primitive!.GameObject.GetComponents<LODZone>();
 
             void CacheObject(SerializableObject obj, Dictionary<int, List<SerializableObject>> parentDict, bool serverside = false)
             {
                 if (objectsById.ContainsKey(obj.ObjectId))
-                {
-                    LogManager.ExtraDebug("objectById contains ObjectId. Canceling.");
                     return;
-                }
 
                 objectsById.Add(obj.ObjectId, (obj, serverside));
 
@@ -619,7 +616,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, rotation));
+            Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, rotation, default));
             return schematicData;
         }
 
@@ -631,13 +628,13 @@ namespace ThaumielMapEditor.API.Helpers
         /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
         public static SchematicData SpawnSchematic(SerializableSchematic schematic, Vector3 position)
         {
-            LogManager.Debug($"Spawning Schematic {schematic.FileName} at {position}");
             SchematicData schematicData = new()
             {
                 FileName = schematic.FileName,
                 Id = GetId(),
             };
-            Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position));
+
+            Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, default, default));
             return schematicData;
         }
 
@@ -655,7 +652,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position));
+            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, default, default));
             return schematicData;
         }
 
@@ -674,7 +671,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, rotation));
+            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, rotation, default));
             return schematicData;
         }
 
@@ -698,7 +695,7 @@ namespace ThaumielMapEditor.API.Helpers
             return schematicData;
         }
 
-        private static IEnumerator<float> SpawnSchematicCoroutine(SerializableSchematic schematic, SchematicData schematicData, Vector3 position, Quaternion? rotation = null, Vector3? scale = null)
+        private static IEnumerator<float> SpawnSchematicCoroutine(SerializableSchematic schematic, SchematicData schematicData, Vector3 position, Quaternion rotation, Vector3 scale)
         {
             if (!PrefabHelper.RanRegister)
             {
@@ -706,73 +703,42 @@ namespace ThaumielMapEditor.API.Helpers
                 yield return Timing.WaitUntilTrue(() => PrefabHelper.RanRegister);
             }
 
-            LogManager.ExtraDebug("Creating LabPrimtive.");
             LabPrimitive baseprimitive = LabPrimitive.Create();
             baseprimitive.Type = PrimitiveType.Cube;
             baseprimitive.Flags = PrimitiveFlags.None;
             baseprimitive.Position = position;
-            LogManager.ExtraDebug($"Grabbing room at position {baseprimitive.Position}.");
-            var roomAtPos = Room.GetRoomAtPosition(baseprimitive.Position);
-            try // Exceptions were being swallowed. Using try-catch.
+            schematicData.Room = Room.GetRoomAtPosition(schematicData.Position);
+            if (rotation != default)
             {
-                if (roomAtPos != null)
-                {
-                    schematicData.Room = roomAtPos;
-                    LogManager.ExtraDebug("Success on grabbing room position!");
-                }
-                else LogManager.Debug($"Note: GetRoomAtPosition returned null for \"{schematic.FileName}\".");
-
-                LogManager.ExtraDebug("Calling on rotation if statement.");
-                if (rotation != null)
-                {
-                    LogManager.ExtraDebug($"Rotation was not default. Setting base primitive + schematicData's rotation to rotation.");
-                    baseprimitive.Rotation = (Quaternion)rotation;
-                    schematicData.Rotation = (Quaternion)rotation;
-                }
-                else
-                {
-                    LogManager.ExtraDebug($"Rotation was default. Setting base primitive + schematicData's rotation to schematic.Rotation.");
-                    baseprimitive.Rotation = schematic.Rotation;
-                    schematicData.Rotation = schematic.Rotation;
-                }
-
-                LogManager.ExtraDebug("Calling on scale if statement.");
-                if (scale != null)
-                {
-                    LogManager.ExtraDebug($"Scale was not default. Setting base primitive + schematicData scale to scale.");
-                    baseprimitive.Scale = (Vector3)scale;
-                    schematicData.Scale = (Vector3)scale;
-                }
-                else
-                {
-                    LogManager.ExtraDebug(
-                        $"Scale was default. Setting base primitive + schematicData scale to schematic.Scale ({schematic.Scale})");
-                    baseprimitive.Scale = schematic.Scale;
-                    schematicData.Scale = schematic.Scale;
-                }
+                baseprimitive.Rotation = rotation;
+                schematicData.Rotation = rotation;
             }
-            catch (Exception e)
+            else
             {
-                LogManager.Error(e.Message + e.StackTrace);
-                yield break;
+                baseprimitive.Rotation = schematic.Rotation;
+                schematicData.Rotation = schematic.Rotation;
             }
 
-            LogManager.ExtraDebug($"Setting primitive, position, and rootObjectID.");
+            if (scale != default)
+            {
+                baseprimitive.Scale = scale;
+                schematicData.Scale = scale;
+            }
+            else
+            {
+                baseprimitive.Scale = schematic.Scale;
+                schematicData.Scale = schematic.Scale;
+            }
+
             schematicData.Primitive = baseprimitive;
-            LogManager.ExtraDebug($"Primitive set. Setting position.");
             schematicData.Position = position;
-            LogManager.ExtraDebug($"Position set. Setting RootObjectId.");
             schematicData.RootObjectId = schematic.RootObjectId;
-            LogManager.ExtraDebug($"RootObjectId set.");
 
-            LogManager.ExtraDebug($"About to generate LODZones for \"{schematic.FileName}\"");
             LODHelper.GenerateLODZones(schematicData, schematic);
-            LogManager.ExtraDebug($"Generated LODZones, and about to get base object transforms for \"{schematic.FileName}\".");
             GetGameObjectTransforms(schematic, schematicData);
-            LogManager.ExtraDebug($"Base objects transforms for \"{schematic.FileName}\" passed. Waiting for SpawnObjectsBatched to be done!");
-            yield return Timing.WaitUntilDone(SpawnObjectsBatched(schematic, schematicData, schematicData.Primitive.Base.netId));
-            LogManager.ExtraDebug("SpawnObjectsBatched has finished.");
-            schematicData.Executor = new BlockExecutor(schematicData);
+            yield return Timing.WaitUntilDone(Timing.RunCoroutine(SpawnObjectsBatched(schematic, schematicData, schematicData.Primitive.Base.netId)));
+
+            schematicData.Executor = new(schematicData);
             ApplyAnimators(schematic, schematicData);
             ApplyTools(schematic, schematicData);
 
@@ -781,7 +747,7 @@ namespace ThaumielMapEditor.API.Helpers
             LogManager.Info($"Schematic '{schematic.FileName}' fully spawned.");
             SchematicsById.Add(schematicData.Id, schematicData);
 
-            if (Main.Instance.Config.SchematicAnimationPlayOnLoad.TryGetValue(schematicData.FileName, out var animationname))
+            if (Main.Instance.Config!.SchematicAnimationPlayOnLoad.TryGetValue(schematicData.FileName, out var animationname))
                 schematicData.AnimationController.Play(animationname);
         }
 
@@ -934,7 +900,7 @@ namespace ThaumielMapEditor.API.Helpers
             }
         }
 
-        private static uint SpawnSerializableObject(SerializableObject serializable, SchematicData schematicData, uint parentNetId, LODZone[]? lodZones, bool serverside = false)
+        private static uint SpawnSerializableObject(SerializableObject serializable, SchematicData schematicData, uint parentNetId, LODZone[] lodZones, bool serverside = false)
         {
             NetworkServer.spawned.TryGetValue(parentNetId, out var identity);
 
@@ -980,7 +946,7 @@ namespace ThaumielMapEditor.API.Helpers
                         primitive.DeserializeValues(serializable);
                         LogManager.Debug($"[CLIENT] {primitive.Name} - {primitive.Color} - {primitive.PrimitiveType} - {primitive.PrimitiveFlags}");
                         schematicData.SpawnedClientObjects.Add(primitive);
-                        if (lodZones == null|| lodZones.IsEmpty())
+                        if (lodZones.IsEmpty())
                         {
                             foreach (Player player in Player.ReadyList)
                             {
@@ -1364,7 +1330,7 @@ namespace ThaumielMapEditor.API.Helpers
             if (serializable.CullingSettings.Bounds != Vector3.zero)
             {
                 GameObject gameObject = new($"{serializable.Name} - Culling Object");
-                Transform targetParent = ColliderHelper.ResolveServerParentTransform(serializable.ParentId, schematic);
+                Transform? targetParent = ColliderHelper.ResolveServerParentTransform(serializable.ParentId, schematic);
                 gameObject.transform.SetParent(targetParent, false);
                 gameObject.transform.localPosition = serializable.Position;
                 gameObject.transform.localRotation = serializable.Rotation;

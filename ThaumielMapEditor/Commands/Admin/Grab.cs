@@ -52,7 +52,7 @@ namespace ThaumielMapEditor.Commands.Admin
                 return false;
             }
 
-            if (!SchematicLoader.TryGetSchematicById(id, out var schematic) || schematic == null)
+            if (!SchematicLoader.TryGetSchematicById(id, out var schematic))
             {
                 response = $"Failed to find schematic with the ID {id}. Run 'tme spawned' to get all spawned schematics";
                 return false;

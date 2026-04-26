@@ -9,7 +9,6 @@ using System;
 using System.Text;
 using CommandSystem;
 using LabApi.Features.Wrappers;
-using PlayerRoles;
 using ThaumielMapEditor.API.Attributes;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Helpers;
@@ -45,7 +44,7 @@ namespace ThaumielMapEditor.Commands.Admin
                 return false;
             }
 
-            Vector3 position;
+            Vector3 position = new();
 
             if (arguments.Count == 4)
             {
@@ -72,12 +71,6 @@ namespace ThaumielMapEditor.Commands.Admin
                 if (!Player.TryGet(sender, out var player))
                 {
                     response = "Failed to get Player.";
-                    return false;
-                }
-
-                if (player.Role is RoleTypeId.Spectator or RoleTypeId.Filmmaker or RoleTypeId.None) // RoleTypeId.None is applied in WaitingForLobby
-                {
-                    response = "This command cannot be used with your current role!"; // due to raycast fails -- more verbose here so the player understands
                     return false;
                 }
 
