@@ -34,16 +34,13 @@ namespace ThaumielMapEditor.API.Conversion
 
                 switch (propName?.ToLowerInvariant())
                 {
-                    case "x": x = reader.GetSingle();
-                            // float.Parse(reader.GetString(), CultureInfo.InvariantCulture);
+                    case "x": x = float.Parse(reader.GetString(), CultureInfo.InvariantCulture);
                         break;
 
-                    case "y": y = reader.GetSingle();
-                        // y = float.Parse(reader.GetString(), CultureInfo.InvariantCulture);
+                    case "y": y = float.Parse(reader.GetString(), CultureInfo.InvariantCulture);
                         break;
 
-                    case "z":  z = reader.GetSingle();
-                        // z = float.Parse(reader.GetString(), CultureInfo.InvariantCulture);
+                    case "z": z = float.Parse(reader.GetString(), CultureInfo.InvariantCulture);
                         break;
                 }
             }
