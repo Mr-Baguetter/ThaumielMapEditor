@@ -704,6 +704,7 @@ namespace ThaumielMapEditor.API.Helpers
             }
 
             LabPrimitive baseprimitive = LabPrimitive.Create();
+            schematicData.Primitive = baseprimitive;
             baseprimitive.Type = PrimitiveType.Cube;
             baseprimitive.Flags = PrimitiveFlags.None;
             baseprimitive.Position = position;
@@ -730,7 +731,6 @@ namespace ThaumielMapEditor.API.Helpers
                 schematicData.Scale = schematic.Scale;
             }
 
-            schematicData.Primitive = baseprimitive;
             schematicData.Position = position;
             schematicData.RootObjectId = schematic.RootObjectId;
 
