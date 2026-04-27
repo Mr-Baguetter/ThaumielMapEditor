@@ -1297,6 +1297,19 @@ namespace ThaumielMapEditor.API.Helpers
                     spawn.Name = serializable.Name;
                     return spawn.NetId;
 
+                case ObjectType.RagdollSpawner:
+                    RagdollSpawner ragdoll = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    ragdoll.SpawnObject(schematicData, serializable);
+                    ragdoll.Name = serializable.Name;
+                    return 0;
+
                 default:
                     LogManager.Warn($"Unhandled ObjectType '{serializable.ObjectType}' on object '{serializable.Name}', skipping.");
                     return 0;
