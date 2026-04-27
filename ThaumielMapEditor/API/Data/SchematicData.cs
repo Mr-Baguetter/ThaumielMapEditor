@@ -96,10 +96,10 @@ namespace ThaumielMapEditor.API.Data
         /// </summary>
         public Vector3 Scale
         {
-            get => GameObject!.transform.localScale;
+            get => GameObject?.transform.localScale ?? Vector3.one;
             set
             {
-                GameObject!.transform.localScale = value;
+                GameObject?.transform.localScale = value;
             }
         }
 
