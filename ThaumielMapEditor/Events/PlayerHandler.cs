@@ -11,8 +11,6 @@ using LabApi.Events.Arguments.Scp079Events;
 using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using MEC;
-using PlayerRoles;
-using PlayerRoles.PlayableScps.Scp079;
 using ThaumielMapEditor.API.Blocks.ClientSide;
 using ThaumielMapEditor.API.Blocks.ServerObjects;
 using ThaumielMapEditor.API.Components;

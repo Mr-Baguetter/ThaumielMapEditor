@@ -101,7 +101,7 @@ namespace ThaumielMapEditor.API.Helpers
         /// </summary>
         /// <param name="zone"></param>
         /// <returns></returns>
-        public static Player[] GetPlayersInZone(LODZone zone)
+        public static IEnumerable<Player> GetPlayersInZone(LODZone zone)
         {
             List<Player> players = [];
 
@@ -114,7 +114,7 @@ namespace ThaumielMapEditor.API.Helpers
                     players.Add(player);
             }
 
-            return players.ToArray();
+            return players;
         }
     }
 }
