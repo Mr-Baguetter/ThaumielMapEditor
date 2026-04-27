@@ -44,7 +44,7 @@ namespace ThaumielMapEditor.API.Data
         /// <summary>
         /// Gets or sets the file name.
         /// </summary>
-        public string FileName { get; internal set; }= string.Empty;
+        public string FileName { get; internal set; } = string.Empty;
 
         /// <summary>
         /// Gets the root object id.

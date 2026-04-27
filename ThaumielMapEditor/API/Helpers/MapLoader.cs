@@ -6,6 +6,7 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Serialization;
@@ -28,10 +29,50 @@ namespace ThaumielMapEditor.API.Helpers
         /// <item><description><c>Unload::MapName</c> - Unloads a single map.</description></item>
         /// <item><description><c>Unload::MapA||MapB</c> - Unloads one random map from the list.</description></item>
         /// <item><description><c>Unload::MapA&amp;&amp;MapB</c> - Unloads all specified maps.</description></item>
+        /// <item><description><c>LoadIf::MapName::IsLoaded::ConditionMap</c> - Loads a map if the condition map is currently loaded.</description></item>
+        /// <item><description><c>LoadIf::MapName::IsNotLoaded::ConditionMap</c> - Loads a map if the condition map is not currently loaded.</description></item>
+        /// <item><description><c>UnloadIf::MapName::IsLoaded::ConditionMap</c> - Unloads a map if the condition map is currently loaded.</description></item>
+        /// <item><description><c>UnloadIf::MapName::IsNotLoaded::ConditionMap</c> - Unloads a map if the condition map is not currently loaded.</description></item>
         /// </list>
         /// </remarks>
         public static void ParseInput(string input)
         {
+            if (input.Contains("LoadIf::"))
+            {
+                string[] parts = input.Replace("LoadIf::", "").Split(["::"], StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length != 3)
+                {
+                    LogManager.Warn($"Invalid LoadIf syntax: '{input}'. Expected: LoadIf::MapName::IsLoaded/IsNotLoaded::ConditionMap");
+                    return;
+                }
+
+                string mapName = parts[0].Trim();
+                string condition = parts[1].Trim();
+                string conditionMap = parts[2].Trim();
+
+                if (EvaluateCondition(condition, conditionMap))
+                    LoadMap(mapName);
+            }
+
+            if (input.Contains("UnloadIf::"))
+            {
+                string[] parts = input.Replace("UnloadIf::", "").Split(["::"], StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length != 3)
+                {
+                    LogManager.Warn($"Invalid UnloadIf syntax: '{input}'. Expected: UnloadIf::MapName::IsLoaded/IsNotLoaded::ConditionMap");
+                    return;
+                }
+
+                string mapName = parts[0].Trim();
+                string condition = parts[1].Trim();
+                string conditionMap = parts[2].Trim();
+
+                if (EvaluateCondition(condition, conditionMap))
+                    UnloadMap(mapName);
+            }
+
             if (input.Contains("Load::"))
             {
                 string mapPart = input.Replace("Load::", "").Trim();
@@ -107,6 +148,30 @@ namespace ThaumielMapEditor.API.Helpers
                 LogManager.Warn($"Map name {name} is invalid!");
 
             SchematicLoader.DestroyMap(map!);
+        }
+
+        /// <summary>
+        /// Determines if the specified map by name is loaded.
+        /// </summary>
+        /// <param name="name">The map name to check.</param>
+        /// <returns><see langword="true"/> if the specified map is loaded. Otherwise <see langword="false"/>.</returns>
+        private static bool IsMapLoaded(string name)
+            => SchematicLoader.SpawnedMaps.Any(s => string.Equals(s.FileName, name, StringComparison.CurrentCultureIgnoreCase));
+
+        private static bool EvaluateCondition(string condition, string mapName)
+        {
+            return condition.ToLowerInvariant() switch
+            {
+                "isloaded" => IsMapLoaded(mapName),
+                "isnotloaded" => !IsMapLoaded(mapName),
+                _ => LogUnknownCondition(condition)
+            };
+        }
+
+        private static bool LogUnknownCondition(string condition)
+        {
+            LogManager.Warn($"Unknown condition '{condition}'. Supported conditions: IsLoaded, IsNotLoaded.");
+            return false;
         }
     }
 }
