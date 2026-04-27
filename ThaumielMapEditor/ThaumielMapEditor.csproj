@@ -71,7 +71,8 @@
 
   <Target Name="EnsureCopyright" BeforeTargets="BeforeBuild">
     <Message Text="Running copyright script on $(ProjectDir)..." Importance="high" />
-    <Exec Command="python $(SolutionDir)addcopyright.py &quot;$(ProjectDir)&quot;" />
+    <Exec Condition="'$(OS)' == 'Windows_NT'" Command="python $(SolutionDir)addcopyright.py &quot;$(ProjectDir.TrimEnd('\\'))&quot;" />
+    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="python $(SolutionDir)addcopyright.py &quot;$(ProjectDir)&quot;" />
   </Target>
 
   <Target Name="PostBuildCopy" AfterTargets="Build">
@@ -81,6 +82,7 @@
 
   <Target Name="DocumentCommands" AfterTargets="PostBuildCopy">
     <Message Text="Parsing commands to markdown" Importance="high" />
-    <Exec Command="python $(SolutionDir)parsecommands.py --base-dir &quot;$(SolutionDir)&quot;" />
+    <Exec Condition="'$(OS)' == 'Windows_NT'" Command="python $(SolutionDir)parsecommands.py --base-dir &quot;$(SolutionDir.TrimEnd('\\'))&quot;" />
+    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="python $(SolutionDir)parsecommands.py --base-dir &quot;$(SolutionDir)&quot;" />
   </Target>
 </Project>

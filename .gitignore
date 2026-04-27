@@ -368,3 +368,5 @@ ThaumielMapEditor/Dependencies/
 !syncversion.py
 !parsecommands.py
 !addcopyright.py
+*.dll
+*.xml
