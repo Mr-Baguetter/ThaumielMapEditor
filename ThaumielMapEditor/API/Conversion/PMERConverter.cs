@@ -46,6 +46,7 @@ namespace ThaumielMapEditor.API.Conversion
             {
                 SerializableSchematic tme = new()
                 {
+                    RootObjectId = root.RootObjectId,
                     FileName = "ConvertedSchematic",
                     Rotation = Quaternion.identity,
                     Scale = Vector3.one,
