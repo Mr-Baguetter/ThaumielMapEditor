@@ -57,6 +57,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 
             CustomReasonDamageHandler handler = new(DeathReason);
             Base = Ragdoll.SpawnRagdoll(RoleType, Position, Rotation, handler, Name, Scale);
+            Object = Base?.Base.gameObject;
             base.SpawnObject(schematic, serializable);
         }
 
