@@ -70,9 +70,7 @@ namespace ThaumielMapEditor.API.Helpers
 
         public static void RegisterPrefabs()
         {
-            Dictionary<uint, GameObject>.ValueCollection prefabs = NetworkClient.prefabs.Values;
-            PrefabColliders.Capacity = prefabs.Count;
-            foreach (GameObject prefab in prefabs)
+            foreach (GameObject prefab in NetworkClient.prefabs.Values)
             {
                 string prefabName = prefab.name;
                 PrefabColliders.Add(new PrefabCollidersData
