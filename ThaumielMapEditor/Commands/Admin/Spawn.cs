@@ -90,11 +90,16 @@ namespace ThaumielMapEditor.Commands.Admin
                 position = hit.point;
             }
 
-            SchematicData data = SchematicLoader.SpawnSchematic(schematic, position);
+            SchematicData? data = SchematicLoader.SpawnSchematic(schematic, position);
+            if (data == null)
+            {
+                response = "Schematic data was null.";
+                return false;
+            }
             StringBuilder sb = new();
             sb.AppendLine();
             sb.AppendLine($"Spawning schematic '{schematic.FileName}'...");
-            sb.AppendLine($"- Id: {data.Id}");
+            sb.AppendLine($"- Id: {data?.Id}");
             sb.AppendLine($"- Position: {position}");
             sb.AppendLine($"- Scale: {schematic.Scale}");
             sb.AppendLine($"- Objects queued: {schematic.Objects.Count}");

@@ -19,7 +19,7 @@ namespace ThaumielMapEditor.API.Data
         /// <summary>
         /// Gets or sets the schematic name to load of this <see cref="MapSchematicData"/> instance.
         /// </summary>
-        public string SchematicName { get; set; } = string.Empty;
+        public string? SchematicName { get; set; } = string.Empty;
 
         [YamlIgnore]
         public uint SchematicId { get; set; }

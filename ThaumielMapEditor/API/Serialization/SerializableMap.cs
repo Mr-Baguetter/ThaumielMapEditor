@@ -24,7 +24,7 @@ namespace ThaumielMapEditor.API.Serialization
         /// <summary>
         /// Gets or sets the schematic name of the parent schematic for the <see cref="SerializedMapSchematic"/> instance.
         /// </summary>
-        public string SchematicName { get; set; } = string.Empty;
+        public string? SchematicName { get; set; } = string.Empty;
     }
 
     /// <summary>

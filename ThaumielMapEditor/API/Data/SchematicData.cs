@@ -44,7 +44,7 @@ namespace ThaumielMapEditor.API.Data
         /// <summary>
         /// Gets or sets the file name.
         /// </summary>
-        public string FileName { get; internal set; }= string.Empty;
+        public string? FileName { get; internal set; }= string.Empty;
 
         /// <summary>
         /// Gets the root object id.
@@ -100,7 +100,7 @@ namespace ThaumielMapEditor.API.Data
             set
             {
                 if (GameObject != null) GameObject.transform.localScale = value;
-                else LogManager.Error($"Error while attempting to set {FileName} to {value}.");
+                else LogManager.Error($"Error while attempting to set {FileName ?? "null filename"} to {value}.");
             }
         }
 

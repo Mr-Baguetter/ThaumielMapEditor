@@ -292,7 +292,25 @@ namespace ThaumielMapEditor.API.Helpers
 
             Queue<(int id, uint parentNetId)> spawnQueue = new();
             HashSet<int> visited = [];
-            spawnQueue.Enqueue((schematic.RootObjectId, rootNetId));
+            int effectiveRootId = schematic.RootObjectId;
+
+            if (!objectsByParent.ContainsKey(effectiveRootId) && !objectsById.ContainsKey(effectiveRootId))
+            {
+                int? inferred = objectsByParent.Keys.FirstOrDefault(id => !objectsById.ContainsKey(id));
+                
+                if (inferred != null && inferred != 0)
+                {
+                    LogManager.Warn($"'{schematic.FileName}': RootObjectId {effectiveRootId} invalid. Inferred root: {inferred}");
+                    effectiveRootId = (int)inferred;
+                }
+                else
+                {
+                    LogManager.Error($"'{schematic.FileName}': Could not determine root object. Aborting spawn.");
+                    yield break;
+                }
+            }
+            
+            spawnQueue.Enqueue((effectiveRootId, rootNetId));
 
             int objectsProcessed = 0;
 
@@ -372,17 +390,19 @@ namespace ThaumielMapEditor.API.Helpers
             foreach (SerializedMapSchematic ms in map.Schematics)
             {
                 Vector3 offset = data.Room!.WorldPosition(ms.Position);
+                if (ms.SchematicName == null) continue;
                 if (!LoadedSchematics.TryGetValue(ms.SchematicName, out SerializableSchematic schematic))
                 {
                     LogManager.Warn($"Schematic '{ms.SchematicName}' not found.");
                     continue;
                 }
 
-                SchematicData schematicData = SpawnSchematic(schematic, offset);
-                data.Schematics.Add(new() { LocalPosition = offset, SchematicName = schematicData.FileName, SchematicId = schematicData.Id });
+
+                SchematicData? schematicData = SpawnSchematic(schematic, offset);
+                if (schematicData != null) data.Schematics.Add(new() { LocalPosition = offset, SchematicName = schematicData.FileName, SchematicId = schematicData.Id });
             }
 
-            MapsById.Add(data.Id, data);
+        MapsById.Add(data.Id, data);
         }
 
         /// <summary>
@@ -629,8 +649,10 @@ namespace ThaumielMapEditor.API.Helpers
         /// <param name="schematic">The serialized schematic to spawn.</param>
         /// <param name="position">The world position at which to place the schematic.</param>
         /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
-        public static SchematicData SpawnSchematic(SerializableSchematic schematic, Vector3 position)
+        public static SchematicData? SpawnSchematic(SerializableSchematic? schematic, Vector3 position)
         {
+            if (schematic == null) return null;
+            
             LogManager.Debug($"Spawning Schematic {schematic.FileName} at {position}");
             SchematicData schematicData = new()
             {
@@ -702,17 +724,24 @@ namespace ThaumielMapEditor.API.Helpers
         {
             if (!PrefabHelper.RanRegister)
             {
-                LogManager.Debug($"Waiting for prefabs to register before spawning schematic '{schematic.FileName}'...");
+                LogManager.Debug($"Waiting for prefabs to register before spawning schematic '{schematic.FileName ?? "Null filename"}'...");
                 yield return Timing.WaitUntilTrue(() => PrefabHelper.RanRegister);
             }
 
             LogManager.ExtraDebug("Creating LabPrimtive.");
-            LabPrimitive baseprimitive = LabPrimitive.Create();
-            baseprimitive.Type = PrimitiveType.Cube;
-            baseprimitive.Flags = PrimitiveFlags.None;
-            baseprimitive.Position = position;
-            LogManager.ExtraDebug($"Grabbing room at position {baseprimitive.Position}.");
-            var roomAtPos = Room.GetRoomAtPosition(baseprimitive.Position);
+            var basePrimitive = LabPrimitive.Create();
+            basePrimitive.Type = PrimitiveType.Cube;
+            basePrimitive.Flags = PrimitiveFlags.None;
+            basePrimitive.Position = position;
+            LogManager.ExtraDebug($"Setting primitive, position, and rootObjectID.");
+            schematicData.Primitive = basePrimitive;
+            LogManager.ExtraDebug($"Grabbing room at position {basePrimitive.Position}.");
+            var roomAtPos = Room.GetRoomAtPosition(basePrimitive.Position);
+            var distinctParentIds = schematic.Objects.Select(o => o.ParentId).Distinct().Take(10);
+            LogManager.Debug($"First 10 distinct ParentIds: {string.Join(", ", distinctParentIds)}");
+            LogManager.Debug($"Any object with ObjectId==0: {schematic.Objects.Any(o => o.ObjectId == 0)}");
+            LogManager.Debug($"Any object with ParentId==0: {schematic.Objects.Any(o => o.ParentId == 0)}");
+
             try // Exceptions were being swallowed. Using try-catch.
             {
                 if (roomAtPos != null)
@@ -720,19 +749,19 @@ namespace ThaumielMapEditor.API.Helpers
                     schematicData.Room = roomAtPos;
                     LogManager.ExtraDebug("Success on grabbing room position!");
                 }
-                else LogManager.Debug($"Note: GetRoomAtPosition returned null for \"{schematic.FileName}\".");
+                else if (schematic.FileName != null) LogManager.Debug($"Note: GetRoomAtPosition returned null for \"{schematic.FileName}\".");
 
                 LogManager.ExtraDebug("Calling on rotation if statement.");
                 if (rotation != null)
                 {
                     LogManager.ExtraDebug($"Rotation was not default. Setting base primitive + schematicData's rotation to rotation.");
-                    baseprimitive.Rotation = (Quaternion)rotation;
+                    basePrimitive.Rotation = (Quaternion)rotation;
                     schematicData.Rotation = (Quaternion)rotation;
                 }
                 else
                 {
                     LogManager.ExtraDebug($"Rotation was default. Setting base primitive + schematicData's rotation to schematic.Rotation.");
-                    baseprimitive.Rotation = schematic.Rotation;
+                    basePrimitive.Rotation = schematic.Rotation;
                     schematicData.Rotation = schematic.Rotation;
                 }
 
@@ -740,15 +769,33 @@ namespace ThaumielMapEditor.API.Helpers
                 if (scale != null)
                 {
                     LogManager.ExtraDebug($"Scale was not default. Setting base primitive + schematicData scale to scale.");
-                    baseprimitive.Scale = (Vector3)scale;
+                    basePrimitive.Scale = (Vector3)scale;
                     schematicData.Scale = (Vector3)scale;
                 }
                 else
                 {
-                    LogManager.ExtraDebug(
-                        $"Scale was default. Setting base primitive + schematicData scale to schematic.Scale ({schematic.Scale})");
-                    baseprimitive.Scale = schematic.Scale;
-                    schematicData.Scale = schematic.Scale;
+                    LogManager.ExtraDebug($"Scale was default. Setting base primitive + schematicData scale to schematic.Scale ({schematic.Scale ?? new Vector3?(Vector3.one)})");
+                    var resolvedScale = Vector3.one;
+
+                    if (schematic.Scale != null)
+                        resolvedScale = (Vector3)schematic.Scale;
+                    
+                    if (resolvedScale == Vector3.zero)
+                    {
+                        LogManager.Warn($"schematic.Scale was (0,0,0) for '{schematic.FileName}', defaulting to (1,1,1).");
+                        resolvedScale = Vector3.one;
+                    }
+
+                    if (schematic.Scale != null)
+                    {
+                        basePrimitive.Scale = resolvedScale;
+                        schematicData.Scale = resolvedScale;
+                    }
+                    else
+                    {
+                        basePrimitive.Scale = new Vector3(1, 1, 1);
+                        schematicData.Scale = new Vector3(1, 1, 1);
+                    }
                 }
             }
             catch (Exception e)
@@ -757,8 +804,6 @@ namespace ThaumielMapEditor.API.Helpers
                 yield break;
             }
 
-            LogManager.ExtraDebug($"Setting primitive, position, and rootObjectID.");
-            schematicData.Primitive = baseprimitive;
             LogManager.ExtraDebug($"Primitive set. Setting position.");
             schematicData.Position = position;
             LogManager.ExtraDebug($"Position set. Setting RootObjectId.");
@@ -770,6 +815,8 @@ namespace ThaumielMapEditor.API.Helpers
             LogManager.ExtraDebug($"Generated LODZones, and about to get base object transforms for \"{schematic.FileName}\".");
             GetGameObjectTransforms(schematic, schematicData);
             LogManager.ExtraDebug($"Base objects transforms for \"{schematic.FileName}\" passed. Waiting for SpawnObjectsBatched to be done!");
+            LogManager.ExtraDebug($"[{schematic.FileName}] Objects: {schematic.Objects?.Count ?? -1}, ServerSideObjects: {schematic.ServerSideObjects?.Count ?? -1}, RootObjectId: {schematic.RootObjectId}");
+            LogManager.ExtraDebug($"netId being passed to SpawnObjectsBatched: {schematicData.Primitive.Base.netId}");
             yield return Timing.WaitUntilDone(SpawnObjectsBatched(schematic, schematicData, schematicData.Primitive.Base.netId));
             LogManager.ExtraDebug("SpawnObjectsBatched has finished.");
             schematicData.Executor = new BlockExecutor(schematicData);
@@ -781,7 +828,7 @@ namespace ThaumielMapEditor.API.Helpers
             LogManager.Info($"Schematic '{schematic.FileName}' fully spawned.");
             SchematicsById.Add(schematicData.Id, schematicData);
 
-            if (Main.Instance.Config.SchematicAnimationPlayOnLoad.TryGetValue(schematicData.FileName, out var animationname))
+            if (schematicData.FileName != null && Main.Instance.Config.SchematicAnimationPlayOnLoad.TryGetValue(schematicData.FileName, out var animationname))
                 schematicData.AnimationController.Play(animationname);
         }
 
@@ -853,6 +900,7 @@ namespace ThaumielMapEditor.API.Helpers
 
             foreach (SerializableObject serializable in animatables)
             {
+                if (schematic?.FileName == null) continue;
                 if (!TryLoadAnimatorController(schematic.FileName, serializable.AnimatorName, out RuntimeAnimatorController controller))
                     continue;
 
