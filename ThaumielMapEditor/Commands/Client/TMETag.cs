@@ -8,7 +8,9 @@
 using System;
 using CommandSystem;
 using LabApi.Features.Wrappers;
+using ThaumielMapEditor.API.Helpers;
 using ThaumielMapEditor.Events;
+using static ThaumielMapEditor.API.Helpers.CreditHelper;
 
 namespace ThaumielMapEditor.Commands.Client
 {
@@ -29,13 +31,7 @@ namespace ThaumielMapEditor.Commands.Client
                 return false;
             }
 
-            if (!PlayerHandler.Credits.TryGetValue(player.UserId, out var tag))
-            {
-                response = "You do not have a credit tag!";
-                return false;
-            }
-
-            PlayerHandler.SetTag(player);
+            TagType tag = CreditHelper.SetTag(player);
 
             response = $"Applied credit tag {tag}";
             return true;

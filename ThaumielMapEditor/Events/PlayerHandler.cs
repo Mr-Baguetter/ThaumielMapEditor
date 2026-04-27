@@ -21,12 +21,6 @@ namespace ThaumielMapEditor.Events
 {
     internal class PlayerHandler
     {
-        public enum TagType
-        {
-            LeadDeveloper = 1,
-            Developer = 2,
-            Contributor = 3,
-        }
 
         public static void Register()
         {
@@ -44,49 +38,6 @@ namespace ThaumielMapEditor.Events
             PlayerEvents.Spawned -= PlayerSpawnPoint.OnPlayerSpawned;
             Scp079Events.ChangedCamera += OnScp079ChangedCamera;
             ReferenceHub.OnBeforePlayerDestroyed -= OnPlayerLeft;
-        }
-
-        // If you contribute and want a CreditTag add your own steamid to this.
-        internal static readonly Dictionary<string, TagType> Credits = new()
-        {
-            // MrBaguetter
-            ["76561199150506472@steam"] = TagType.LeadDeveloper,
-
-            // Example developer badge
-            ["EXAMPLE99@steam"] = TagType.Developer,
-
-            // Example contributor badge
-            ["EXAMPLE99@steam"] = TagType.Contributor
-        };
-
-        internal static void SetTag(Player player)
-        {
-            if (!Main.Instance.Config!.EnableCreditTags)
-                return;
-
-            if (!Credits.TryGetValue(player.UserId, out var type))
-            {
-                LogManager.Debug($"Player {player.DisplayName} is not in the Credits dictionary.");
-                return;
-            }
-
-            switch (type)
-            {
-                case TagType.LeadDeveloper:
-                    player.GroupName = "TME Lead Developer";
-                    player.GroupColor = "pumpkin";
-                    break;
-
-                case TagType.Developer:
-                    player.GroupName = "TME Developer";
-                    player.GroupColor = "purple";
-                    break;
-
-                case TagType.Contributor:
-                    player.GroupName = "TME Contributor";
-                    player.GroupColor = "red";
-                    break;
-            };
         }
 
         private static void OnScp079ChangedCamera(Scp079ChangedCameraEventArgs ev)
@@ -193,7 +144,7 @@ namespace ThaumielMapEditor.Events
                     data.SyncWithPlayer(ev.Player);
                 }
 
-                SetTag(ev.Player);
+                CreditHelper.SetTag(ev.Player);
             });
         }
     }
