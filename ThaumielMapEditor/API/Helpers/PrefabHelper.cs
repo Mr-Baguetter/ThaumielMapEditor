@@ -70,6 +70,9 @@ namespace ThaumielMapEditor.API.Helpers
 
         public static void RegisterPrefabs()
         {
+            if (RanRegister)
+                return;
+
             foreach (GameObject prefab in NetworkClient.prefabs.Values)
             {
                 string prefabName = prefab.name;
