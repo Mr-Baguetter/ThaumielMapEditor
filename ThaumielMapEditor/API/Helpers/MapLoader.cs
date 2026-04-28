@@ -127,9 +127,12 @@ namespace ThaumielMapEditor.API.Helpers
         {
             SerializableMap? map = SchematicLoader.LoadedMaps.FirstOrDefault(s => string.Equals(s.FileName, name, StringComparison.CurrentCultureIgnoreCase));
             if (map == null)
+            {
                 LogManager.Warn($"Map name {name} is invalid!");
+                return;
+            }
 
-            SchematicLoader.SpawnMap(map!);
+            SchematicLoader.SpawnMap(map);
         }
 
         /// <summary>
@@ -144,9 +147,12 @@ namespace ThaumielMapEditor.API.Helpers
         {
             MapData? map = SchematicLoader.SpawnedMaps.FirstOrDefault(s => string.Equals(s.FileName, name, StringComparison.CurrentCultureIgnoreCase));
             if (map == null)
+            {
                 LogManager.Warn($"Map name {name} is invalid!");
+                return;
+            }
 
-            SchematicLoader.DestroyMap(map!);
+            SchematicLoader.DestroyMap(map);
         }
 
         /// <summary>

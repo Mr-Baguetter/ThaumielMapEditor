@@ -40,13 +40,13 @@ namespace ThaumielMapEditor
             "# Random Loading (||)\n" +
             "# Use this to load exactly ONE random map from a provided list.\n" +
             "# \n" +
-            "# - Load:MAPNAME||MAPNAME1\n" +
+            "# - Load::MAPNAME||MAPNAME1\n" +
             "#   Will load either MAPNAME or MAPNAME1, but not both.\n" +
             "# \n" +
             "# Batch Loading (&&)\n" +
             "# Use this to load ALL maps specified in the line simultaneously.\n" +
             "# \n" +
-            "# - Load:MAPNAME&&MAPNAME1\n" +
+            "# - Load::MAPNAME&&MAPNAME1\n" +
             "#   Will load both MAPNAME and MAPNAME1 at the same time."
         )]
         public List<string> WaitingForPlayers { get; set; } = [];

@@ -33,6 +33,7 @@ using HarmonyLib;
 using ThaumielMapEditor.API.Components;
 using ThaumielMapEditor.Events.EventArgs.Handlers;
 using ThaumielMapEditor.API.Serialization.Converters;
+using MapGeneration;
 
 namespace ThaumielMapEditor.API.Helpers
 {
@@ -350,27 +351,22 @@ namespace ThaumielMapEditor.API.Helpers
         /// </summary>
         /// <param name="map">The serialized map to spawn</param>
         /// <returns><see cref="MapData"/></returns>
-        public static MapData SpawnMap(SerializableMap map)
+        public static MapData? SpawnMap(SerializableMap map)
         {
+            Room? room = Room.List.FirstOrDefault(r => r.Name == map.Room);
+            if (room == null && map.Room != RoomName.Unnamed)
+            {
+                LogManager.Warn($"Could not find room {map.Room} for map {map.FileName}!");
+                return null;
+            }
+
             MapData data = new()
             {
                 Id = Guid.NewGuid(),
-                Room = Room.List.Where(r => r.Name == map.Room).First(),
+                Room = room,
                 Position = map.LocalPosition,
                 FileName = map.FileName
             };
-
-            Timing.RunCoroutine(SpawnMapCoroutine(map, data));
-            return data;
-        }
-
-        private static IEnumerator<float> SpawnMapCoroutine(SerializableMap map, MapData data)
-        {
-            if (!PrefabHelper.RanRegister)
-            {
-                LogManager.Debug($"Waiting for prefabs to register before spawning map {map.FileName}...");
-                yield return Timing.WaitUntilTrue(() => PrefabHelper.RanRegister);
-            }
 
             foreach (SerializedMapSchematic ms in map.Schematics)
             {
@@ -391,6 +387,8 @@ namespace ThaumielMapEditor.API.Helpers
             }
 
             MapsById.Add(data.Id, data);
+
+            return data;
         }
 
         /// <summary>
