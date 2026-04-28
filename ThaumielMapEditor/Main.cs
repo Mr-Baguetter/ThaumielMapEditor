@@ -43,16 +43,6 @@ namespace ThaumielMapEditor
         {
             Instance = this;
             
-            try
-            {
-                harmony = new(HarmonyId);
-                harmony.PatchAll();
-            }
-            catch (Exception ex)
-            {
-                LogManager.Error($"Failed to patch {ex}");
-            }
-
             SchematicLoader.Init();
 
             PlayerHandler.Register();
@@ -62,6 +52,9 @@ namespace ThaumielMapEditor
             ThaumFileManager.TryCreateDirectory("Audio");
             Config?.AudioPath = Path.Combine(PathManager.Configs.ToString(), "Thaumiel", "Audio");
             SaveConfig();
+
+            harmony = new(HarmonyId);
+            harmony.PatchAll();
         }
 
         public override void Disable()

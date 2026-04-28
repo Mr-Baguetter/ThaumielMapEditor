@@ -36,85 +36,69 @@ namespace ThaumielMapEditor.API.Helpers
         /// </remarks>
         public static void ParseInput(string input)
         {
-            if (input.Contains("LoadIf::"))
-            {
-                string[] parts = input.Replace("LoadIf::", "").Split(["::"], StringSplitOptions.RemoveEmptyEntries);
+            if (string.IsNullOrWhiteSpace(input))
+                return;
 
-                if (parts.Length != 3)
-                {
-                    LogManager.Warn($"Invalid LoadIf syntax: '{input}'. Expected: LoadIf::MapName::IsLoaded/IsNotLoaded::ConditionMap");
-                    return;
-                }
+            if (TryHandleConditional(input, "LoadIf::", LoadMap))
+                return;
 
-                string mapName = parts[0].Trim();
-                string condition = parts[1].Trim();
-                string conditionMap = parts[2].Trim();
+            if (TryHandleConditional(input, "UnloadIf::", UnloadMap))
+                return;
 
-                if (EvaluateCondition(condition, conditionMap))
-                    LoadMap(mapName);
-            }
+            if (TryHandleSimple(input, "Load::", LoadMap))
+                return;
 
-            if (input.Contains("UnloadIf::"))
-            {
-                string[] parts = input.Replace("UnloadIf::", "").Split(["::"], StringSplitOptions.RemoveEmptyEntries);
-
-                if (parts.Length != 3)
-                {
-                    LogManager.Warn($"Invalid UnloadIf syntax: '{input}'. Expected: UnloadIf::MapName::IsLoaded/IsNotLoaded::ConditionMap");
-                    return;
-                }
-
-                string mapName = parts[0].Trim();
-                string condition = parts[1].Trim();
-                string conditionMap = parts[2].Trim();
-
-                if (EvaluateCondition(condition, conditionMap))
-                    UnloadMap(mapName);
-            }
-
-            if (input.Contains("Load::"))
-            {
-                string mapPart = input.Replace("Load::", "").Trim();
-
-                if (mapPart.Contains("||"))
-                {
-                    string[] orMaps = mapPart.Split(["||"], StringSplitOptions.RemoveEmptyEntries);
-                    string selectedMap = orMaps[Random.Range(0, orMaps.Length)].Trim();
-                    LoadMap(selectedMap);
-                }
-                else if (mapPart.Contains("&&"))
-                {
-                    foreach (string map in mapPart.Split(["&&"], StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        LoadMap(map.Trim());
-                    }
-                }
-                else
-                    LoadMap(mapPart);
-            }
-
-            if (input.Contains("Unload::"))
-            {
-                string mapPart = input.Replace("Unload::", "").Trim();
-
-                if (mapPart.Contains("||"))
-                {
-                    string[] orMaps = mapPart.Split(["||"], StringSplitOptions.RemoveEmptyEntries);
-                    string selectedMap = orMaps[Random.Range(0, orMaps.Length)].Trim();
-                    UnloadMap(selectedMap);
-                }
-                else if (mapPart.Contains("&&"))
-                {
-                    foreach (string map in mapPart.Split(["&&"], StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        UnloadMap(map.Trim());
-                    }
-                }
-                else
-                    UnloadMap(mapPart);
-            }
+            if (TryHandleSimple(input, "Unload::", UnloadMap))
+                return;
         }
 
+        private static bool TryHandleConditional(string input, string prefix, Action<string> action)
+        {
+            if (!input.StartsWith(prefix))
+                return false;
+
+            string[] parts = input.Substring(prefix.Length).Split(["::"], StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length != 3)
+            {
+                LogManager.Warn($"Invalid {prefix} syntax: '{input}'. Expected: {prefix}MapName::IsLoaded/IsNotLoaded::ConditionMap");
+                return true;
+            }
+
+            string mapName = parts[0].Trim();
+            string condition = parts[1].Trim();
+            string conditionMap = parts[2].Trim();
+
+            if (EvaluateCondition(condition, conditionMap))
+                action(mapName);
+
+            return true;
+        }
+
+        private static bool TryHandleSimple(string input, string prefix, Action<string> action)
+        {
+            if (!input.StartsWith(prefix))
+                return false;
+
+            string mapPart = input.Substring(prefix.Length).Trim();
+            if (mapPart.Contains("||"))
+            {
+                string[] options = mapPart.Split(["||"], StringSplitOptions.RemoveEmptyEntries);
+                string selected = options[Random.Range(0, options.Length)].Trim();
+                action(selected);
+            }
+            else if (mapPart.Contains("&&"))
+            {
+                foreach (string? map in mapPart.Split(["&&"], StringSplitOptions.RemoveEmptyEntries))
+                {
+                    action(map.Trim());
+                }
+            }
+            else
+                action(mapPart);
+
+            return true;
+        }
+        
         /// <summary>
         /// Loads a map by its file name.
         /// </summary>
