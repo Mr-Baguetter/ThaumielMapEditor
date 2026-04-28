@@ -115,6 +115,12 @@ namespace ThaumielMapEditor.API.Helpers
             .WithTypeConverter(new FloatTypeConverter())
             .Build();
 
+        public static void Cleanup()
+        {
+            MapsById.Clear();
+            SchematicsById.Clear();
+        }
+
         /// <summary>
         /// Initializes the <see cref="SchematicLoader"/>
         /// </summary>
@@ -368,7 +374,7 @@ namespace ThaumielMapEditor.API.Helpers
 
             foreach (SerializedMapSchematic ms in map.Schematics)
             {
-                Vector3 offset = data.Room!.WorldPosition(ms.Position);
+                Vector3 offset = data.Room?.WorldPosition(ms.Position) ?? ms.Position;
                 if (!LoadedSchematics.TryGetValue(ms.SchematicName, out SerializableSchematic schematic))
                 {
                     LogManager.Warn($"Schematic '{ms.SchematicName}' not found.");
@@ -376,7 +382,12 @@ namespace ThaumielMapEditor.API.Helpers
                 }
 
                 SchematicData schematicData = SpawnSchematic(schematic, offset);
-                data.Schematics.Add(new() { LocalPosition = offset, SchematicName = schematicData.FileName, SchematicId = schematicData.Id });
+                data.Schematics.Add(new()
+                {
+                    LocalPosition = offset,
+                    SchematicName = schematicData.FileName,
+                    SchematicId = schematicData.Id
+                });
             }
 
             MapsById.Add(data.Id, data);
@@ -597,7 +608,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, rotation, scale));
+            SpawnSchematic(schematic, schematicData, position, rotation, scale);
             return schematicData;
         }
 
@@ -616,7 +627,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, rotation, default));
+            SpawnSchematic(schematic, schematicData, position, rotation, default);
             return schematicData;
         }
 
@@ -634,7 +645,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, default, default));
+            SpawnSchematic(schematic, schematicData, position, default, default);
             return schematicData;
         }
 
@@ -652,7 +663,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, default, default));
+            SpawnSchematic(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, default, default);
             return schematicData;
         }
 
@@ -671,7 +682,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, rotation, default));
+            SpawnSchematic(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, rotation, default);
             return schematicData;
         }
 
@@ -691,43 +702,42 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, rotation, scale));
+            SpawnSchematic(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, rotation, scale);
             return schematicData;
         }
 
-        private static IEnumerator<float> SpawnSchematicCoroutine(SerializableSchematic schematic, SchematicData schematicData, Vector3 position, Quaternion rotation, Vector3 scale)
+        private static void SpawnSchematic(SerializableSchematic schematic, SchematicData schematicData, Vector3 position, Quaternion rotation, Vector3 scale)
         {
             if (!PrefabHelper.RanRegister)
             {
-                LogManager.Debug($"Waiting for prefabs to register before spawning schematic '{schematic.FileName}'...");
-                yield return Timing.WaitUntilTrue(() => PrefabHelper.RanRegister);
+                LogManager.Warn($"Prefabs are not registered yet!");
+                return;
             }
 
-            LabPrimitive baseprimitive = LabPrimitive.Create();
-            schematicData.Primitive = baseprimitive;
-            baseprimitive.Type = PrimitiveType.Cube;
-            baseprimitive.Flags = PrimitiveFlags.None;
-            baseprimitive.Position = position;
+            schematicData.Primitive = LabPrimitive.Create();
+            schematicData.Primitive.Type = PrimitiveType.Cube;
+            schematicData.Primitive.Flags = PrimitiveFlags.None;
+            schematicData.Primitive.Position = position;
             schematicData.Room = Room.GetRoomAtPosition(schematicData.Position);
             if (rotation != default)
             {
-                baseprimitive.Rotation = rotation;
+                schematicData.Primitive.Rotation = rotation;
                 schematicData.Rotation = rotation;
             }
             else
             {
-                baseprimitive.Rotation = schematic.Rotation;
+                schematicData.Primitive.Rotation = schematic.Rotation;
                 schematicData.Rotation = schematic.Rotation;
             }
 
             if (scale != default)
             {
-                baseprimitive.Scale = scale;
+                schematicData.Primitive.Scale = scale;
                 schematicData.Scale = scale;
             }
             else
             {
-                baseprimitive.Scale = schematic.Scale;
+                schematicData.Primitive.Scale = schematic.Scale;
                 schematicData.Scale = schematic.Scale;
             }
 
@@ -736,7 +746,7 @@ namespace ThaumielMapEditor.API.Helpers
 
             LODHelper.GenerateLODZones(schematicData, schematic);
             GetGameObjectTransforms(schematic, schematicData);
-            yield return Timing.WaitUntilDone(Timing.RunCoroutine(SpawnObjectsBatched(schematic, schematicData, schematicData.Primitive.Base.netId)));
+            Timing.RunCoroutine(SpawnObjectsBatched(schematic, schematicData, schematicData.Primitive.Base.netId));
 
             schematicData.Executor = new(schematicData);
             ApplyAnimators(schematic, schematicData);

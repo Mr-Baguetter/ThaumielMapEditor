@@ -112,6 +112,7 @@ namespace ThaumielMapEditor.Events
         private static void OnWaitingForPlayers()
         {
             PrefabHelper.RegisterPrefabs();
+            SchematicLoader.Cleanup();
             MECHelper.TryRunCoroutine(Updater.CheckForUpdatesCoroutine(false), "WaitingForPlayers - Update Check");
 
             foreach (string name in Main.Instance.Config!.WaitingForPlayers)

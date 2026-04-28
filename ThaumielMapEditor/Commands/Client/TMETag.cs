@@ -9,7 +9,6 @@ using System;
 using CommandSystem;
 using LabApi.Features.Wrappers;
 using ThaumielMapEditor.API.Helpers;
-using ThaumielMapEditor.Events;
 using static ThaumielMapEditor.API.Helpers.CreditHelper;
 
 namespace ThaumielMapEditor.Commands.Client

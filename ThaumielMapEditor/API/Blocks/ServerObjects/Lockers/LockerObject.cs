@@ -94,7 +94,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects.Lockers
                 posSync.Network_rotationY = (sbyte)Mathf.RoundToInt(Rotation.eulerAngles.y / 5.625f);
             }
 
-            locker.ParentRoom = RoomExtensions.GetClosestRoomToPosition(Position);
+            locker.ParentRoom = RoomExtensions.GetClosestRoomToPosition(Position)?.Base ?? null;
             NetworkServer.Spawn(locker.gameObject);
             Timing.CallDelayed(Timing.WaitForOneFrame, () =>
             {
