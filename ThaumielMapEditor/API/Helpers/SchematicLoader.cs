@@ -162,23 +162,25 @@ namespace ThaumielMapEditor.API.Helpers
             string schematicDir = ThaumFileManager.Dir(["Schematics"]);
             ThaumFileManager.TryCreateDirectory(schematicDir);
 
-            foreach (string filename in ThaumFileManager.GetFilesInDirectory(schematicDir))
+            foreach (string path in ThaumFileManager.GetFilesInDirectory(schematicDir))
             {
+                string name = Path.GetFileNameWithoutExtension(path);
+
                 try
                 {
-                    SerializableSchematic schematic = Deserializer.Deserialize<SerializableSchematic>(File.ReadAllText(filename));
-                    schematic.FileName = Path.GetFileNameWithoutExtension(filename);
+                    SerializableSchematic schematic = Deserializer.Deserialize<SerializableSchematic>(File.ReadAllText(path));
+                    schematic.FileName = name;
                     LoadedSchematics[schematic.FileName] = schematic;
-                    LogManager.Debug($"Loaded schematic {Path.GetFileNameWithoutExtension(filename)}");
+                    LogManager.Debug($"Loaded schematic {name}");
                 }
                 catch (YamlException yamlex)
                 {
-                    LogManager.Warn($"Failed to parse Schematic {Path.GetFileNameWithoutExtension(filename)}. \n\n {yamlex}");
+                    LogManager.Warn($"Failed to parse Schematic {name}. \n\n {yamlex}");
                     continue;
                 }
                 catch (Exception ex)
                 {
-                    LogManager.Warn($"Exception when trying to parse Schematic {Path.GetFileNameWithoutExtension(filename)}. \n\n {ex}");
+                    LogManager.Warn($"Exception when trying to parse Schematic {name}. \n\n {ex}");
                     continue;
                 }
             }
@@ -192,23 +194,25 @@ namespace ThaumielMapEditor.API.Helpers
             string mapsDir = ThaumFileManager.Dir(["Maps"]);
             ThaumFileManager.TryCreateDirectory(mapsDir);
 
-            foreach (string filename in ThaumFileManager.GetFilesInDirectory(mapsDir))
+            foreach (string path in ThaumFileManager.GetFilesInDirectory(mapsDir))
             {
+                string name = Path.GetFileNameWithoutExtension(path);
+
                 try
                 {
-                    SerializableMap map = Deserializer.Deserialize<SerializableMap>(File.ReadAllText(filename));
-                    map.FileName = Path.GetFileNameWithoutExtension(filename);
+                    SerializableMap map = Deserializer.Deserialize<SerializableMap>(File.ReadAllText(path));
+                    map.FileName = name;
                     LoadedMaps.Add(map);
-                    LogManager.Debug($"Loaded map {Path.GetFileNameWithoutExtension(filename)}");
+                    LogManager.Debug($"Loaded map {name}");
                 }
                 catch (YamlException yamlex)
                 {
-                    LogManager.Warn($"Failed to parse Map {Path.GetFileNameWithoutExtension(filename)}. \n\n {yamlex}");
+                    LogManager.Warn($"Failed to parse Map {name}. \n\n {yamlex}");
                     continue;
                 }
                 catch (Exception ex)
                 {
-                    LogManager.Warn($"Exception when trying to parse Map {Path.GetFileNameWithoutExtension(filename)}. \n\n {ex}");
+                    LogManager.Warn($"Exception when trying to parse Map {name}. \n\n {ex}");
                     continue;
                 }
             }
