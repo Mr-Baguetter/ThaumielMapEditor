@@ -748,19 +748,21 @@ namespace ThaumielMapEditor.API.Helpers
 
             LODHelper.GenerateLODZones(schematicData, schematic);
             GetGameObjectTransforms(schematic, schematicData);
-            Timing.RunCoroutine(SpawnObjectsBatched(schematic, schematicData, schematicData.Primitive.Base.netId));
+            
+            Timing.CallDelayed(Timing.WaitUntilDone(Timing.RunCoroutine(SpawnObjectsBatched(schematic, schematicData, schematicData.Primitive.Base.netId))), () => 
+            {
+                schematicData.Executor = new(schematicData);
+                ApplyAnimators(schematic, schematicData);
+                ApplyTools(schematic, schematicData);
 
-            schematicData.Executor = new(schematicData);
-            ApplyAnimators(schematic, schematicData);
-            ApplyTools(schematic, schematicData);
+                SchematicHandler.OnSchematicSpawned(new(schematicData));
+                SchematicSpawned?.Invoke(schematicData);
+                LogManager.Info($"Schematic '{schematic.FileName}' fully spawned.");
+                SchematicsById.Add(schematicData.Id, schematicData);
 
-            SchematicHandler.OnSchematicSpawned(new(schematicData));
-            SchematicSpawned?.Invoke(schematicData);
-            LogManager.Info($"Schematic '{schematic.FileName}' fully spawned.");
-            SchematicsById.Add(schematicData.Id, schematicData);
-
-            if (Main.Instance.Config!.SchematicAnimationPlayOnLoad.TryGetValue(schematicData.FileName, out var animationname))
-                schematicData.AnimationController.Play(animationname);
+                if (Main.Instance.Config!.SchematicAnimationPlayOnLoad.TryGetValue(schematicData.FileName, out var animationname))
+                    schematicData.AnimationController.Play(animationname);
+            });
         }
 
         private static void GetGameObjectTransforms(SerializableSchematic schematic, SchematicData schematicData)
@@ -978,7 +980,6 @@ namespace ThaumielMapEditor.API.Helpers
                             }
                         }
 
-                        ColliderHelper.CreateCollisionMesh(primitive);
                         SetupCulling(serializable, primitive, schematicData);
                         return primitive.NetId;
                     }

@@ -5,21 +5,21 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-global using Vector3 = UnityEngine.Vector3;
-global using Quaternion = UnityEngine.Quaternion;
 global using Logger = LabApi.Features.Console.Logger;
+global using Quaternion = UnityEngine.Quaternion;
 global using ThaumFileManager = ThaumielMapEditor.API.Helpers.FileManager;
+global using Vector3 = UnityEngine.Vector3;
 
-using LabApi.Features;
-using LabApi.Loader.Features.Plugins;
-using System;
-using ThaumielMapEditor.API.Helpers;
-using LabApi.Loader.Features.Plugins.Enums;
-using ThaumielMapEditor.Events;
 using HarmonyLib;
-using ThaumielMapEditor.API.Attributes;
-using System.IO;
+using LabApi.Features;
 using LabApi.Loader.Features.Paths;
+using LabApi.Loader.Features.Plugins;
+using LabApi.Loader.Features.Plugins.Enums;
+using System;
+using System.IO;
+using ThaumielMapEditor.API.Attributes;
+using ThaumielMapEditor.API.Helpers;
+using ThaumielMapEditor.Events;
 
 namespace ThaumielMapEditor
 {
