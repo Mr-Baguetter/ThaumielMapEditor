@@ -203,12 +203,12 @@ namespace ThaumielMapEditor.API.Helpers
                 }
                 catch (YamlException yamlex)
                 {
-                    LogManager.Warn($"Failed to parse Schematic {Path.GetFileNameWithoutExtension(filename)}. \n\n {yamlex}");
+                    LogManager.Warn($"Failed to parse Map {Path.GetFileNameWithoutExtension(filename)}. \n\n {yamlex}");
                     continue;
                 }
                 catch (Exception ex)
                 {
-                    LogManager.Warn($"Exception when trying to parse Schematic {Path.GetFileNameWithoutExtension(filename)}. \n\n {ex}");
+                    LogManager.Warn($"Exception when trying to parse Map {Path.GetFileNameWithoutExtension(filename)}. \n\n {ex}");
                     continue;
                 }
             }
