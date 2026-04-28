@@ -98,6 +98,26 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             base.SpawnObject(schematic, serializable);
         }
 
+        public void SpawnObject(SchematicData schematic)
+        {
+            if (PrefabHelper.TextToy == null)
+            {
+                LogManager.Warn($"Failed to spawn TextToy. Prefab is null.");
+                return;
+            }
+
+            TextToy textToy = UnityEngine.Object.Instantiate(PrefabHelper.TextToy);
+            Base = textToy;
+            Object = textToy.gameObject;
+            NetId = textToy.netId;
+            NetworkServer.UnSpawn(Base.gameObject);
+            SetWorldTransform(schematic);
+
+            Base.TextFormat = Text;
+            Base.DisplaySize = DisplaySize;
+            NetworkServer.Spawn(Base.gameObject);
+        }
+
         /// <summary>
         /// Parses values from the provided <see cref="SerializableObject"/> and applies them to this instance.
         /// </summary>

@@ -184,7 +184,7 @@ namespace ThaumielMapEditor.API.Components.Tools
                 Scp096DamageHandler => [DamageType.Scp096Charge, DamageType.Scp096Swipe],
                 JailbirdDamageHandler => [DamageType.JailbirdCharge, DamageType.JailbirdHit],
                 DisruptorDamageHandler => [DamageType.DisruptorBurst, DamageType.DisruptorCharge],
-                MicroHidDamageHandler => [DamageType.MicroHidQuick, DamageType.MircoHidFullCharge, DamageType.MircoHidBroken],
+                MicroHidDamageHandler => [DamageType.MicroHidQuick, DamageType.MicroHidFullCharge, DamageType.MicroHidBroken],
                 Scp1509DamageHandler => [DamageType.Scp1509],
                 MarshmallowDamageHandler => [DamageType.Marshmallow],
                 Scp1507DamageHandler => [DamageType.Scp1507],

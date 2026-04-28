@@ -32,6 +32,8 @@ using ThaumielMapEditor.API.Blocks;
 using HarmonyLib;
 using ThaumielMapEditor.API.Components;
 using ThaumielMapEditor.Events.EventArgs.Handlers;
+using ThaumielMapEditor.API.Serialization.Converters;
+using MapGeneration;
 
 namespace ThaumielMapEditor.API.Helpers
 {
@@ -98,6 +100,7 @@ namespace ThaumielMapEditor.API.Helpers
             .WithTypeConverter(new CustomColor32Converter())
             .WithTypeConverter(new CustomColorConverter())
             .WithTypeConverter(new CustomQuaternionConverter())
+            .WithTypeConverter(new FloatTypeConverter())
             .Build();
 
         /// <summary>
@@ -110,7 +113,14 @@ namespace ThaumielMapEditor.API.Helpers
             .WithTypeConverter(new CustomColor32Converter())
             .WithTypeConverter(new CustomColorConverter())
             .WithTypeConverter(new CustomQuaternionConverter())
+            .WithTypeConverter(new FloatTypeConverter())
             .Build();
+
+        public static void Cleanup()
+        {
+            MapsById.Clear();
+            SchematicsById.Clear();
+        }
 
         /// <summary>
         /// Initializes the <see cref="SchematicLoader"/>
@@ -152,23 +162,25 @@ namespace ThaumielMapEditor.API.Helpers
             string schematicDir = ThaumFileManager.Dir(["Schematics"]);
             ThaumFileManager.TryCreateDirectory(schematicDir);
 
-            foreach (string filename in ThaumFileManager.GetFilesInDirectory(schematicDir))
+            foreach (string path in ThaumFileManager.GetFilesInDirectory(schematicDir))
             {
+                string name = Path.GetFileNameWithoutExtension(path);
+
                 try
                 {
-                    SerializableSchematic schematic = Deserializer.Deserialize<SerializableSchematic>(File.ReadAllText(filename));
-                    schematic.FileName = Path.GetFileNameWithoutExtension(filename);
+                    SerializableSchematic schematic = Deserializer.Deserialize<SerializableSchematic>(File.ReadAllText(path));
+                    schematic.FileName = name;
                     LoadedSchematics[schematic.FileName] = schematic;
-                    LogManager.Debug($"Loaded schematic {Path.GetFileNameWithoutExtension(filename)}");
+                    LogManager.Debug($"Loaded schematic {name}");
                 }
                 catch (YamlException yamlex)
                 {
-                    LogManager.Warn($"Failed to parse Schematic {Path.GetFileNameWithoutExtension(filename)}. \n\n {yamlex}");
+                    LogManager.Warn($"Failed to parse Schematic {name}. \n\n {yamlex}");
                     continue;
                 }
                 catch (Exception ex)
                 {
-                    LogManager.Warn($"Exception when trying to parse Schematic {Path.GetFileNameWithoutExtension(filename)}. \n\n {ex}");
+                    LogManager.Warn($"Exception when trying to parse Schematic {name}. \n\n {ex}");
                     continue;
                 }
             }
@@ -182,23 +194,25 @@ namespace ThaumielMapEditor.API.Helpers
             string mapsDir = ThaumFileManager.Dir(["Maps"]);
             ThaumFileManager.TryCreateDirectory(mapsDir);
 
-            foreach (string filename in ThaumFileManager.GetFilesInDirectory(mapsDir))
+            foreach (string path in ThaumFileManager.GetFilesInDirectory(mapsDir))
             {
+                string name = Path.GetFileNameWithoutExtension(path);
+
                 try
                 {
-                    SerializableMap map = Deserializer.Deserialize<SerializableMap>(File.ReadAllText(filename));
-                    map.FileName = Path.GetFileNameWithoutExtension(filename);
+                    SerializableMap map = Deserializer.Deserialize<SerializableMap>(File.ReadAllText(path));
+                    map.FileName = name;
                     LoadedMaps.Add(map);
-                    LogManager.Debug($"Loaded map {Path.GetFileNameWithoutExtension(filename)}");
+                    LogManager.Debug($"Loaded map {name}");
                 }
                 catch (YamlException yamlex)
                 {
-                    LogManager.Warn($"Failed to parse Schematic {Path.GetFileNameWithoutExtension(filename)}. \n\n {yamlex}");
+                    LogManager.Warn($"Failed to parse Map {name}. \n\n {yamlex}");
                     continue;
                 }
                 catch (Exception ex)
                 {
-                    LogManager.Warn($"Exception when trying to parse Schematic {Path.GetFileNameWithoutExtension(filename)}. \n\n {ex}");
+                    LogManager.Warn($"Exception when trying to parse Map {name}. \n\n {ex}");
                     continue;
                 }
             }
@@ -341,31 +355,26 @@ namespace ThaumielMapEditor.API.Helpers
         /// </summary>
         /// <param name="map">The serialized map to spawn</param>
         /// <returns><see cref="MapData"/></returns>
-        public static MapData SpawnMap(SerializableMap map)
+        public static MapData? SpawnMap(SerializableMap map)
         {
+            Room? room = Room.List.FirstOrDefault(r => r.Name == map.Room);
+            if (room == null && map.Room != RoomName.Unnamed)
+            {
+                LogManager.Warn($"Could not find room {map.Room} for map {map.FileName}!");
+                return null;
+            }
+
             MapData data = new()
             {
                 Id = Guid.NewGuid(),
-                Room = Room.List.Where(r => r.Name == map.Room).First(),
+                Room = room,
                 Position = map.LocalPosition,
                 FileName = map.FileName
             };
 
-            Timing.RunCoroutine(SpawnMapCoroutine(map, data));
-            return data;
-        }
-
-        private static IEnumerator<float> SpawnMapCoroutine(SerializableMap map, MapData data)
-        {
-            if (!PrefabHelper.RanRegister)
-            {
-                LogManager.Debug($"Waiting for prefabs to register before spawning map {map.FileName}...");
-                yield return Timing.WaitUntilTrue(() => PrefabHelper.RanRegister);
-            }
-
             foreach (SerializedMapSchematic ms in map.Schematics)
             {
-                Vector3 offset = data.Room!.WorldPosition(ms.Position);
+                Vector3 offset = data.Room?.WorldPosition(ms.Position) ?? ms.Position;
                 if (!LoadedSchematics.TryGetValue(ms.SchematicName, out SerializableSchematic schematic))
                 {
                     LogManager.Warn($"Schematic '{ms.SchematicName}' not found.");
@@ -373,10 +382,17 @@ namespace ThaumielMapEditor.API.Helpers
                 }
 
                 SchematicData schematicData = SpawnSchematic(schematic, offset);
-                data.Schematics.Add(new() { LocalPosition = offset, SchematicName = schematicData.FileName, SchematicId = schematicData.Id });
+                data.Schematics.Add(new()
+                {
+                    LocalPosition = offset,
+                    SchematicName = schematicData.FileName,
+                    SchematicId = schematicData.Id
+                });
             }
 
             MapsById.Add(data.Id, data);
+
+            return data;
         }
 
         /// <summary>
@@ -594,7 +610,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, rotation, scale));
+            SpawnSchematic(schematic, schematicData, position, rotation, scale);
             return schematicData;
         }
 
@@ -613,7 +629,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, rotation, default));
+            SpawnSchematic(schematic, schematicData, position, rotation, default);
             return schematicData;
         }
 
@@ -631,7 +647,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(schematic, schematicData, position, default, default));
+            SpawnSchematic(schematic, schematicData, position, default, default);
             return schematicData;
         }
 
@@ -649,7 +665,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, default, default));
+            SpawnSchematic(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, default, default);
             return schematicData;
         }
 
@@ -668,7 +684,7 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, rotation, default));
+            SpawnSchematic(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, rotation, default);
             return schematicData;
         }
 
@@ -688,63 +704,65 @@ namespace ThaumielMapEditor.API.Helpers
                 Id = GetId(),
             };
 
-            Timing.RunCoroutine(SpawnSchematicCoroutine(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, rotation, scale));
+            SpawnSchematic(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, rotation, scale);
             return schematicData;
         }
 
-        private static IEnumerator<float> SpawnSchematicCoroutine(SerializableSchematic schematic, SchematicData schematicData, Vector3 position, Quaternion rotation, Vector3 scale)
+        private static void SpawnSchematic(SerializableSchematic schematic, SchematicData schematicData, Vector3 position, Quaternion rotation, Vector3 scale)
         {
             if (!PrefabHelper.RanRegister)
             {
-                LogManager.Debug($"Waiting for prefabs to register before spawning schematic '{schematic.FileName}'...");
-                yield return Timing.WaitUntilTrue(() => PrefabHelper.RanRegister);
+                LogManager.Warn($"Prefabs are not registered yet!");
+                return;
             }
 
-            LabPrimitive baseprimitive = LabPrimitive.Create();
-            baseprimitive.Type = PrimitiveType.Cube;
-            baseprimitive.Flags = PrimitiveFlags.None;
-            baseprimitive.Position = position;
+            schematicData.Primitive = LabPrimitive.Create();
+            schematicData.Primitive.Type = PrimitiveType.Cube;
+            schematicData.Primitive.Flags = PrimitiveFlags.None;
+            schematicData.Primitive.Position = position;
             schematicData.Room = Room.GetRoomAtPosition(schematicData.Position);
             if (rotation != default)
             {
-                baseprimitive.Rotation = rotation;
+                schematicData.Primitive.Rotation = rotation;
                 schematicData.Rotation = rotation;
             }
             else
             {
-                baseprimitive.Rotation = schematic.Rotation;
+                schematicData.Primitive.Rotation = schematic.Rotation;
                 schematicData.Rotation = schematic.Rotation;
             }
 
             if (scale != default)
             {
-                baseprimitive.Scale = scale;
+                schematicData.Primitive.Scale = scale;
                 schematicData.Scale = scale;
             }
             else
             {
-                baseprimitive.Scale = schematic.Scale;
+                schematicData.Primitive.Scale = schematic.Scale;
                 schematicData.Scale = schematic.Scale;
             }
 
-            schematicData.Primitive = baseprimitive;
             schematicData.Position = position;
             schematicData.RootObjectId = schematic.RootObjectId;
 
             LODHelper.GenerateLODZones(schematicData, schematic);
             GetGameObjectTransforms(schematic, schematicData);
-            yield return Timing.WaitUntilDone(Timing.RunCoroutine(SpawnObjectsBatched(schematic, schematicData, schematicData.Primitive.Base.netId)));
+            
+            Timing.CallDelayed(Timing.WaitUntilDone(Timing.RunCoroutine(SpawnObjectsBatched(schematic, schematicData, schematicData.Primitive.Base.netId))), () => 
+            {
+                schematicData.Executor = new(schematicData);
+                ApplyAnimators(schematic, schematicData);
+                ApplyTools(schematic, schematicData);
 
-            ApplyAnimators(schematic, schematicData);
-            ApplyTools(schematic, schematicData);
+                SchematicHandler.OnSchematicSpawned(new(schematicData));
+                SchematicSpawned?.Invoke(schematicData);
+                LogManager.Info($"Schematic '{schematic.FileName}' fully spawned.");
+                SchematicsById.Add(schematicData.Id, schematicData);
 
-            SchematicHandler.OnSchematicSpawned(new(schematicData));
-            SchematicSpawned?.Invoke(schematicData);
-            LogManager.Info($"Schematic '{schematic.FileName}' fully spawned.");
-            SchematicsById.Add(schematicData.Id, schematicData);
-
-            if (Main.Instance.Config!.SchematicAnimationPlayOnLoad.TryGetValue(schematicData.FileName, out var animationname))
-                schematicData.AnimationController.Play(animationname);
+                if (Main.Instance.Config!.SchematicAnimationPlayOnLoad.TryGetValue(schematicData.FileName, out var animationname))
+                    schematicData.AnimationController.Play(animationname);
+            });
         }
 
         private static void GetGameObjectTransforms(SerializableSchematic schematic, SchematicData schematicData)
@@ -766,7 +784,7 @@ namespace ThaumielMapEditor.API.Helpers
                     dummyNode.transform.localRotation = obj.Rotation;
                     dummyNode.transform.localScale = obj.Scale;
 
-                    LogManager.Info($"Added transform with local position: {dummyNode.transform.localPosition}");
+                    LogManager.Debug($"Added transform with local position: {dummyNode.transform.localPosition}");
                     schematicData.ServerSideTransforms[obj.ObjectId] = dummyNode.transform;
                 }
             }
@@ -884,6 +902,13 @@ namespace ThaumielMapEditor.API.Helpers
                             interactable.Init(match, schematicData, tool.Properties);
                             match.Tools.AddItem(interactable);
                             break;
+
+                        case ToolType.BlockyRuntime:
+                            BlockyRuntime blocky = match.Object.AddComponent<BlockyRuntime>();
+                            blocky.Init(match, schematicData, tool.Properties);
+                            schematicData.Executor?.Execute(ArgumentsParser.Load(blocky.Blocky!), null!, EventType.OnSpawned);
+                            match.Tools.AddItem(blocky);
+                            break;
                     }
                 }
             }
@@ -955,7 +980,6 @@ namespace ThaumielMapEditor.API.Helpers
                             }
                         }
 
-                        ColliderHelper.CreateCollisionMesh(primitive);
                         SetupCulling(serializable, primitive, schematicData);
                         return primitive.NetId;
                     }
@@ -1285,6 +1309,19 @@ namespace ThaumielMapEditor.API.Helpers
                     spawn.SpawnObject(schematicData, serializable);
                     spawn.Name = serializable.Name;
                     return spawn.NetId;
+
+                case ObjectType.RagdollSpawner:
+                    RagdollSpawner ragdoll = new()
+                    {
+                        Position = serializable.Position,
+                        Rotation = serializable.Rotation,
+                        Scale = serializable.Scale,
+                        IsStatic = serializable.IsStatic
+                    };
+
+                    ragdoll.SpawnObject(schematicData, serializable);
+                    ragdoll.Name = serializable.Name;
+                    return 0;
 
                 default:
                     LogManager.Warn($"Unhandled ObjectType '{serializable.ObjectType}' on object '{serializable.Name}', skipping.");

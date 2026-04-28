@@ -5,21 +5,21 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-global using Vector3 = UnityEngine.Vector3;
-global using Quaternion = UnityEngine.Quaternion;
 global using Logger = LabApi.Features.Console.Logger;
+global using Quaternion = UnityEngine.Quaternion;
 global using ThaumFileManager = ThaumielMapEditor.API.Helpers.FileManager;
+global using Vector3 = UnityEngine.Vector3;
 
-using LabApi.Features;
-using LabApi.Loader.Features.Plugins;
-using System;
-using ThaumielMapEditor.API.Helpers;
-using LabApi.Loader.Features.Plugins.Enums;
-using ThaumielMapEditor.Events;
 using HarmonyLib;
-using ThaumielMapEditor.API.Attributes;
-using System.IO;
+using LabApi.Features;
 using LabApi.Loader.Features.Paths;
+using LabApi.Loader.Features.Plugins;
+using LabApi.Loader.Features.Plugins.Enums;
+using System;
+using System.IO;
+using ThaumielMapEditor.API.Attributes;
+using ThaumielMapEditor.API.Helpers;
+using ThaumielMapEditor.Events;
 
 namespace ThaumielMapEditor
 {
@@ -29,7 +29,7 @@ namespace ThaumielMapEditor
         public override string Name => "Thaumiel Map Editor";
         public override string Description => ":3";
         public override string Author => "Mr. Baguetter";
-        public override Version Version => new(0, 5, 0);
+        public override Version Version => new(0, 6, 0);
         public override Version RequiredApiVersion => LabApiProperties.CurrentVersion;
         public override LoadPriority Priority => LoadPriority.Medium;
         public string HarmonyId => $"MrBaguetter_TME_{Guid.NewGuid()}";
@@ -43,16 +43,6 @@ namespace ThaumielMapEditor
         {
             Instance = this;
             
-            try
-            {
-                harmony = new(HarmonyId);
-                harmony.PatchAll();
-            }
-            catch (Exception ex)
-            {
-                LogManager.Error($"Failed to patch {ex}");
-            }
-
             SchematicLoader.Init();
 
             PlayerHandler.Register();
@@ -62,6 +52,9 @@ namespace ThaumielMapEditor
             ThaumFileManager.TryCreateDirectory("Audio");
             Config?.AudioPath = Path.Combine(PathManager.Configs.ToString(), "Thaumiel", "Audio");
             SaveConfig();
+
+            harmony = new(HarmonyId);
+            harmony.PatchAll();
         }
 
         public override void Disable()

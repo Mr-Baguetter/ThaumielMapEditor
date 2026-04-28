@@ -78,6 +78,9 @@ namespace ThaumielMapEditor.API.Components
             }
         }
 
+        public bool IsInsideCollider(Vector3 pos)
+            => Collider.bounds.Contains(pos);
+
         public void ToggleVisibility(Player player, bool show)
         {
             if (ClientObject != null)

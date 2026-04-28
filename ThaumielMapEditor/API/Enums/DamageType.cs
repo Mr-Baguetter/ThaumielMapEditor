@@ -20,8 +20,8 @@ namespace ThaumielMapEditor.API.Enums
         DisruptorCharge,
         DisruptorBurst,
         MicroHidQuick,
-        MircoHidFullCharge,
-        MircoHidBroken,
+        MicroHidFullCharge,
+        MicroHidBroken,
         Scp1509,
         Marshmallow,
         Scp1507

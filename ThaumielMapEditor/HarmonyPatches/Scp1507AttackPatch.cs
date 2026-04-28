@@ -7,6 +7,8 @@
 
 using HarmonyLib;
 using PlayerRoles.PlayableScps.Scp1507;
+using ThaumielMapEditor.API.Components.Tools;
+using ThaumielMapEditor.API.Enums;
 using UnityEngine;
 
 namespace ThaumielMapEditor.HarmonyPatches
@@ -25,8 +27,14 @@ namespace ThaumielMapEditor.HarmonyPatches
             if (!Physics.Raycast(__instance.Owner.PlayerCameraReference.position, __instance.Owner.PlayerCameraReference.forward, out RaycastHit hitInfo, 1.728f))
                 return;
 
-            if (!hitInfo.collider.TryGetComponent<IDestructible>(out var destructible))
+            if (!hitInfo.collider.TryGetComponent<IDestructible>(out var destructible) || destructible is not ObjectHealth health)
                 return;
+
+            if (!health.AllowedDamage.Contains(DamageType.Scp1507))
+            {
+                Hitmarker.SendHitmarkerDirectly(__instance.Owner, AttackDamage, hitmarkerType: HitmarkerType.Blocked);
+                return;
+            }
 
             Scp1507DamageHandler handler = new(new(__instance.Owner), AttackDamage);
             if (!destructible.Damage(AttackDamage, handler, hitInfo.point))

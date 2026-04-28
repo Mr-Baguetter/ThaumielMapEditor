@@ -28,53 +28,77 @@ namespace ThaumielMapEditor.API.Helpers
         /// <item><description><c>Unload::MapName</c> - Unloads a single map.</description></item>
         /// <item><description><c>Unload::MapA||MapB</c> - Unloads one random map from the list.</description></item>
         /// <item><description><c>Unload::MapA&amp;&amp;MapB</c> - Unloads all specified maps.</description></item>
+        /// <item><description><c>LoadIf::MapName::IsLoaded::ConditionMap</c> - Loads a map if the condition map is currently loaded.</description></item>
+        /// <item><description><c>LoadIf::MapName::IsNotLoaded::ConditionMap</c> - Loads a map if the condition map is not currently loaded.</description></item>
+        /// <item><description><c>UnloadIf::MapName::IsLoaded::ConditionMap</c> - Unloads a map if the condition map is currently loaded.</description></item>
+        /// <item><description><c>UnloadIf::MapName::IsNotLoaded::ConditionMap</c> - Unloads a map if the condition map is not currently loaded.</description></item>
         /// </list>
         /// </remarks>
         public static void ParseInput(string input)
         {
-            if (input.Contains("Load::"))
-            {
-                string mapPart = input.Replace("Load::", "").Trim();
+            if (string.IsNullOrWhiteSpace(input))
+                return;
 
-                if (mapPart.Contains("||"))
-                {
-                    string[] orMaps = mapPart.Split(["||"], StringSplitOptions.RemoveEmptyEntries);
-                    string selectedMap = orMaps[Random.Range(0, orMaps.Length)].Trim();
-                    LoadMap(selectedMap);
-                }
-                else if (mapPart.Contains("&&"))
-                {
-                    foreach (string map in mapPart.Split(["&&"], StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        LoadMap(map.Trim());
-                    }
-                }
-                else
-                    LoadMap(mapPart);
-            }
+            if (TryHandleConditional(input, "LoadIf::", LoadMap))
+                return;
 
-            if (input.Contains("Unload::"))
-            {
-                string mapPart = input.Replace("Unload::", "").Trim();
+            if (TryHandleConditional(input, "UnloadIf::", UnloadMap))
+                return;
 
-                if (mapPart.Contains("||"))
-                {
-                    string[] orMaps = mapPart.Split(["||"], StringSplitOptions.RemoveEmptyEntries);
-                    string selectedMap = orMaps[Random.Range(0, orMaps.Length)].Trim();
-                    UnloadMap(selectedMap);
-                }
-                else if (mapPart.Contains("&&"))
-                {
-                    foreach (string map in mapPart.Split(["&&"], StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        UnloadMap(map.Trim());
-                    }
-                }
-                else
-                    UnloadMap(mapPart);
-            }
+            if (TryHandleSimple(input, "Load::", LoadMap))
+                return;
+
+            if (TryHandleSimple(input, "Unload::", UnloadMap))
+                return;
         }
 
+        private static bool TryHandleConditional(string input, string prefix, Action<string> action)
+        {
+            if (!input.StartsWith(prefix))
+                return false;
+
+            string[] parts = input.Substring(prefix.Length).Split(["::"], StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length != 3)
+            {
+                LogManager.Warn($"Invalid {prefix} syntax: '{input}'. Expected: {prefix}MapName::IsLoaded/IsNotLoaded::ConditionMap");
+                return true;
+            }
+
+            string mapName = parts[0].Trim();
+            string condition = parts[1].Trim();
+            string conditionMap = parts[2].Trim();
+
+            if (EvaluateCondition(condition, conditionMap))
+                action(mapName);
+
+            return true;
+        }
+
+        private static bool TryHandleSimple(string input, string prefix, Action<string> action)
+        {
+            if (!input.StartsWith(prefix))
+                return false;
+
+            string mapPart = input.Substring(prefix.Length).Trim();
+            if (mapPart.Contains("||"))
+            {
+                string[] options = mapPart.Split(["||"], StringSplitOptions.RemoveEmptyEntries);
+                string selected = options[Random.Range(0, options.Length)].Trim();
+                action(selected);
+            }
+            else if (mapPart.Contains("&&"))
+            {
+                foreach (string? map in mapPart.Split(["&&"], StringSplitOptions.RemoveEmptyEntries))
+                {
+                    action(map.Trim());
+                }
+            }
+            else
+                action(mapPart);
+
+            return true;
+        }
+        
         /// <summary>
         /// Loads a map by its file name.
         /// </summary>
@@ -87,9 +111,12 @@ namespace ThaumielMapEditor.API.Helpers
         {
             SerializableMap? map = SchematicLoader.LoadedMaps.FirstOrDefault(s => string.Equals(s.FileName, name, StringComparison.CurrentCultureIgnoreCase));
             if (map == null)
+            {
                 LogManager.Warn($"Map name {name} is invalid!");
+                return;
+            }
 
-            SchematicLoader.SpawnMap(map!);
+            SchematicLoader.SpawnMap(map);
         }
 
         /// <summary>
@@ -104,9 +131,36 @@ namespace ThaumielMapEditor.API.Helpers
         {
             MapData? map = SchematicLoader.SpawnedMaps.FirstOrDefault(s => string.Equals(s.FileName, name, StringComparison.CurrentCultureIgnoreCase));
             if (map == null)
+            {
                 LogManager.Warn($"Map name {name} is invalid!");
+                return;
+            }
 
-            SchematicLoader.DestroyMap(map!);
+            SchematicLoader.DestroyMap(map);
+        }
+
+        /// <summary>
+        /// Determines if the specified map by name is loaded.
+        /// </summary>
+        /// <param name="name">The map name to check.</param>
+        /// <returns><see langword="true"/> if the specified map is loaded. Otherwise <see langword="false"/>.</returns>
+        private static bool IsMapLoaded(string name)
+            => SchematicLoader.SpawnedMaps.Any(s => string.Equals(s.FileName, name, StringComparison.CurrentCultureIgnoreCase));
+
+        private static bool EvaluateCondition(string condition, string mapName)
+        {
+            return condition.ToLowerInvariant() switch
+            {
+                "isloaded" => IsMapLoaded(mapName),
+                "isnotloaded" => !IsMapLoaded(mapName),
+                _ => LogUnknownCondition(condition)
+            };
+        }
+
+        private static bool LogUnknownCondition(string condition)
+        {
+            LogManager.Warn($"Unknown condition '{condition}'. Supported conditions: IsLoaded, IsNotLoaded.");
+            return false;
         }
     }
 }

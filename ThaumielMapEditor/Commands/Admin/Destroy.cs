@@ -35,7 +35,13 @@ namespace ThaumielMapEditor.Commands.Admin
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             uint count = 0;
-            if (!SchematicLoader.SchematicsById.TryGetValue(uint.Parse(arguments.At(0)), out var data))
+            if (!uint.TryParse(arguments.At(0), out var id))
+            {
+                response = "Invalid uint.";
+                return false;
+            }
+
+            if (!SchematicLoader.SchematicsById.TryGetValue(id, out var data))
             {
                 StringBuilder sb = new();
                 sb.AppendLine();

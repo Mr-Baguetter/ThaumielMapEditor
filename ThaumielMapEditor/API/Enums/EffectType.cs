@@ -1,6 +1,9 @@
+using ThaumielMapEditor.API.Attributes;
+
 namespace ThaumielMapEditor.API.Enums
 {
     // Copied from Exiled (Exiled.API.Enums.EffectType)
+    [PythonIgnore]
     public enum EffectType
     {
         /// <summary>

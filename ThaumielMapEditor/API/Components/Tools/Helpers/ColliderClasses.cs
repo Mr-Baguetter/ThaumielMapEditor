@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using ThaumielMapEditor.API.Serialization;
 
 namespace ThaumielMapEditor.API.Components.Tools.Helpers
 {
@@ -22,5 +23,6 @@ namespace ThaumielMapEditor.API.Components.Tools.Helpers
         public List<RemoveItem> RemoveItem { get; set; } = [];
         public List<Warhead> Warhead { get; set; } = [];
         public List<SendCassieMessage> SendCassieMessage { get; set; } = [];
+        public List<BlockyPayload> Blocky { get; set; } = [];
     }
 }

@@ -5,36 +5,58 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Linq;
 using LabApi.Features.Wrappers;
 using MapGeneration;
+using ThaumielMapEditor.API.Data;
+using ThaumielMapEditor.API.Helpers;
 
 namespace ThaumielMapEditor.API.Extensions
 {
     public static class RoomExtensions
     {
         /// <summary>
-        /// Gets the closest room to the <see cref="Vector3"/> <paramref name="pos"/>
+        /// Gets all the spawned maps in this <see cref="Room"/>.
+        /// </summary>
+        public static IEnumerable<MapData> GetMaps(this Room room) =>
+            SchematicLoader.SpawnedMaps.Where(m => m.Room != null && m.Room == room);
+
+        /// <summary>
+        /// Gets all the spawned schematics in this <see cref="Room"/>.
+        /// </summary>
+        public static IEnumerable<SchematicData> GetSchematics(this Room room)
+            => SchematicLoader.SchematicsById.Values.Where(s => s.Room != null && s.Room == room);
+
+        /// <summary>
+        /// Gets the closest <see cref="Room"/> to the <see cref="Vector3"/> <paramref name="pos"/>
         /// </summary>
         /// <param name="pos">The position to get the closest room from</param>
-        /// <returns><see cref="RoomIdentifier"/> if a room was found else returns <see langword="null"/> if no room was found</returns>
-        public static RoomIdentifier? GetClosestRoomToPosition(Vector3 pos)
+        /// <returns><see cref="Room"/> if a room was found else returns <see langword="null"/> if no room was found</returns>
+        public static Room? GetClosestRoomToPosition(Vector3 pos)
         {
-            if (Room.List == null || Room.List.Count == 0)
+            Dictionary<RoomIdentifier, Room>.ValueCollection rooms = Room.Dictionary.Values;
+            if (rooms.Count == 0)
                 return null;
 
-            RoomIdentifier closest = null!;
+            Room? closest = null;
             float closestSqrDist = float.MaxValue;
 
-            foreach (Room room in Room.List)
+            foreach (Room room in rooms)
             {
-                if (room == null || room.Base == null)
+                if (room?.Base == null)
                     continue;
 
-                float sqrDist = (room.Position - pos).sqrMagnitude;
+                Vector3 roomPos = room.Position;
+                float dx = roomPos.x - pos.x;
+                float dy = roomPos.y - pos.y;
+                float dz = roomPos.z - pos.z;
+                float sqrDist = (dx * dx) + (dy * dy) + (dz * dz);
+
                 if (sqrDist < closestSqrDist)
                 {
                     closestSqrDist = sqrDist;
-                    closest = room.Base;
+                    closest = room;
                 }
             }
 

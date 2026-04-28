@@ -181,6 +181,27 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             SetWorldTransform(schematic);
         }
 
+        public void SpawnObject(SchematicData schematic)
+        {
+            SpeakerSettings settings = new()
+            {
+                IsSpatial = IsSpatial,
+                Volume = Volume,
+                MaxDistance = MaxDistance,
+                MinDistance = MinDistance
+            };
+
+            Player = AudioPlayer.Create(1, settings);
+            if (IsLocalFile(Path))
+            {
+                Player.UseFile(System.IO.Path.Combine(Main.Instance.Config?.AudioPath, Path), Loop, Volume);
+            }
+            else
+                Player.UseFile(Path, Loop, Volume);
+
+            SetWorldTransform(schematic);
+        }
+
         private void ParseValues(SerializableObject serializable)
         {
             if (serializable.ObjectType != ObjectType.Speaker)

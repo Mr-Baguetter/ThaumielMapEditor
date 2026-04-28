@@ -31,7 +31,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                     return;
 
                 field = value;
-                SyncToPlayers(32uL, w => w.WriteFloat(value));
+                SyncToPlayers();
             }
         } = 1f;
 
@@ -47,7 +47,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                     return;
 
                 field = value;
-                SyncToPlayers(64uL, w => w.WriteFloat(value));
+                SyncToPlayers();
             }
         } = 10f;
 
@@ -63,7 +63,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                     return;
 
                 field = value;
-                SyncToPlayers(128uL, w => w.WriteColor(value));
+                SyncToPlayers();
             }
         } = Color.white;
 
@@ -79,7 +79,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                     return;
 
                 field = value;
-                SyncToPlayers(256uL, w => w.WriteInt((int)value));
+                SyncToPlayers();
             }
         } = LightShadows.None;
 
@@ -95,7 +95,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                     return;
 
                 field = value;
-                SyncToPlayers(512uL, w => w.WriteFloat(value));
+                SyncToPlayers();
             }
         } = 1f;
 
@@ -111,7 +111,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                     return;
 
                 field = value;
-                SyncToPlayers(1024uL, w => w.WriteInt((int)value));
+                SyncToPlayers();
             }
         } = LightType.Point;
 
@@ -128,7 +128,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                     return;
 
                 field = value;
-                SyncToPlayers(2048uL, w => w.WriteInt((int)value));
+                SyncToPlayers();
             }
         } = LightShape.Cone;
 #pragma warning restore CS0618
@@ -145,7 +145,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                     return;
 
                 field = value;
-                SyncToPlayers(4096uL, w => w.WriteFloat(value));
+                SyncToPlayers();
             }
         } = 30f;
 
@@ -161,7 +161,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                     return;
 
                 field = value;
-                SyncToPlayers(8192uL, w => w.WriteFloat(value));
+                SyncToPlayers();
             }
         } = 20f;
 

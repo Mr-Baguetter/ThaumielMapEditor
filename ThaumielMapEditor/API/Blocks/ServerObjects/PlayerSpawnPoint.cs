@@ -67,7 +67,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 
         internal static void OnPlayerSpawned(PlayerSpawnedEventArgs ev)
         {
-            List<PlayerSpawnPoint> validSpawns = Instances.Where(p => p.AllowedRoles.Contains(ev.Role.RoleTypeId) && !p.Disabled).ToList();
+            IEnumerable<PlayerSpawnPoint> validSpawns = Instances.Where(p => p.AllowedRoles.Contains(ev.Role.RoleTypeId) && !p.Disabled);
             if (validSpawns.IsEmpty())
                 return;
 

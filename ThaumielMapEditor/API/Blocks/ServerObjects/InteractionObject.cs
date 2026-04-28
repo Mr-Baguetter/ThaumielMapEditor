@@ -20,6 +20,8 @@ using YamlDotNet.Serialization;
 using Interactables.Interobjects.DoorUtils;
 using System.Linq;
 using ThaumielMapEditor.Events.EventArgs.Handlers;
+using PlayerRoles;
+using System.Collections.Generic;
 
 namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
@@ -90,7 +92,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                     return;
 
                 field = value;
-                Base.Shape = value;
+                Base?.Shape = value;
             }
         }
 
@@ -111,7 +113,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                     return;
 
                 field = value;
-                Base.InteractionDuration = value;
+                Base?.InteractionDuration = value;
             }
         }
 
@@ -131,7 +133,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                     return;
 
                 field = value;
-                Base.IsLocked = value;
+                Base?.IsLocked = value;
             }
         }
 
@@ -151,11 +153,27 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             }
         }
 
+        public override Vector3 Scale
+        {
+            get;
+            set
+            {
+                field = value;
+                Base?.Scale = value;
+            }
+        }
+
         /// <summary>
         /// Returns true if the underlying interactable toy can currently be searched by players.
         /// </summary>
-        public bool CanSearch => Base.CanSearch;
-    
+        public bool CanSearch => Base?.CanSearch ?? false;
+
+        /// <summary>
+        /// Gets or sets the <see cref="RoleTypeId"/>s that are allowed to interact with this.
+        /// </summary>
+        /// <value></value>
+        public List<RoleTypeId> AllowedRoles { get; set; } = [];
+
         /// <inheritdoc/>
         public override void SpawnObject(SchematicData schematic, SerializableObject serializable)
         {
@@ -169,13 +187,14 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             NetworkServer.UnSpawn(toy.gameObject);
             Base = toy;
             Object = toy.gameObject;
-            NetId = toy.netId;
             ParseValues(serializable);
             SetWorldTransform(schematic);
-            Base.Shape = Shape;
-            Base.InteractionDuration = InteractionDuration;
-            Base.IsLocked = IsLocked;
+            Base?.Shape = Shape;
+            Base?.InteractionDuration = InteractionDuration;
+            Base?.IsLocked = IsLocked;
+            Base?.Scale = Scale;
             NetworkServer.Spawn(toy.gameObject);
+            NetId = toy.netId;
 
             toy.OnInteracted += HandleInteracted;
             toy.OnSearching += HandleSearching;
@@ -201,6 +220,7 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             Base.Shape = Shape;
             Base.InteractionDuration = InteractionDuration;
             Base.IsLocked = IsLocked;
+            Base.Scale = Scale;
             NetworkServer.Spawn(toy.gameObject);
 
             toy.OnInteracted += HandleInteracted;
@@ -316,9 +336,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// <returns><see langword="true"/> if found else returns <see langword="false"/> if not found</returns>
         public static bool TryGetInteractionObject(InvisibleInteractableToy toy, out InteractionObject interactionobj)
         {
-            foreach (InteractionObject interaction in SpawnedObjects.Where(obj => obj is InteractionObject).Cast<InteractionObject>())
+            foreach (InteractionObject interaction in SpawnedObjects.OfType<InteractionObject>())
             {
-                if (interaction.NetId != toy.netId)
+                if (interaction.Base != toy)
                     continue;
 
                 interactionobj = interaction;

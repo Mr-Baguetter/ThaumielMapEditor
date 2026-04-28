@@ -13,6 +13,12 @@ namespace ThaumielMapEditor.API.Conversion
     public class PMERRoot
     {
         /// <summary>
+        /// The name of the PMER Schematic
+        /// </summary>
+        [JsonIgnore]
+        public string Name = string.Empty;
+
+        /// <summary>
         /// Gets or sets the root id of the PMER schematic root
         /// </summary>
         [JsonPropertyName("RootObjectId")]

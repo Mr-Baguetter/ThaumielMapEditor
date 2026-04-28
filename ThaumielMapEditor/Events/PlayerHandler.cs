@@ -5,8 +5,8 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Arguments.Scp079Events;
 using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using MEC;
@@ -20,17 +20,13 @@ namespace ThaumielMapEditor.Events
 {
     internal class PlayerHandler
     {
-        public class CreditTag
-        {
-            public string Name { get; set; } = string.Empty;
-            public string Color { get; set; } = string.Empty;
-        }
 
         public static void Register()
         {
             PlayerEvents.Joined += OnPlayerJoined;
             PlayerEvents.ChangedSpectator += OnPlayerChangedSpectator;
             PlayerEvents.Spawned += PlayerSpawnPoint.OnPlayerSpawned;
+            Scp079Events.ChangedCamera += OnScp079ChangedCamera;
             ReferenceHub.OnBeforePlayerDestroyed += OnPlayerLeft;
         }
 
@@ -39,33 +35,22 @@ namespace ThaumielMapEditor.Events
             PlayerEvents.Joined -= OnPlayerJoined;
             PlayerEvents.ChangedSpectator -= OnPlayerChangedSpectator;
             PlayerEvents.Spawned -= PlayerSpawnPoint.OnPlayerSpawned;
+            Scp079Events.ChangedCamera += OnScp079ChangedCamera;
             ReferenceHub.OnBeforePlayerDestroyed -= OnPlayerLeft;
         }
 
-        // If you contribute and want a CreditTag add your own steamid to this.
-        internal static readonly Dictionary<string, CreditTag> Credits = new()
+        private static void OnScp079ChangedCamera(Scp079ChangedCameraEventArgs ev)
         {
-            // MrBaguetter
-            ["76561199150506472@steam"] = new CreditTag()
+            foreach (CullingObject cullingZone in CullingObject.AllInstances)
             {
-                Name = "TME Lead Developer",
-                Color = "pumpkin"
-            },
-
-            // Example developer badge
-            ["EXAMPLE99@steam"] = new CreditTag()
-            {
-                Name = "TME Developer",
-                Color = "purple"
-            },
-
-            // Example contributor badge
-            ["EXAMPLE99@steam"] = new CreditTag()
-            {
-                Name = "TME Contributor",
-                Color = "red"
+                if (cullingZone.IsInsideCollider(ev.Camera.Position))
+                {
+                    cullingZone.ToggleVisibility(ev.Player, true);
+                }
+                else
+                    cullingZone.ToggleVisibility(ev.Player, false);
             }
-        };
+        }
         
         private static void OnPlayerChangedSpectator(PlayerChangedSpectatorEventArgs ev)
         {
@@ -158,11 +143,7 @@ namespace ThaumielMapEditor.Events
                     data.SyncWithPlayer(ev.Player);
                 }
 
-                if (Main.Instance.Config!.EnableCreditTags && Credits.TryGetValue(ev.Player.UserId, out var credittag) && ev.Player.UserGroup == null)
-                {
-                    ev.Player.GroupColor = credittag.Color;
-                    ev.Player.GroupName = credittag.Name;
-                }
+                CreditHelper.SetTag(ev.Player);
             });
         }
     }

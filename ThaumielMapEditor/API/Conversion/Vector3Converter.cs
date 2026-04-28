@@ -6,6 +6,7 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -31,15 +32,38 @@ namespace ThaumielMapEditor.API.Conversion
                 string propName = reader.GetString() ?? string.Empty;
                 reader.Read();
 
-                switch (propName?.ToLowerInvariant())
+                switch (propName.ToLowerInvariant())
                 {
-                    case "x": x = reader.GetSingle(); break;
-                    case "y": y = reader.GetSingle(); break;
-                    case "z": z = reader.GetSingle(); break;
+                    // Log report: a0047a96ad745014
+                    case "x":
+                        x = ReadFloat(ref reader);
+                        break;
+
+                    case "y":
+                        y = ReadFloat(ref reader);
+                        break;
+
+                    case "z":
+                        z = ReadFloat(ref reader);
+                        break;
                 }
             }
 
             throw new JsonException("Unexpected end when reading Vector3.");
+        }
+
+        private static float ReadFloat(ref Utf8JsonReader reader)
+        {
+            if (reader.TokenType == JsonTokenType.Number)
+                return reader.GetSingle();
+
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                string value = reader.GetString()?.Replace(',', '.') ?? string.Empty;
+                return float.Parse(value, CultureInfo.InvariantCulture);
+            }
+
+            throw new JsonException($"Cannot read float from token type '{reader.TokenType}'.");
         }
 
         public override void Write(Utf8JsonWriter writer, Vector3 value, JsonSerializerOptions options)

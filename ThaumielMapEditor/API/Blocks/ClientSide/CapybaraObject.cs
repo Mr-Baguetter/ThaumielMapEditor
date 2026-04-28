@@ -33,7 +33,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 
                 field = value;
                 RotationUpdated?.Invoke(value, this);
-                SyncToPlayers(2uL, w => w.WriteQuaternion(field));
+                SyncToPlayers();
             }
         }
 
@@ -48,7 +48,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 
                 field = value;
                 ScaleUpdated?.Invoke(value, this);
-                SyncToPlayers(4uL, w => w.WriteVector3(field));
+                SyncToPlayers();
             }
         }
 
@@ -63,7 +63,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 
                 field = value;
                 PositionUpdated?.Invoke(value, this);
-                SyncToPlayers(1uL, w => w.WriteVector3(field));
+                SyncToPlayers();
             }
         }
 
@@ -80,7 +80,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                     return;
 
                 field = value;
-                SyncToPlayers(16uL, w => w.WriteBool(field));
+                SyncToPlayers();
             }
         }
 
@@ -94,7 +94,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                     return;
 
                 field = value;
-                SyncToPlayers(8uL, w => w.WriteByte(field));
+                SyncToPlayers();
             }
         }
 
@@ -108,7 +108,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                     return;
 
                 field = value;
-                SyncToPlayers(32uL, w => w.WriteBool(field));
+                SyncToPlayers();
                 ColliderHelper.SetColliders(this, value);
             }
         } = true;

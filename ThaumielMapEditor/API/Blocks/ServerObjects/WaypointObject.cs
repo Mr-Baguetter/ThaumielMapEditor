@@ -117,6 +117,25 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             base.SpawnObject(schematic, serializable);
         }
 
+        public void SpawnObject(SchematicData schematic)
+        {
+            if (PrefabHelper.WaypointToy == null)
+            {
+                LogManager.Warn($"Failed to spawn Waypoint. Prefab is null");
+                return;
+            }
+
+            WaypointToy toy = UnityEngine.Object.Instantiate(PrefabHelper.WaypointToy);
+            NetworkServer.UnSpawn(toy.gameObject);
+            toy.VisualizeBounds = VisualizeBounds;
+            toy.Priority = Priority;
+            toy.BoundsSize = BoundsSize;
+            Object = toy.gameObject;
+            NetId = toy.netId;
+            SetWorldTransform(schematic);
+            NetworkServer.Spawn(toy.gameObject);
+        }
+
         /// <summary>
         /// Parses values from a <see cref="SerializableObject"/> and applies them to this <see cref="WaypointObject"/> instance.
         /// </summary>
