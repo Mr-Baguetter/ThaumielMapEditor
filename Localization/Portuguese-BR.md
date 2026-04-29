@@ -109,4 +109,4 @@ Aviso de dependências: [Dependencies.md](Dependencies.md)
 
 *O Thaumiel Map Editor é uma "obra em andamento". Contribuições, feeebacks, e aviso sobre erros ou problemas são bem-vindos.*
 
-*Traduzido por [Unbistrackted](https://github.com/Unbistrackted).**
+*Traduzido por [Unbistrackted](https://github.com/Unbistrackted).*
