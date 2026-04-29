@@ -6,6 +6,41 @@ Thaumiel Map Editor (TME) is a Unity based map editor designed to help developer
 
 ---
 
+<table align="center" style="width: 100%; max-width: 600px; border-collapse: separate; border-spacing: 15px;">
+    <tr>
+        <td align="center" style="background-color: #1d1d1d; border-radius: 10px; padding: 10px; ; width: 100px;">
+            <a href="README.md" 
+               style="display: block; width: 100%; height: 100%; text-align: center; text-decoration: none; color: #333; cursor: pointer;">
+                <img src="https://flagsapi.com/US/flat/64.png" height=30><br>
+                <span style="color: #f0f0f0">English</span>
+            </a>
+        </td>
+        <td align="center" style="background-color: #1d1d1d; border-radius: 10px; padding: 10px; width: 100px;">
+            <a href="Localization/Russian.md" 
+               style="display: block; width: 100%; height: 100%; text-align: center; text-decoration: none; color: #333; cursor: pointer;">
+                <img src="https://flagsapi.com/RU/flat/64.png" height=30><br>
+                <span style="color: #f0f0f0">Русский</span>
+            </a>
+        </td>
+        <td align="center" style="background-color: #1d1d1d; border-radius: 10px; padding: 10px; width: 100px;">
+            <a href="Localization/Spanish.md" 
+               style="display: block; width: 100%; height: 100%; text-align: center; text-decoration: none; color: #333; cursor: pointer;">
+                <img src="https://flagsapi.com/ES/flat/64.png" height=30><br>
+                <span style="color: #f0f0f0">Español</span>
+            </a>
+        </td>
+        <td align="center" style="background-color: #1d1d1d; border-radius: 10px; padding: 10px; width: 100px;">
+            <a href="Localization/French.md" 
+               style="display: block; width: 100%; height: 100%; text-align: center; text-decoration: none; color: #333; cursor: pointer;">
+                <img src="https://flagsapi.com/FR/flat/64.png" height=30><br>
+                <span style="color: #f0f0f0">Français</span>
+            </a>
+        </td>
+    </tr>
+</table>
+
+---
+
 ## Features
 
 > Features are actively being developed. The list below reflects what is currently implemented.
