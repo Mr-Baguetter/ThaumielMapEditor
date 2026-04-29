@@ -87,7 +87,7 @@ O ``TME`` suporta o spawn dos seguintes objetos:
 ---
 ## Uso & Comandos
 
-Para ver a lista completa de comandos, permissões, e apelidos de comandos, por favor cheque nossa **[Documentação de Comandos](Commands.md)**.
+Para ver a lista completa de comandos, permissões, e apelidos de comandos, por favor cheque nossa **[Documentação de Comandos](Commands-PT-BR.md)**.
 
 ## Instalação
 
