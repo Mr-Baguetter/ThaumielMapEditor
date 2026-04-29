@@ -29,7 +29,7 @@
     <Reference Include="SecretLabNAudio.NLayer" HintPath="deps/SecretLabNAudio.NLayer.dll"/>
     <Reference Include="SecretLabNAudio.NVorbis" HintPath="deps/SecretLabNAudio.NVorbis.dll"/>
     <Reference Include="0Harmony" HintPath="deps/0Harmony.dll"/>
-    <Reference Include="LabApiExtensions" HintPath="deps/LabApiExtensions.dll"/>
+    <Reference Include="LabApiExtensions" Publicize="true" HintPath="deps/LabApiExtensions.dll"/>
 
     <!--SL References-->
     <Reference Include="Assembly-CSharp" Publicize="true" HintPath="$(SL_REFERENCES)/Assembly-CSharp.dll"/>
