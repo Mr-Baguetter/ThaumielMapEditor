@@ -114,7 +114,7 @@ namespace ThaumielMapEditor.Events
 
             foreach (SchematicData data in SchematicLoader.SpawnedSchematics)
             {
-                foreach (ClientSideObjectBase clientobj in data.SpawnedClientObjects)
+                foreach (ClientObject clientobj in data.SpawnedClientObjects)
                 {
                     if (!clientobj.SpawnedPlayers.Contains(player))
                         continue;

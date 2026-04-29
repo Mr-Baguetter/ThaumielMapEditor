@@ -17,7 +17,7 @@ using UnityEngine;
 
 namespace ThaumielMapEditor.API.Blocks.ClientSide
 {
-    public class LightObject : ClientSideObjectBase
+    public class LightObject : ClientObject
     {
         /// <summary>
         /// Gets or sets the intensity of the light.
@@ -171,13 +171,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         public SchematicData? Schematic { get; set; }
 
         /// <inheritdoc/>
-        public override ObjectType ObjectType { get; set; } = ObjectType.Light;
-
-        /// <inheritdoc/>
-        public override uint NetId { get; set; }
-
-        /// <inheritdoc/>
-        public override uint AssetId { get; set; }
+        public override ObjectType ObjectType => ObjectType.Light;
 
         /// <inheritdoc/>
         public override void SpawnForPlayer(Player player)

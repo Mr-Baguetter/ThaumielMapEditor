@@ -1351,7 +1351,7 @@ namespace ThaumielMapEditor.API.Helpers
         /// <param name="serializable"></param>
         /// <param name="obj"></param>
         /// <param name="schematic"></param>
-        public static void SetupCulling(SerializableObject serializable, ClientSideObjectBase obj, SchematicData schematic)
+        public static void SetupCulling(SerializableObject serializable, ClientObject obj, SchematicData schematic)
         {
             if (serializable.CullingSettings.Bounds != Vector3.zero)
             {

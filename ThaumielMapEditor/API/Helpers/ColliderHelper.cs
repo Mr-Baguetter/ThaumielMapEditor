@@ -25,9 +25,9 @@ namespace ThaumielMapEditor.API.Helpers
         /// <summary>
         /// Creates the colliders on the server for the client side objects.
         /// </summary>
-        /// <param name="clientObject">The <see cref="ClientSideObjectBase"/> to create colliders for.</param>
+        /// <param name="clientObject">The <see cref="ClientObject"/> to create colliders for.</param>
         /// <param name="schematic">The <see cref="SchematicData"/> that the colliders will be parented to.</param>
-        public static void CreateClientObjectColliders(ClientSideObjectBase clientObject, SchematicData schematic)
+        public static void CreateClientObjectColliders(ClientObject clientObject, SchematicData schematic)
         {
             List<Collider> colliders = [];
             GameObject? prefab = GetPrefabForClientObject(clientObject);
@@ -79,10 +79,10 @@ namespace ThaumielMapEditor.API.Helpers
         }
 
         /// <summary>
-        /// Disables all the colliders on the specified <see cref="ClientSideObjectBase"/>.
+        /// Disables all the colliders on the specified <see cref="ClientObject"/>.
         /// </summary>
         /// <param name="clientObject">The client side object to disable the server side colliders on.</param>
-        public static void DisableColliders(ClientSideObjectBase clientObject)
+        public static void DisableColliders(ClientObject clientObject)
         {
             if (clientObject.ServerColliders.IsEmpty())
             {
@@ -104,7 +104,7 @@ namespace ThaumielMapEditor.API.Helpers
         /// </summary>
         /// <param name="clientObject"></param>
         /// <param name="enabled"></param>
-        public static void SetColliders(ClientSideObjectBase clientObject, bool enabled)
+        public static void SetColliders(ClientObject clientObject, bool enabled)
         {
             if (enabled)
             {
@@ -115,10 +115,10 @@ namespace ThaumielMapEditor.API.Helpers
         }
 
         /// <summary>
-        /// Enables all the colliders on the specified <see cref="ClientSideObjectBase"/>.
+        /// Enables all the colliders on the specified <see cref="ClientObject"/>.
         /// </summary>
         /// <param name="clientObject">The client side object to enable the server side colliders on.</param>
-        public static void EnableColliders(ClientSideObjectBase clientObject)
+        public static void EnableColliders(ClientObject clientObject)
         {
             if (clientObject.ServerColliders.IsEmpty())
             {
@@ -182,7 +182,7 @@ namespace ThaumielMapEditor.API.Helpers
         /// Resolves the source prefab <see cref="GameObject"/> for a given client-side object,
         /// used to extract its collider hierarchy.
         /// </summary>
-        private static GameObject? GetPrefabForClientObject(ClientSideObjectBase clientObject)
+        private static GameObject? GetPrefabForClientObject(ClientObject clientObject)
         {
             return clientObject.ObjectType switch
             {

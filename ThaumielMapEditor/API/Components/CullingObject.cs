@@ -20,11 +20,11 @@ namespace ThaumielMapEditor.API.Components
         public readonly HashSet<Player> PlayersInside = [];
 
         public NetworkIdentity? NetworkIdentity;
-        public ClientSideObjectBase? ClientObject;
+        public ClientObject? ClientObject;
         public ServerObject? ServerObject;
         public Vector3 Bounds;
 
-        public void Init(ClientSideObjectBase client, Vector3 bounds)
+        public void Init(ClientObject client, Vector3 bounds)
         {
             ClientObject = client;
             Bounds = bounds;

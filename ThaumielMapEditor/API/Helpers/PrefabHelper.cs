@@ -289,5 +289,21 @@ namespace ThaumielMapEditor.API.Helpers
 
             RanRegister = true;
         }
+
+        /// <summary>
+        /// Gets the asset id of the specified <see cref="GameObject"/>.
+        /// </summary>
+        /// <param name="obj">The <see cref="GameObject"/> to get the AssetId from.</param>
+        /// <returns>0 if no AssetId was found otherwise returns the AssetId.</returns>
+        public static uint GetAssetId(GameObject obj)
+        {
+            if (!obj.TryGetComponent<NetworkBehaviour>(out var net))
+            {
+                LogManager.Warn($"Failed to get AssetId. Obj has no NetworkBehaviour component");
+                return 0;
+            }
+
+            return net.netIdentity.assetId;
+        }
     }
 }

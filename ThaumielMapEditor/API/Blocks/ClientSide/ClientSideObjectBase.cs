@@ -19,113 +19,171 @@ using UnityEngine;
 
 namespace ThaumielMapEditor.API.Blocks.ClientSide
 {
-    public abstract class ClientSideObjectBase
+    public class ClientObject
     {
         internal ulong _pendingDirtyBits = 0;
         internal readonly SortedDictionary<ulong, Action<NetworkWriter>> _pendingWrites = [];
 
+        public static event Action<Vector3, ClientObject>? PositionUpdated;
+        public static event Action<Vector3, ClientObject>? ScaleUpdated;
+        public static event Action<Quaternion, ClientObject>? RotationUpdated;
+
         /// <summary>
-        /// All the <see cref="Player"/>s that this <see cref="ClientSideObjectBase"/> instance has been spawned for.
+        /// All the <see cref="Player"/>s that this <see cref="ClientObject"/> instance has been spawned for.
         /// </summary>
         public HashSet<Player> SpawnedPlayers { get; internal set; } = [];
 
         /// <summary>
-        /// Gets a value indicating whether this <see cref="ClientSideObjectBase"/> has been spawned for any players.
+        /// Gets a value indicating whether this <see cref="ClientObject"/> has been spawned for any players.
         /// </summary>
         public bool Spawned { get; internal set; } = false;
 
         /// <summary>
-        /// Gets the object id from the <see cref="SerializableObject"/> this <see cref="ClientSideObjectBase"/> instance was generated from.
+        /// Gets the object id from the <see cref="SerializableObject"/> this <see cref="ClientObject"/> instance was generated from.
         /// </summary>
         public int ObjectId { get; internal set; }
 
         /// <summary>
-        /// Gets the parent id from the <see cref="SerializableObject"/> this <see cref="ClientSideObjectBase"/> instance was generated from.
+        /// Gets the parent id from the <see cref="SerializableObject"/> this <see cref="ClientObject"/> instance was generated from.
         /// </summary>
-        public int ParentId { get; internal set; }
+        public int ParentId
+        {
+            get;
+            internal set
+            {
+                field = value;
+                SetParent(value);
+            }
+        }
 
         /// <summary>
-        /// Gets or sets the position of the <see cref="ClientSideObjectBase"/> instance.
-        /// </summary>
-        /// <remarks>
-        /// This will be automatically synced to players.
-        /// </remarks>
-        public virtual Vector3 Position { get; set; }
-
-        /// <summary>
-        /// Gets or sets the scale of the <see cref="ClientSideObjectBase"/> instance.
-        /// </summary>
-        /// <remarks>
-        /// This will be automatically synced to players.
-        /// </remarks>
-        public virtual Vector3 Scale { get; set; }
-
-        /// <summary>
-        /// Gets or sets the rotation of the <see cref="ClientSideObjectBase"/> instance.
+        /// Gets or sets the position of the <see cref="ClientObject"/> instance.
         /// </summary>
         /// <remarks>
         /// This will be automatically synced to players.
         /// </remarks>
-        public virtual Quaternion Rotation { get; set; }
+        public Vector3 Position
+        {
+            get;
+            set
+            {
+                field = value;
+                SyncToPlayers();
+                PositionUpdated?.Invoke(value, this);
+            }
+        }
 
         /// <summary>
-        /// Gets or sets the world position of the <see cref="ClientSideObjectBase"/> instance.
+        /// Gets or sets the scale of the <see cref="ClientObject"/> instance.
+        /// </summary>
+        /// <remarks>
+        /// This will be automatically synced to players.
+        /// </remarks>
+        public Vector3 Scale
+        {
+            get;
+            set
+            {
+                field = value;
+                SyncToPlayers();
+                ScaleUpdated?.Invoke(value, this);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the rotation of the <see cref="ClientObject"/> instance.
+        /// </summary>
+        /// <remarks>
+        /// This will be automatically synced to players.
+        /// </remarks>
+        public Quaternion Rotation
+        {
+            get;
+            set
+            {
+                field = value;
+                SyncToPlayers();
+                RotationUpdated?.Invoke(value, this);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether or not this <see cref="ClientObject"/> is static.
+        /// </summary>
+        public bool IsStatic
+        {
+            get;
+            set
+            {
+                if (field == value)
+                    return;
+
+                field = value;
+                SyncToPlayers();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the sync interval of the <see cref="ClientObject"/>.
+        /// </summary>
+        public byte MovementSmoothing
+        {
+            get;
+            set
+            {
+                field = value;
+                SyncToPlayers();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the world position of the <see cref="ClientObject"/> instance.
         /// </summary>
         public Vector3 WorldPosition { get; set; }
 
         /// <summary>
-        /// Gets or sets the world rotation of the <see cref="ClientSideObjectBase"/> instance.
+        /// Gets or sets the world rotation of the <see cref="ClientObject"/> instance.
         /// </summary>
         public Quaternion WorldRotation { get; set; }
 
         /// <summary>
-        /// Gets or sets 
+        /// Gets or sets the colliders of the <see cref="ClientObject"/> instance.
         /// </summary>
-        public virtual bool IsStatic { get; set; }
+        public Collider[] ServerColliders { get; set; } = [];
 
         /// <summary>
-        /// Gets or sets the sync interval of the <see cref="ClientSideObjectBase"/>.
-        /// </summary>
-        public virtual byte MovementSmoothing { get; set; }
-
-        /// <summary>
-        /// Gets or sets the colliders of the <see cref="ClientSideObjectBase"/> instance.
-        /// </summary>
-        public virtual Collider[] ServerColliders { get; set; } = [];
-
-        /// <summary>
-        /// Gets or sets the <see cref="GameObject"/> the <see cref="ClientSideObjectBase"/> is parented to on the client.
+        /// Gets or sets the <see cref="GameObject"/> the <see cref="ClientObject"/> is parented to on the client.
         /// </summary>
         public GameObject? Parent { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the netId of the <see cref="GameObject"/> this <see cref="ClientSideObjectBase"/> is parented to.
+        /// Gets or sets the netId of the <see cref="GameObject"/> this <see cref="ClientObject"/> is parented to.
         /// </summary>
         public uint ParentNetId { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the netid of the <see cref="ClientSideObjectBase"/> instance.
+        /// Gets or sets the netid of the <see cref="ClientObject"/> instance.
         /// </summary>
-        public abstract uint NetId { get; set; }
+        public uint NetId { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the object type of the <see cref="ClientSideObjectBase"/> instance.
+        /// Gets or sets the object type of the <see cref="ClientObject"/> instance.
         /// </summary>
-        public abstract ObjectType ObjectType { get; set; }
+        public virtual ObjectType ObjectType { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the asset id of the <see cref="ClientSideObjectBase"/> instance.
+        /// Gets or sets the asset id of the <see cref="ClientObject"/> instance.
         /// </summary>
-        public abstract uint AssetId { get; set; }
+        public uint AssetId { get; internal set; }
 
         /// <summary>
-        /// Spawns the <see cref="ClientSideObjectBase"/> instance for the specified player.
+        /// Spawns the <see cref="ClientObject"/> instance for the specified player.
         /// </summary>
-        /// <param name="player">The player to spawn the <see cref="ClientSideObjectBase"/> instance to.</param>
+        /// <param name="player">The player to spawn the <see cref="ClientObject"/> instance to.</param>
         public virtual void SpawnForPlayer(Player player) { }
 
         /// <summary>
-        /// Destroys this <see cref="ClientSideObjectBase"/> instance for the specified <see cref="Player"/>
+        /// Destroys this <see cref="ClientObject"/> instance for the specified <see cref="Player"/>
         /// </summary>
         /// <param name="player">The <see cref="Player"/> to destroy this object on.</param>
         public void DestroyForPlayer(Player player)
@@ -135,7 +193,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         }
 
         /// <summary>
-        /// Destroys this <see cref="ClientSideObjectBase"/> instance for all <see cref="Player"/>s
+        /// Destroys this <see cref="ClientObject"/> instance for all <see cref="Player"/>s
         /// </summary>
         public void DestroyForAllPlayers()
         {
@@ -153,7 +211,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         /// </summary>
         /// <param name="player">The <see cref="Player"/> that will recive the parent message=</param>
         /// <param name="parentId">The <see cref="NetworkBehaviour.netId"/> of the parent</param>
-        public void SetParent(Player player, uint parentId)
+        public void SetParent(Player player, int parentId)
         {
             player.SendFakeRPC(NetId, typeof(AdminToyBase), nameof(AdminToyBase.RpcChangeParent), 0, parentId);
 
@@ -164,6 +222,26 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
             else
                 LogManager.Warn($"Failed to find GameObject with NetId {ParentNetId}!");
+        }
+
+        /// <summary>
+        /// Sets the parent of the <see cref="ClientObject"/>
+        /// </summary>
+        /// <param name="parentId">The <see cref="NetworkBehaviour.netId"/> of the parent</param>
+        public void SetParent(int parentId)
+        {
+            foreach (Player player in Player.ReadyList)
+            {
+                player.SendFakeRPC(NetId, typeof(AdminToyBase), nameof(AdminToyBase.RpcChangeParent), 0, parentId);
+
+                GameObject? go = NetworkServer.spawned.TryGetValue(ParentNetId, out NetworkIdentity identity) ? identity.gameObject : null;
+                if (go != null)
+                {
+                    Parent = go;
+                }
+                else
+                    LogManager.Warn($"Failed to find GameObject with NetId {ParentNetId}!");
+            }
         }
 
         /// <summary>
@@ -234,10 +312,8 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         }
 
         /// <summary>
-        /// Syncs the specified bits to all <see cref="Player"/>s this <see cref="ClientSideObjectBase"/> is spawned for
+        /// Syncs the server values to all <see cref="Player"/>s this <see cref="ClientObject"/> is spawned for
         /// </summary>
-        /// <param name="dirtyBit">The bits to sync.</param>
-        /// <param name="writeValue">The writer to use.</param>
         public void SyncToPlayers()
         {
             foreach (Player player in SpawnedPlayers)
@@ -251,12 +327,44 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         }
 
         /// <summary>
+        /// Syncs the server values to the specified <see cref="Player"/>
+        /// </summary>
+        /// <param name="player">The <see cref="Player"/> to be synced.</param>
+        public void SyncToPlayer(Player player)
+        {
+            if (player.IsHost)
+                return;
+
+            LogManager.Debug($"Syncing object with id {NetId} to {player.DisplayName}");
+            SpawnForPlayer(player);
+        }
+
+        /// <summary>
+        /// Syncs the server values to the players that match the filter.
+        /// </summary>
+        /// <param name="filter">The filter.</param>
+        public void SyncToPlayer(Func<Player, bool> filter)
+        {
+            foreach (Player player in SpawnedPlayers)
+            {
+                if (player.IsHost)
+                    continue;
+
+                if (!filter(player))
+                    continue;
+
+                LogManager.Debug($"Syncing object with id {NetId} to {player.DisplayName}");
+                SpawnForPlayer(player);
+            }
+        }
+
+        /// <summary>
         /// Spawns a <see cref="GameObject"/> to the specified <see cref="Player"/>.
         /// </summary>
         /// <param name="obj">The <see cref="GameObject"/> to be spawned.</param>
         /// <param name="player">The <see cref="Player"/> to be spawned for.</param>
         /// <returns><see langword="true"/> if it is successfully spawned otherwise returns <see langword="false"/></returns>
-        public static bool SpawnForPlayer(GameObject obj, Player player)
+        public virtual bool SpawnObjectOnPlayers(GameObject obj, Player player)
         {
             if (obj == null)
             {
@@ -281,7 +389,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             identity.isServer = false;
             identity.netId = NetworkIdentity.GetNextNetworkId();
             NetworkServer.spawned[identity.netId] = identity;
-            LogManager.Info($"SpawnForConnection: Registered {obj.name} with netId={identity.netId}.");
+            LogManager.Info($"Registered {obj.name} with netId={identity.netId}.");
             identity.OnStartServer();
             SendCustomSpawnMessage(identity, player);
 

@@ -18,40 +18,49 @@ namespace ThaumielMapEditor.Events
 
         public static void Register()
         {
-            PrimitiveObject.ScaleUpdated += OnScaleUpdated;
-            PrimitiveObject.PositionUpdated += OnPositionUpdated;
-            PrimitiveObject.RotationUpdated += OnRotationUpdated;
+            ClientObject.ScaleUpdated += OnScaleUpdated;
+            ClientObject.PositionUpdated += OnPositionUpdated;
+            ClientObject.RotationUpdated += OnRotationUpdated;
             SchematicData.SchematicPositionUpdated += OnSchematicPositionUpdated;
             SchematicData.SchematicRotationUpdated += OnSchematicRotationUpdated;
         }
 
         public static void Unregister()
         {
-            PrimitiveObject.ScaleUpdated -= OnScaleUpdated;
-            PrimitiveObject.PositionUpdated -= OnPositionUpdated;
-            PrimitiveObject.RotationUpdated -= OnRotationUpdated;
+            ClientObject.ScaleUpdated -= OnScaleUpdated;
+            ClientObject.PositionUpdated -= OnPositionUpdated;
+            ClientObject.RotationUpdated -= OnRotationUpdated;
             SchematicData.SchematicPositionUpdated -= OnSchematicPositionUpdated;
             SchematicData.SchematicRotationUpdated -= OnSchematicRotationUpdated;
         }
 
-        private static void OnScaleUpdated(Vector3 scale, PrimitiveObject primitive)
+        private static void OnScaleUpdated(Vector3 scale, ClientObject client)
         {
+            if (client is not PrimitiveObject primitive)
+                return;
+
             if (!primitive.PrimitiveFlags.HasFlag(PrimitiveFlags.Collidable) || primitive.ServerCollider == null || primitive.Schematic == null || primitive.Schematic.Primitive == null)
                 return;
 
             primitive.ServerCollider.transform.localScale = new(Math.Abs(scale.x), Math.Abs(scale.y), Math.Abs(scale.z));
         }
 
-        private static void OnPositionUpdated(Vector3 position, PrimitiveObject primitive)
+        private static void OnPositionUpdated(Vector3 position, ClientObject client)
         {
+            if (client is not PrimitiveObject primitive)
+                return;
+
             if (!primitive.PrimitiveFlags.HasFlag(PrimitiveFlags.Collidable) || primitive.ServerCollider == null || primitive.Schematic == null || primitive.Schematic.Primitive == null)
                 return;
 
             primitive.ServerCollider.transform.position = primitive.Schematic.Primitive.Transform.TransformPoint(position);
         }
 
-        private static void OnRotationUpdated(Quaternion rotation, PrimitiveObject primitive)
+        private static void OnRotationUpdated(Quaternion rotation, ClientObject client)
         {
+            if (client is not PrimitiveObject primitive)
+                return;
+
             if (!primitive.PrimitiveFlags.HasFlag(PrimitiveFlags.Collidable) || primitive.ServerCollider == null || primitive.Schematic == null || primitive.Schematic.Primitive == null)
                 return;
 

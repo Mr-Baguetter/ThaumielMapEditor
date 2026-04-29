@@ -123,9 +123,9 @@ namespace ThaumielMapEditor.API.Data
         public List<LODData> LODZones { get; internal set; } = [];
 
         /// <summary>
-        /// A list of all spawned <see cref="ClientSideObjectBase"/> instances.
+        /// A list of all spawned <see cref="ClientObject"/> instances.
         /// </summary>
-        public List<ClientSideObjectBase> SpawnedClientObjects = [];
+        public List<ClientObject> SpawnedClientObjects = [];
 
         /// <summary>
         /// A list of all spawned <see cref="ServerObject"/> instances.
@@ -143,11 +143,11 @@ namespace ThaumielMapEditor.API.Data
         public GameObject? GameObject => Primitive?.GameObject;
 
         /// <summary>
-        /// Retrieves all spawned <see cref="ClientSideObjectBase"/>s of the specified type.
+        /// Retrieves all spawned <see cref="ClientObject"/>s of the specified type.
         /// </summary>
-        /// <typeparam name="T">The type of <see cref="ClientSideObjectBase"/> to filter.</typeparam>
-        /// <returns>An <see cref="IEnumerable{T}"/> containing all <see cref="ClientSideObjectBase"/>s that match type <typeparamref name="T"/>.</returns>
-        public IEnumerable<T> GetClientObject<T>() where T : ClientSideObjectBase => SpawnedClientObjects.OfType<T>();
+        /// <typeparam name="T">The type of <see cref="ClientObject"/> to filter.</typeparam>
+        /// <returns>An <see cref="IEnumerable{T}"/> containing all <see cref="ClientObject"/>s that match type <typeparamref name="T"/>.</returns>
+        public IEnumerable<T> GetClientObject<T>() where T : ClientObject => SpawnedClientObjects.OfType<T>();
 
         /// <summary>
         /// Retrieves all spawned <see cref="ServerObject"/>s of the specified type.
@@ -162,12 +162,12 @@ namespace ThaumielMapEditor.API.Data
         public IReadOnlyList<NetworkIdentity> ServerNetworkIdentities => SpawnedServerObjects.Select(o => o.Object!.GetComponent<NetworkIdentity>()).Where(identity => identity != null).ToList();
 
         /// <summary>
-        /// Syncs the <see cref="ClientSideObjectBase"/> of this <see cref="SchematicData"/> with the specified <see cref="Player"/>.
+        /// Syncs the <see cref="ClientObject"/> of this <see cref="SchematicData"/> with the specified <see cref="Player"/>.
         /// </summary>
         /// <param name="player">The <see cref="Player"/> to sync with.</param>
         public void SyncWithPlayer(Player player)
         {
-            foreach (ClientSideObjectBase objects in SpawnedClientObjects)
+            foreach (ClientObject objects in SpawnedClientObjects)
             {
                 objects.SpawnForPlayer(player);
             }
@@ -185,7 +185,7 @@ namespace ThaumielMapEditor.API.Data
                 SchematicLoader.SchematicLODZones.Remove(kvp.Key);
             }
 
-            foreach (ClientSideObjectBase clientobj in SpawnedClientObjects.ToArray())
+            foreach (ClientObject clientobj in SpawnedClientObjects.ToArray())
             {
                 clientobj.DestroyForAllPlayers();
                 SpawnedClientObjects.Remove(clientobj);
