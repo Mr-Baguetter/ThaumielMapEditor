@@ -36,6 +36,13 @@ Thaumiel Map Editor (TME) is a Unity based map editor designed to help developer
                 <span style="color: #f0f0f0">Français</span>
             </a>
         </td>
+        <td align="center" style="background-color: #1d1d1d; border-radius: 10px; padding: 10px; width: 100px;">
+            <a href="Localization/Portuguese-BR.md" 
+               style="display: block; width: 100%; height: 100%; text-align: center; text-decoration: none; color: #333; cursor: pointer;">
+                <img src="https://flagsapi.com/BR/flat/64.png" height=30><br>
+                <span style="color: #f0f0f0">Português-BR</span>
+            </a>
+        </td>
     </tr>
 </table>
 
