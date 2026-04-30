@@ -259,6 +259,15 @@ namespace ThaumielMapEditor.API.Helpers
             return null;
         }
 
+        public static SerializableSchematic? GetSchematicByName(string name)
+        {
+            SerializableSchematic? schematic = LoadedSchematics.FirstOrDefault(s => s.Key == name).Value;
+            if (schematic == null)
+                return null;
+
+            return schematic;
+        }
+
         /// <summary>
         /// Gets a unique id for all <see cref="SchematicData"/>
         /// </summary>
@@ -666,15 +675,19 @@ namespace ThaumielMapEditor.API.Helpers
         /// <param name="schematicname">The file name of the schematic to spawn. Must match a schematic in <see cref="LoadedSchematics"/>.</param>
         /// <param name="position">The world position at which to place the schematic.</param>
         /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
-        public static SchematicData SpawnSchematic(string schematicname, Vector3 position)
+        public static SchematicData? SpawnSchematic(string schematicname, Vector3 position)
         {
+            SerializableSchematic? schematic = GetSchematicByName(schematicname);
+            if (schematic == null)
+                return null;
+
             SchematicData schematicData = new()
             {
                 FileName = schematicname,
                 Id = GetId(),
             };
 
-            SpawnSchematic(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, default, default);
+            SpawnSchematic(schematic, schematicData, position, default, default);
             return schematicData;
         }
 
@@ -685,15 +698,20 @@ namespace ThaumielMapEditor.API.Helpers
         /// <param name="position">The world position at which to place the schematic.</param>
         /// <param name="rotation">The rotation to apply to the schematic.</param>
         /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
-        public static SchematicData SpawnSchematic(string schematicname, Vector3 position, Quaternion rotation)
+        public static SchematicData? SpawnSchematic(string schematicname, Vector3 position, Quaternion rotation)
         {
+            SerializableSchematic? schematic = GetSchematicByName(schematicname);
+            if (schematic == null)
+                return null;
+
             SchematicData schematicData = new()
             {
                 FileName = schematicname,
                 Id = GetId(),
             };
 
-            SpawnSchematic(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, rotation, default);
+
+            SpawnSchematic(schematic, schematicData, position, rotation, default);
             return schematicData;
         }
 
@@ -705,15 +723,19 @@ namespace ThaumielMapEditor.API.Helpers
         /// <param name="rotation">The rotation to apply to the schematic.</param>
         /// <param name="scale">The scale to apply to the schematic.</param>
         /// <returns>A <see cref="SchematicData"/> instance representing the spawned schematic.</returns>
-        public static SchematicData SpawnSchematic(string schematicname, Vector3 position, Quaternion rotation, Vector3 scale)
+        public static SchematicData? SpawnSchematic(string schematicname, Vector3 position, Quaternion rotation, Vector3 scale)
         {
+            SerializableSchematic? schematic = GetSchematicByName(schematicname);
+            if (schematic == null)
+                return null;
+
             SchematicData schematicData = new()
             {
                 FileName = schematicname,
                 Id = GetId(),
             };
 
-            SpawnSchematic(LoadedSchematics.FirstOrDefault(s => s.Key == schematicname).Value, schematicData, position, rotation, scale);
+            SpawnSchematic(schematic, schematicData, position, rotation, scale);
             return schematicData;
         }
 
@@ -799,9 +821,10 @@ namespace ThaumielMapEditor.API.Helpers
             }
         }
 
-        private static bool TryLoadAnimatorController(string schematicFileName, string animatorName, out RuntimeAnimatorController controller)
+        private static bool TryLoadAnimatorController(string schematicFileName, string animatorName, out RuntimeAnimatorController controller, out AssetBundle outbundle)
         {
             controller = null!;
+            outbundle = null!;
 
             foreach (AssetBundle bundle in AssetBundle.GetAllLoadedAssetBundles())
             {
@@ -820,14 +843,14 @@ namespace ThaumielMapEditor.API.Helpers
                 return false;
             }
 
-            AssetBundle loaded = AssetBundle.LoadFromFile(path);
-            if (loaded == null)
+            outbundle = AssetBundle.LoadFromFile(path);
+            if (outbundle == null)
             {
                 LogManager.Warn($"Failed to load asset bundle at '{path}'.");
                 return false;
             }
 
-            RuntimeAnimatorController[] bundleControllers = loaded.LoadAllAssets<RuntimeAnimatorController>();
+            RuntimeAnimatorController[] bundleControllers = outbundle.LoadAllAssets<RuntimeAnimatorController>();
             if (bundleControllers.Length == 0)
                 return false;
 
@@ -842,7 +865,7 @@ namespace ThaumielMapEditor.API.Helpers
 
             foreach (SerializableObject serializable in animatables)
             {
-                if (!TryLoadAnimatorController(schematic.FileName, serializable.AnimatorName, out RuntimeAnimatorController controller))
+                if (!TryLoadAnimatorController(schematic.FileName, serializable.AnimatorName, out RuntimeAnimatorController controller, out AssetBundle bundle))
                     continue;
 
                 if (!serverObjectsById.TryGetValue(serializable.ObjectId, out ServerObject match) || match.Object == null)
@@ -855,9 +878,8 @@ namespace ThaumielMapEditor.API.Helpers
                 animator.runtimeAnimatorController = controller;
                 animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
                 LogManager.Debug($"Applied animator '{controller.name}' to '{match.Object.name}' in '{schematic.FileName}'.");
+                bundle.Unload(false);
             }
-
-            AssetBundle.UnloadAllAssetBundles(false);
         }
 
         private static void ApplyTools(SerializableSchematic schematic, SchematicData schematicData)

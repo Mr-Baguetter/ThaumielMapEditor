@@ -29,6 +29,9 @@ namespace ThaumielMapEditor.API.Helpers
         /// <param name="schematic">The <see cref="SchematicData"/> that the colliders will be parented to.</param>
         public static void CreateClientObjectColliders(ClientObject clientObject, SchematicData schematic)
         {
+            if (!SchematicColliders.ContainsKey(schematic))
+                SchematicColliders.Add(schematic, []);
+
             List<Collider> colliders = [];
             GameObject? prefab = GetPrefabForClientObject(clientObject);
 
@@ -73,9 +76,9 @@ namespace ThaumielMapEditor.API.Helpers
                     LogManager.Warn($"Unhandled collider type '{col.GetType().Name}' on prefab '{prefab.name}', skipping.");
                     UnityEngine.Object.Destroy(colGo);
                 }
-
-                clientObject.ServerColliders = colliders.ToArray();
             }
+
+            clientObject.ServerColliders = colliders.ToArray();
         }
 
         /// <summary>

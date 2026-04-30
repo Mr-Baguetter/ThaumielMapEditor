@@ -32,7 +32,7 @@ namespace ThaumielMapEditor
         public override Version Version => new(0, 6, 1);
         public override Version RequiredApiVersion => LabApiProperties.CurrentVersion;
         public override LoadPriority Priority => LoadPriority.Medium;
-        public string HarmonyId => $"MrBaguetter_TME_{Guid.NewGuid()}";
+        public string HarmonyId { get; private set; } = string.Empty;
 
 #pragma warning disable CS8618
         public Harmony harmony;
@@ -53,6 +53,7 @@ namespace ThaumielMapEditor
             Config?.AudioPath = Path.Combine(PathManager.Configs.ToString(), "Thaumiel", "Audio");
             SaveConfig();
 
+            HarmonyId = $"MrBaguetter_TME_{Guid.NewGuid()}";
             harmony = new(HarmonyId);
             harmony.PatchAll();
         }

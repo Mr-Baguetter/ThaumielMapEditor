@@ -127,7 +127,7 @@ namespace ThaumielMapEditor.API.Conversion
                             dict["Color"] = unityColor;
                         }
                         else
-                            Debug.LogWarning($"Failed to parse color value: {color}");
+                            LogManager.Warn($"Failed to parse color value: {color}");
                     }
                     break;
 

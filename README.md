@@ -56,7 +56,7 @@ Thaumiel Map Editor (TME) is a Unity based map editor designed to help developer
 - **Unity powered editor interface** — Built directly in Unity
 - **Object spawning system** — Place a wide variety of typed objects onto your map from a structured spawn panel
 - **Client side object support** — Certain object types are spawned on the client only and do not affect server state
-- **Save & load maps** — Persist your work in a custom map formatt
+- **Save & load maps** — Persist your work in a custom map format
 
 ---
 
