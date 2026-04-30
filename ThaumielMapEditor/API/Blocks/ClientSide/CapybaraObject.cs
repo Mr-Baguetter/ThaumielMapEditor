@@ -15,88 +15,9 @@ using ThaumielMapEditor.Events.EventArgs.Handlers;
 
 namespace ThaumielMapEditor.API.Blocks.ClientSide
 {
-    public class CapybaraObject : ClientSideObjectBase
+    public class CapybaraObject : ClientObject
     {
         public string Name { get; set; } = string.Empty;
-        public static event Action<Vector3, CapybaraObject>? PositionUpdated;
-        public static event Action<Vector3, CapybaraObject>? ScaleUpdated;
-        public static event Action<Quaternion, CapybaraObject>? RotationUpdated;
-        
-        /// <inheritdoc/>
-        public override Quaternion Rotation
-        {
-            get;
-            set
-            {
-                if (field == value)
-                    return;
-
-                field = value;
-                RotationUpdated?.Invoke(value, this);
-                SyncToPlayers();
-            }
-        }
-
-        /// <inheritdoc/>
-        public override Vector3 Scale
-        {
-            get;
-            set
-            {
-                if (field == value)
-                    return;
-
-                field = value;
-                ScaleUpdated?.Invoke(value, this);
-                SyncToPlayers();
-            }
-        }
-
-        /// <inheritdoc/>
-        public override Vector3 Position
-        {
-            get;
-            set
-            {
-                if (field == value)
-                    return;
-
-                field = value;
-                PositionUpdated?.Invoke(value, this);
-                SyncToPlayers();
-            }
-        }
-
-        /// <inheritdoc/>
-        public override uint NetId { get; set; }
-
-        /// <inheritdoc/>
-        public override bool IsStatic
-        {
-            get;
-            set
-            {
-                if (field == value)
-                    return;
-
-                field = value;
-                SyncToPlayers();
-            }
-        }
-
-        /// <inheritdoc/>
-        public override byte MovementSmoothing
-        {
-            get;
-            set
-            {
-                if (field == value)
-                    return;
-
-                field = value;
-                SyncToPlayers();
-            }
-        }
 
         public bool CollisionsEnabled
         {
@@ -119,10 +40,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         public SchematicData? Schematic { get; set; }
 
         /// <inheritdoc/>
-        public override uint AssetId { get; set; }
-
-        /// <inheritdoc/>
-        public override ObjectType ObjectType { get; set; } = ObjectType.Capybara;
+        public override ObjectType ObjectType => ObjectType.Capybara;
 
         /// <inheritdoc/>
         public override void SpawnForPlayer(Player player)

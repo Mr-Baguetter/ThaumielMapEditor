@@ -61,13 +61,13 @@ namespace ThaumielMapEditor.Commands.Admin
                         PMERRoot root = PMERLoader.Load(file);
                         root.Name = filename;
                         SerializableSchematic schematic = await PMERConverter.ConvertSchematicAsync(root);
-                        string yaml = SchematicLoader.Serializer.Serialize(schematic);
+                        string yaml = Loader.Serializer.Serialize(schematic);
                         string outputPath = ThaumFileManager.Dir(["Schematics", $"{schematicName}.yml"]);
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
                         File.WriteAllText(outputPath, yaml);
 
                         LogManager.Info($"Conversion of '{schematicName}' completed successfully.");
-                        SchematicLoader.ReloadSchematics();
+                        Loader.ReloadSchematics();
                     }
                     catch (Exception e)
                     {

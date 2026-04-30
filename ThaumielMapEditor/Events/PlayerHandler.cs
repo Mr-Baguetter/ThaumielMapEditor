@@ -86,7 +86,7 @@ namespace ThaumielMapEditor.Events
 
             foreach (LODZone zone in zones)
             {
-                if (!SchematicLoader.SchematicLODZones.TryGetValue(zone, out var schematic))
+                if (!Loader.SchematicLODZones.TryGetValue(zone, out var schematic))
                     continue;
 
                 foreach (PrimitiveObject primitive in schematic.GetClientObject<PrimitiveObject>())
@@ -112,9 +112,9 @@ namespace ThaumielMapEditor.Events
                 return;
             }
 
-            foreach (SchematicData data in SchematicLoader.SpawnedSchematics)
+            foreach (SchematicData data in Loader.SpawnedSchematics)
             {
-                foreach (ClientSideObjectBase clientobj in data.SpawnedClientObjects)
+                foreach (ClientObject clientobj in data.SpawnedClientObjects)
                 {
                     if (!clientobj.SpawnedPlayers.Contains(player))
                         continue;
@@ -137,7 +137,7 @@ namespace ThaumielMapEditor.Events
                     return;
                 }
 
-                foreach (SchematicData data in SchematicLoader.SchematicsById.Values)
+                foreach (SchematicData data in Loader.SchematicsById.Values)
                 {
                     LogManager.Debug($"Spawning {data.FileName} for player {ev.Player.DisplayName}");
                     data.SyncWithPlayer(ev.Player);

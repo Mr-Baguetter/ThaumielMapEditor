@@ -1,9 +1,11 @@
-# Thaumiel Map Editor (TME)
+# Thaumiel Map Editor (``TME``)
 
 > [!WARNING]
-> This project is currently in early development. Expect bugs, missing features, and breaking changes.
+> **Este projeto atualmente se encontra em fase de desenvolvimento. Espere bugs, funcionalidades faltando ou até mesmo mudanças que quebram compatibilidade.**
 
-Thaumiel Map Editor (TME) is a Unity based map editor designed to help developers and designers create, edit, and manage game maps. TME provides an in editor interface for placing and configuring a wide range of game objects, from interactive elements and lighting to props and navigation aids.
+Thaumiel Map Editor é um editor de mapa baseado na Unity voltado a criação, edição e manutenção de mapas para o **SCP:SL**.
+
+O ``TME`` dispõe de uma interface de dentro do editor para colocar e configurar uma variedade de ``GameObjects``, de elementos interativos e luzes até props.
 
 ---
 
@@ -49,63 +51,62 @@ Thaumiel Map Editor (TME) is a Unity based map editor designed to help developer
 
 ---
 
-## Features
+## Funcionalidades
 
-> Features are actively being developed. The list below reflects what is currently implemented.
+> Novas implementações estão sendo ativamente desenvolvidas. A lista abaixo reflete apenas o que já foi adicionado.
 
-- **Unity powered editor interface** — Built directly in Unity
-- **Object spawning system** — Place a wide variety of typed objects onto your map from a structured spawn panel
-- **Client side object support** — Certain object types are spawned on the client only and do not affect server state
-- **Save & load maps** — Persist your work in a custom map formatt
+- **Interface de Edição Construida na Unity** - Edite e crie seu mapa por meio da Unity
+- **Sistema de Criação de Objetos** — Coloque uma vasta gama de objetos por meio de paines da Unity
+- **Suporte a Objetos ``Client-Side``** — Alguns objetos são apenas criados no cliente, resultando em ganhos de perfomance no servidor
+- **Salvamento e Carregamento de Mapas** — Faça seu mapa ser persistente de dentro do Servidor
 
 ---
 
-## Supported Object Types
+## ``GameObjects`` suportados
 
 > [!NOTE]
-> Objects marked as Client are spawned locally on the client and are not replicated to the server.
+>  Objetos marcados como ``Client`` são criados apenas no cliente e não são replicados no Servidor.
 
-TME supports spawning the following object types. 
+O ``TME`` suporta o spawn dos seguintes objetos:
 
-| Object Type | Scope |
+| Tipo | Escopo |
 |-|-|
-| Doors | Server |
-| Clutter | Server |
-| Interactables | Server |
-| Pickups | Server |
-| Lockers | Server |
-| Waypoints | Server |
-| Cameras | Server |
-| Targets | Server |
-| Teleporters | Server |
-| Primitives | Client |
-| Lights | Client |
-| Capybaras | Client |
+| Portas | ``Server`` |
+| Clutters | ``Server`` |
+| Interativos | ``Server`` |
+| Pickups | ``Server`` |
+| Armários | ``Server`` |
+| Waypoints | ``Server`` |
+| Cameras | ``Server`` |
+| Targets | ``Server`` |
+| Teletransportadores | ``Server`` |
+| Primitivos | ``Client`` |
+| Luzes | ``Client`` |
+| Capibaras | ``Client`` |
 
 ---
-## Usage & Commands
+## Uso & Comandos
 
-To view the full list of in-game console and admin commands, permissions, and aliases, please see our **[Commands Documentation](Commands.md)**.
+Para ver a lista completa de comandos, permissões, e apelidos de comandos, por favor cheque nossa **[Documentação de Comandos](Commands-PT-BR.md)**.
 
-## Installation
-
-### Prerequisites
+## Instalação
 
 > [!IMPORTANT]
-> Before getting started, make sure you have the following installed: [Unity Hub](https://unity.com/download)
+> Antes de começar, garanta que você tem o [Unity Hub](https://unity.com/download) instalado.
 
-### Getting Started
 
-1. Download the repository from here: https://www.github.com/Mr-Baguetter/ThaumielMapEditorUnityProject
+1. Baixe o repositório inteiro aqui: https://www.github.com/Mr-Baguetter/ThaumielMapEditorUnityProject
 
-2. Extract the downloaded file.
+2. Extraia os arquivos.
 
-3. Open the project in Unity Hub by clicking Add and selecting the extracted folder.
+3. Abra o projeto no [Unity Hub](https://unity.com/download) clicando em ``Add`` e selecionando a pasta extraída.
 
 ---
 
-Discord Community: https://discord.gg/N8qrNHf4s9
+Nosso Discord: https://discord.gg/N8qrNHf4s9
 
-Dependency Notices: [Click here](Dependencies.md) - (Dependencies.md)
+Aviso de dependências: [Dependencies.md](Dependencies.md)
 
-*Thaumiel Map Editor is a work in progress. Contributions, feedback, and bug reports are welcome.*
+*O Thaumiel Map Editor é uma "obra em andamento". Contribuições, feeebacks, e aviso sobre erros ou problemas são bem-vindos.*
+
+*Traduzido por [Unbistrackted](https://github.com/Unbistrackted).*

@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="SchematicLoader.cs" company="Thaumiel Team">
+// <copyright file="Loader.cs" company="Thaumiel Team">
 // Copyright (c) Thaumiel Team. All rights reserved.
 // Licensed under the GNU General Public License v3.0 (GPL-3.0).
 // </copyright>
@@ -37,7 +37,10 @@ using MapGeneration;
 
 namespace ThaumielMapEditor.API.Helpers
 {
-    public class SchematicLoader
+    [Obsolete($"{nameof(SchematicLoader)} has been renamed to {nameof(Loader)}. Please update your code to use {nameof(Loader)} instead. This will be removed in version 1.0.0")]
+    public class SchematicLoader : Loader;
+
+    public class Loader
     {
         /// <summary>
         /// Fired when a <see cref="SchematicData"/> is spawned.
@@ -116,6 +119,12 @@ namespace ThaumielMapEditor.API.Helpers
             .WithTypeConverter(new FloatTypeConverter())
             .Build();
 
+        /// <summary>
+        /// Cleans the <see cref="Loader"/> class.
+        /// </summary>
+        /// <remarks>
+        /// This is automatically called when the server is ready for players.
+        /// </remarks>
         public static void Cleanup()
         {
             MapsById.Clear();
@@ -123,7 +132,7 @@ namespace ThaumielMapEditor.API.Helpers
         }
 
         /// <summary>
-        /// Initializes the <see cref="SchematicLoader"/>
+        /// Initializes the <see cref="Loader"/>
         /// </summary>
         public static void Init()
         {
@@ -937,7 +946,7 @@ namespace ThaumielMapEditor.API.Helpers
                             serverprim.Object?.transform.SetParent(identity.transform, false);
 
                         serverprim.Name = serializable.Name;
-                        SetupCulling(serializable, serverprim, schematicData);
+                        SetupCulling(serializable, serverprim);
                         LogManager.Debug($"[SERVER] {serverprim.Name} - {serverprim.Color} - {serverprim.PrimitiveType} - {serverprim.PrimitiveFlags}");
                         return serverprim.NetId;
                     }
@@ -1000,7 +1009,7 @@ namespace ThaumielMapEditor.API.Helpers
                             serverprim.Object?.transform.SetParent(identity.transform, false);
 
                         serverprim.Name = serializable.Name;
-                        SetupCulling(serializable, serverprim, schematicData);
+                        SetupCulling(serializable, serverprim);
                         return serverprim.NetId;
                     }
                     else
@@ -1049,7 +1058,7 @@ namespace ThaumielMapEditor.API.Helpers
                             servercapy.Object?.transform.SetParent(identity.transform, false);
 
                         servercapy.Name = serializable.Name;
-                        SetupCulling(serializable, servercapy, schematicData);
+                        SetupCulling(serializable, servercapy);
                         return servercapy.NetId;
                     }
                     else
@@ -1100,7 +1109,7 @@ namespace ThaumielMapEditor.API.Helpers
                             serverlight.Object?.transform.SetParent(identity.transform, false);
 
                         serverlight.Name = serializable.Name;
-                        SetupCulling(serializable, serverlight, schematicData);
+                        SetupCulling(serializable, serverlight);
                         return serverlight.NetId;
                     }
                     else
@@ -1142,7 +1151,7 @@ namespace ThaumielMapEditor.API.Helpers
                     clutter.Type = clutter.GetValue<ClutterType>(serializable, "ClutterType");
                     clutter.SpawnObject(schematicData, serializable);
                     clutter.Name = serializable.Name;
-                    SetupCulling(serializable, clutter, schematicData);
+                    SetupCulling(serializable, clutter);
                     return clutter.NetId;
 
                 case ObjectType.Door:
@@ -1157,7 +1166,7 @@ namespace ThaumielMapEditor.API.Helpers
                     door.ParseValues(serializable);
                     door.SpawnObject(schematicData, serializable);
                     door.Name = serializable.Name;
-                    SetupCulling(serializable, door, schematicData);
+                    SetupCulling(serializable, door);
                     return door.NetId;
 
                 case ObjectType.TextToy:
@@ -1171,7 +1180,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     textToy.SpawnObject(schematicData, serializable);
                     textToy.Name = serializable.Name;
-                    SetupCulling(serializable, textToy, schematicData);
+                    SetupCulling(serializable, textToy);
                     return textToy.NetId;
 
                 case ObjectType.Workstation:
@@ -1185,7 +1194,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     workstation.SpawnObject(schematicData, serializable);
                     workstation.Name = serializable.Name;
-                    SetupCulling(serializable, workstation, schematicData);
+                    SetupCulling(serializable, workstation);
                     return workstation.NetId;
 
                 case ObjectType.Camera:
@@ -1199,7 +1208,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     camera.SpawnObject(schematicData, serializable);
                     camera.Name = serializable.Name;
-                    SetupCulling(serializable, camera, schematicData);
+                    SetupCulling(serializable, camera);
                     return camera.NetId;
 
                 case ObjectType.Interactable:
@@ -1213,7 +1222,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     interaction.SpawnObject(schematicData, serializable);
                     interaction.Name = serializable.Name;
-                    SetupCulling(serializable, interaction, schematicData);
+                    SetupCulling(serializable, interaction);
                     return interaction.NetId;
 
                 case ObjectType.Waypoint:
@@ -1227,7 +1236,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     waypoint.SpawnObject(schematicData, serializable);
                     waypoint.Name = serializable.Name;
-                    SetupCulling(serializable, waypoint, schematicData);
+                    SetupCulling(serializable, waypoint);
                     return waypoint.NetId;
 
                 case ObjectType.Locker:
@@ -1241,7 +1250,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     locker.SpawnObject(schematicData, serializable);
                     locker.Name = serializable.Name;
-                    SetupCulling(serializable, locker, schematicData);
+                    SetupCulling(serializable, locker);
                     return locker.NetId;
 
                 case ObjectType.Pickup:
@@ -1268,7 +1277,7 @@ namespace ThaumielMapEditor.API.Helpers
 
                     target.SpawnObject(schematicData, serializable);
                     target.Name = serializable.Name;
-                    SetupCulling(serializable, target, schematicData);
+                    SetupCulling(serializable, target);
                     return target.NetId;
 
                 case ObjectType.Teleporter:
@@ -1334,8 +1343,7 @@ namespace ThaumielMapEditor.API.Helpers
         /// </summary>
         /// <param name="serializable"></param>
         /// <param name="obj"></param>
-        /// <param name="schematic"></param>
-        public static void SetupCulling(SerializableObject serializable, ServerObject obj, SchematicData schematic)
+        public static void SetupCulling(SerializableObject serializable, ServerObject obj)
         {
             if (serializable.CullingSettings.Bounds != Vector3.zero)
             {
@@ -1351,7 +1359,7 @@ namespace ThaumielMapEditor.API.Helpers
         /// <param name="serializable"></param>
         /// <param name="obj"></param>
         /// <param name="schematic"></param>
-        public static void SetupCulling(SerializableObject serializable, ClientSideObjectBase obj, SchematicData schematic)
+        public static void SetupCulling(SerializableObject serializable, ClientObject obj, SchematicData schematic)
         {
             if (serializable.CullingSettings.Bounds != Vector3.zero)
             {

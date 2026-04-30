@@ -12,10 +12,10 @@ namespace ThaumielMapEditor.Events.EventArgs.Objects
 {
     public class DestroyedClientObjectEventArgs : System.EventArgs
     {
-        public ClientSideObjectBase Object { get; }
+        public ClientObject Object { get; }
         public Player Player { get; }
 
-        public DestroyedClientObjectEventArgs(ClientSideObjectBase @object, Player player)
+        public DestroyedClientObjectEventArgs(ClientObject @object, Player player)
         {
             Object = @object;
             Player = player;

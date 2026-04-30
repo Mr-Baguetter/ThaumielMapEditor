@@ -19,57 +19,9 @@ using UnityEngine;
 
 namespace ThaumielMapEditor.API.Blocks.ClientSide
 {
-    public class PrimitiveObject : ClientSideObjectBase
+    public class PrimitiveObject : ClientObject
     {
         public string Name { get; set; } = string.Empty;
-        public static event Action<Vector3, PrimitiveObject>? PositionUpdated;
-        public static event Action<Vector3, PrimitiveObject>? ScaleUpdated;
-        public static event Action<Quaternion, PrimitiveObject>? RotationUpdated;
-
-        /// <inheritdoc/>
-        public override Quaternion Rotation
-        {
-            get;
-            set
-            {
-                if (field == value)
-                    return;
-
-                field = value;
-                RotationUpdated?.Invoke(value, this);
-                SyncToPlayers();
-            }
-        }
-
-        /// <inheritdoc/>
-        public override Vector3 Scale
-        {
-            get;
-            set
-            {
-                if (field == value)
-                    return;
-
-                field = value;
-                ScaleUpdated?.Invoke(value, this);
-                SyncToPlayers();
-            }
-        }
-
-        /// <inheritdoc/>
-        public override Vector3 Position
-        {
-            get;
-            set
-            {
-                if (field == value)
-                    return;
-
-                field = value;
-                PositionUpdated?.Invoke(value, this);
-                SyncToPlayers();
-            }
-        }
 
         public Color Color
         {
@@ -110,45 +62,11 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             }
         }
 
-        /// <inheritdoc/>
-        public override uint NetId { get; set; }
-
-        /// <inheritdoc/>
-        public override bool IsStatic
-        {
-            get;
-            set
-            {
-                if (field == value)
-                    return;
-
-                field = value;
-                SyncToPlayers();
-            }
-        }
-
-        /// <inheritdoc/>
-        public override byte MovementSmoothing
-        {
-            get;
-            set
-            {
-                if (field == value)
-                    return;
-
-                field = value;
-                SyncToPlayers();
-            }
-        }
-
         public MeshCollider? ServerCollider { get; set; }
         public SchematicData? Schematic { get; set; }
 
         /// <inheritdoc/>
-        public override uint AssetId { get; set; }
-
-        /// <inheritdoc/>
-        public override ObjectType ObjectType { get; set; } = ObjectType.Primitive; 
+        public override ObjectType ObjectType => ObjectType.Primitive; 
 
         /// <inheritdoc/>
         public override void SpawnForPlayer(Player player)

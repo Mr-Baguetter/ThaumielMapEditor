@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="MapLoader.cs" company="Thaumiel Team">
+// <copyright file="MapParser.cs" company="Thaumiel Team">
 // Copyright (c) Thaumiel Team. All rights reserved.
 // Licensed under the GNU General Public License v3.0 (GPL-3.0).
 // </copyright>
@@ -13,7 +13,10 @@ using Random = UnityEngine.Random;
 
 namespace ThaumielMapEditor.API.Helpers
 {
-    public class MapLoader
+    [Obsolete($"{nameof(MapLoader)} has been renamed to {nameof(MapParser)}. Please update your code to use {nameof(MapParser)} instead. This will be removed in version 1.0.0")]
+    public class MapLoader : MapParser;
+
+    public class MapParser
     {
         /// <summary>
         /// Parses an input string and executes map load or unload operations based on the provided syntax.
@@ -109,14 +112,14 @@ namespace ThaumielMapEditor.API.Helpers
         /// </remarks>
         public static void LoadMap(string name)
         {
-            SerializableMap? map = SchematicLoader.LoadedMaps.FirstOrDefault(s => string.Equals(s.FileName, name, StringComparison.CurrentCultureIgnoreCase));
+            SerializableMap? map = Loader.LoadedMaps.FirstOrDefault(s => string.Equals(s.FileName, name, StringComparison.CurrentCultureIgnoreCase));
             if (map == null)
             {
                 LogManager.Warn($"Map name {name} is invalid!");
                 return;
             }
 
-            SchematicLoader.SpawnMap(map);
+            Loader.SpawnMap(map);
         }
 
         /// <summary>
@@ -129,14 +132,14 @@ namespace ThaumielMapEditor.API.Helpers
         /// </remarks>
         public static void UnloadMap(string name)
         {
-            MapData? map = SchematicLoader.SpawnedMaps.FirstOrDefault(s => string.Equals(s.FileName, name, StringComparison.CurrentCultureIgnoreCase));
+            MapData? map = Loader.SpawnedMaps.FirstOrDefault(s => string.Equals(s.FileName, name, StringComparison.CurrentCultureIgnoreCase));
             if (map == null)
             {
                 LogManager.Warn($"Map name {name} is invalid!");
                 return;
             }
 
-            SchematicLoader.DestroyMap(map);
+            Loader.DestroyMap(map);
         }
 
         /// <summary>
@@ -145,7 +148,7 @@ namespace ThaumielMapEditor.API.Helpers
         /// <param name="name">The map name to check.</param>
         /// <returns><see langword="true"/> if the specified map is loaded. Otherwise <see langword="false"/>.</returns>
         private static bool IsMapLoaded(string name)
-            => SchematicLoader.SpawnedMaps.Any(s => string.Equals(s.FileName, name, StringComparison.CurrentCultureIgnoreCase));
+            => Loader.SpawnedMaps.Any(s => string.Equals(s.FileName, name, StringComparison.CurrentCultureIgnoreCase));
 
         private static bool EvaluateCondition(string condition, string mapName)
         {

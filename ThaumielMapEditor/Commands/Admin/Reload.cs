@@ -31,7 +31,7 @@ namespace ThaumielMapEditor.Commands.Admin
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            SchematicLoader.ReloadSchematics();
+            Loader.ReloadSchematics();
             response = "Reloaded.";
             return true;
         }

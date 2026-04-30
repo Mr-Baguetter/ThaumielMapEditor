@@ -36,7 +36,7 @@ namespace ThaumielMapEditor.Commands.Admin
         {
             StringBuilder sb = new();
             sb.AppendLine();
-            foreach (KeyValuePair<string, SerializableSchematic> kvp in SchematicLoader.LoadedSchematics)
+            foreach (KeyValuePair<string, SerializableSchematic> kvp in Loader.LoadedSchematics)
                 sb.AppendLine($"- {kvp.Key}");
 
             response = sb.ToString();

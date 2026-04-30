@@ -42,12 +42,12 @@ namespace ThaumielMapEditor.Commands.Admin
 
             if (hasId)
             {
-                if (!SchematicLoader.SchematicsById.TryGetValue(id, out data) || data.Primitive == null)
+                if (!Loader.SchematicsById.TryGetValue(id, out data) || data.Primitive == null)
                 {
                     sb.AppendLine($"No schematic with id {id} was found.");
                     sb.AppendLine($"Available schematics:");
 
-                    foreach (KeyValuePair<uint, SchematicData> kvp in SchematicLoader.SchematicsById)
+                    foreach (KeyValuePair<uint, SchematicData> kvp in Loader.SchematicsById)
                     {
                         sb.AppendLine($"- [{kvp.Key}]: {kvp.Value.FileName}");
                     }

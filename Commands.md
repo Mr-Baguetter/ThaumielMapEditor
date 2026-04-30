@@ -10,7 +10,8 @@ This document outlines all available commands, subcommands, and required permiss
 
 ### Admin Subcommands
 
-These commands are executed via the main Remote Admin command (`tme <subcommand>`).
+> [!IMPORTANT]
+> These commands are executed via the main Remote Admin command `tme <subcommand>`.
 
 | Subcommand | Aliases | Arguments | Permission | Description |
 | :--- | :--- | :--- | :--- | :--- |

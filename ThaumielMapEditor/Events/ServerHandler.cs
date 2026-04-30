@@ -76,7 +76,7 @@ namespace ThaumielMapEditor.Events
         // TODO Test.
         private static void OnRoomLightChanged(RoomLightChangedEventArgs ev)
         {
-            foreach (SchematicData schematic in SchematicLoader.SpawnedSchematics.Where(s => s.Room != null && s.Room == ev.Room))
+            foreach (SchematicData schematic in Loader.SpawnedSchematics.Where(s => s.Room != null && s.Room == ev.Room))
             {
                 if (schematic.GetClientObject<LightObject>().IsEmpty() && schematic.GetServerObject<LightObjectServer>().IsEmpty())
                     continue;
@@ -112,12 +112,12 @@ namespace ThaumielMapEditor.Events
         private static void OnWaitingForPlayers()
         {
             PrefabHelper.RegisterPrefabs();
-            SchematicLoader.Cleanup();
+            Loader.Cleanup();
             MECHelper.TryRunCoroutine(Updater.CheckForUpdatesCoroutine(false), "WaitingForPlayers - Update Check");
 
             foreach (string name in Main.Instance.Config!.WaitingForPlayers)
             {
-                MapLoader.ParseInput(name);
+                MapParser.ParseInput(name);
             }
         }
 
@@ -125,7 +125,7 @@ namespace ThaumielMapEditor.Events
         {
             foreach (string name in Main.Instance.Config!.RoundStarted)
             {
-                MapLoader.ParseInput(name);
+                MapParser.ParseInput(name);
             }
         }
 
@@ -133,7 +133,7 @@ namespace ThaumielMapEditor.Events
         {
             foreach (string name in Main.Instance.Config!.DecontaminationStarted)
             {
-                MapLoader.ParseInput(name);
+                MapParser.ParseInput(name);
             }
 
             foreach (PlayerSpawnPoint point in PlayerSpawnPoint.Instances.Where(p => p.HasFlagFast(DisableFlags.Decontamination)))
@@ -146,7 +146,7 @@ namespace ThaumielMapEditor.Events
         {
             foreach (string name in Main.Instance.Config!.WarheadStarted)
             {
-                MapLoader.ParseInput(name);
+                MapParser.ParseInput(name);
             }
         }
 
@@ -154,7 +154,7 @@ namespace ThaumielMapEditor.Events
         {
             foreach (string name in Main.Instance.Config!.WarheadDetonated)
             {
-                MapLoader.ParseInput(name);
+                MapParser.ParseInput(name);
             }
 
             foreach (PlayerSpawnPoint point in PlayerSpawnPoint.Instances.Where(p => p.HasFlagFast(DisableFlags.WarheadDetonated)))
