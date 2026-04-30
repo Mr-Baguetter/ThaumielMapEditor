@@ -37,7 +37,7 @@ using MapGeneration;
 
 namespace ThaumielMapEditor.API.Helpers
 {
-    [Obsolete($"{nameof(SchematicLoader)} has been renamed to {nameof(Loader)}. Please update your code to use Loader instead. This will be removed in version 1.0.0")]
+    [Obsolete($"{nameof(SchematicLoader)} has been renamed to {nameof(Loader)}. Please update your code to use {nameof(Loader)} instead. This will be removed in version 1.0.0")]
     public class SchematicLoader : Loader;
 
     public class Loader
