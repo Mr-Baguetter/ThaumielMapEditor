@@ -91,7 +91,8 @@ def generate_markdown(commands, base_dir):
         f.write("\n---\n\n")
 
         f.write("### Admin Subcommands\n\n")
-        f.write("These commands are executed via the main Remote Admin command (`tme <subcommand>`).\n\n")
+        f.write("> [!IMPORTANT]\n")
+        f.write("> These commands are executed via the main Remote Admin command `tme <subcommand>`.\n\n")
         if commands["SubCommand"]:
             f.write("| Subcommand | Aliases | Arguments | Permission | Description |\n")
             f.write("| :--- | :--- | :--- | :--- | :--- |\n")
