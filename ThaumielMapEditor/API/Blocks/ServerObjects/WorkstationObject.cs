@@ -22,6 +22,8 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 {
     public class WorkstationObject : ServerObject
     {
+        public static Dictionary<WorkstationController, WorkstationObject> WorkstationCache = [];
+
         /// <summary>
         /// The instantiated <see cref="WorkstationController"/> that backs this server object.
         /// It will be null until <see cref="SpawnObject"/> successfully instantiates the prefab.
@@ -68,7 +70,14 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
 
             SetWorldTransform(schematic);
             NetworkServer.Spawn(workstationPrefab.gameObject);
+            WorkstationCache.Add(workstationPrefab, this);
             base.SpawnObject(schematic, serializable);
+        }
+
+        public override void DestroyObject(SchematicData schematic)
+        {
+            WorkstationCache.Remove(Base!);
+            base.DestroyObject(schematic);
         }
 
         public void ParseValues(SerializableObject serializable)
