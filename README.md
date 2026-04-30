@@ -5,6 +5,8 @@
 
 Thaumiel Map Editor (TME) is a Unity based map editor designed to help developers and designers create, edit, and manage game maps. TME provides an in editor interface for placing and configuring a wide range of game objects, from interactive elements and lighting to props and navigation aids.
 
+Our docs are available at: https://thaumiel.gitbook.io/tme-docs/
+
 ---
 
 <table align="center" style="width: 100%; max-width: 600px; border-collapse: separate; border-spacing: 15px;">
