@@ -30,24 +30,26 @@ namespace ThaumielMapEditor
 
         public string GithubToken { get; set; } = string.Empty;
         public string AudioPath { get; set; } = string.Empty;
-
+        
         [Description(
             "\n" +
             "# ------------------------------Map Loading Logic------------------------------\n" +
-            "# Below are the operators used to handle map loading randomization and batching.\n" +
+            "# This method parses input strings to load/unload maps using operators:\n" +
+            "# - || (Random): Loads exactly ONE random map from a list.\n" +
+            "# - && (Batch): Loads ALL maps specified in the line simultaneously.\n" +
             "# ----------------------------------------------------------------------------\n" +
             "# \n" +
-            "# Random Loading (||)\n" +
-            "# Use this to load exactly ONE random map from a provided list.\n" +
-            "# \n" +
-            "# - Load::MAPNAME||MAPNAME1\n" +
-            "#   Will load either MAPNAME or MAPNAME1, but not both.\n" +
-            "# \n" +
-            "# Batch Loading (&&)\n" +
-            "# Use this to load ALL maps specified in the line simultaneously.\n" +
-            "# \n" +
-            "# - Load::MAPNAME&&MAPNAME1\n" +
-            "#   Will load both MAPNAME and MAPNAME1 at the same time."
+            "# Supported syntax examples:\n" +
+            "#   Load::MapName\n" +
+            "#   Load::MapA||MapB\n" +
+            "#   Load::MapA&&MapB\n" +
+            "#   Unload::MapName\n" +
+            "#   Unload::MapA||MapB\n" +
+            "#   Unload::MapA&&MapB\n" +
+            "#   LoadIf::MapName::IsLoaded::ConditionMap\n" +
+            "#   LoadIf::MapName::IsNotLoaded::ConditionMap\n" +
+            "#   UnloadIf::MapName::IsLoaded::ConditionMap\n" +
+            "#   UnloadIf::MapName::IsNotLoaded::ConditionMap\n"
         )]
         public List<string> WaitingForPlayers { get; set; } = [];
         public List<string> RoundStarted { get; set; } = [];
