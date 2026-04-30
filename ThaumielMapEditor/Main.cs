@@ -29,7 +29,7 @@ namespace ThaumielMapEditor
         public override string Name => "Thaumiel Map Editor";
         public override string Description => ":3";
         public override string Author => "Mr. Baguetter";
-        public override Version Version => new(0, 6, 1);
+        public override Version Version => new(0, 6, 2);
         public override Version RequiredApiVersion => LabApiProperties.CurrentVersion;
         public override LoadPriority Priority => LoadPriority.Medium;
         public string HarmonyId { get; private set; } = string.Empty;
@@ -49,10 +49,13 @@ namespace ThaumielMapEditor
             ServerHandler.Register();
             PrimitiveHandler.Register();
 
-            ThaumFileManager.TryCreateDirectory("Audio");
-            Config?.AudioPath = Path.Combine(PathManager.Configs.ToString(), "Thaumiel", "Audio");
-            SaveConfig();
-
+            if (string.IsNullOrEmpty(Config?.AudioPath))
+            {
+                ThaumFileManager.TryCreateDirectory("Audio");
+                Config?.AudioPath = Path.Combine(PathManager.Configs.ToString(), "Thaumiel", "Audio");
+                SaveConfig();
+            }
+            
             HarmonyId = $"MrBaguetter_TME_{Guid.NewGuid()}";
             harmony = new(HarmonyId);
             harmony.PatchAll();

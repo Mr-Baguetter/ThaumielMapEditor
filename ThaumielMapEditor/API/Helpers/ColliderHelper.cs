@@ -88,10 +88,7 @@ namespace ThaumielMapEditor.API.Helpers
         public static void DisableColliders(ClientObject clientObject)
         {
             if (clientObject.ServerColliders.IsEmpty())
-            {
-                LogManager.Warn($"Failed to disable colliders for object {clientObject.AssetId} - {clientObject.ObjectType} there are no colliders");
                 return;
-            }
 
             foreach (Collider collider in clientObject.ServerColliders)
             {
@@ -220,19 +217,17 @@ namespace ThaumielMapEditor.API.Helpers
             collider.transform.localScale = new Vector3(Math.Abs(primitive.Scale.x), Math.Abs(primitive.Scale.y), Math.Abs(primitive.Scale.z));
 
             MeshCollider mesh = collider.AddComponent<MeshCollider>();
-            mesh.sharedMesh = AdminToys.PrimitiveObjectToy.PrimitiveTypeToMesh[primitive.PrimitiveType];
+            mesh.sharedMesh = PrimitiveObjectToy.PrimitiveTypeToMesh[primitive.PrimitiveType];
 
             if (mesh != null)
             {
                 primitive.ServerCollider = mesh;
                 if (!SchematicColliders.TryGetValue(primitive.Schematic, out var value))
-                {
-                    value = [];
-                    SchematicColliders.Add(primitive.Schematic, value);
-                }
+                    SchematicColliders.Add(primitive.Schematic, []);
 
                 value.Add(mesh);
                 SchematicColliders[primitive.Schematic] = value;
+                LogManager.Debug($"Created collider for primitive {primitive.Name} with type {primitive.PrimitiveType} at {collider.transform.position}.");
             }
             else
             {

@@ -1012,6 +1012,7 @@ namespace ThaumielMapEditor.API.Helpers
                         }
 
                         SetupCulling(serializable, primitive, schematicData);
+                        ColliderHelper.CreateCollisionMesh(primitive);
                         return primitive.NetId;
                     }
 
