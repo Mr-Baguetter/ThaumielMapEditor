@@ -63,7 +63,7 @@ namespace ThaumielMapEditor.API.Helpers
                 try
                 {
                     string content = File.ReadAllText(path);
-                    onComplete?.Invoke(content);
+                    MainThreadDispatcher.Dispatch(() => onComplete?.Invoke(content));
                 }
                 catch (Exception ex)
                 {

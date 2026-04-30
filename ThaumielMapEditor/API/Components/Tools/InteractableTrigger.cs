@@ -189,6 +189,9 @@ namespace ThaumielMapEditor.API.Components.Tools
 
         private void HandleEffect(InteractableClasses classes, Player player)
         {
+            if (!PlayerEffectCache.ContainsKey(player))
+                PlayerEffectCache[player] = [];
+
             foreach (GiveEffect give in classes.GiveEffect)
             {
                 if (!player.TryGetEffect(give.Effect.ToString(), out var effectBase))

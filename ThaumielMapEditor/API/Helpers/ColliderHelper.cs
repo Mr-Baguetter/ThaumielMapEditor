@@ -29,6 +29,9 @@ namespace ThaumielMapEditor.API.Helpers
         /// <param name="schematic">The <see cref="SchematicData"/> that the colliders will be parented to.</param>
         public static void CreateClientObjectColliders(ClientObject clientObject, SchematicData schematic)
         {
+            if (!SchematicColliders.ContainsKey(schematic))
+                SchematicColliders.Add(schematic, []);
+
             List<Collider> colliders = [];
             GameObject? prefab = GetPrefabForClientObject(clientObject);
 
@@ -73,9 +76,9 @@ namespace ThaumielMapEditor.API.Helpers
                     LogManager.Warn($"Unhandled collider type '{col.GetType().Name}' on prefab '{prefab.name}', skipping.");
                     UnityEngine.Object.Destroy(colGo);
                 }
-
-                clientObject.ServerColliders = colliders.ToArray();
             }
+
+            clientObject.ServerColliders = colliders.ToArray();
         }
 
         /// <summary>
@@ -85,10 +88,7 @@ namespace ThaumielMapEditor.API.Helpers
         public static void DisableColliders(ClientObject clientObject)
         {
             if (clientObject.ServerColliders.IsEmpty())
-            {
-                LogManager.Warn($"Failed to disable colliders for object {clientObject.AssetId} - {clientObject.ObjectType} there are no colliders");
                 return;
-            }
 
             foreach (Collider collider in clientObject.ServerColliders)
             {
@@ -217,19 +217,17 @@ namespace ThaumielMapEditor.API.Helpers
             collider.transform.localScale = new Vector3(Math.Abs(primitive.Scale.x), Math.Abs(primitive.Scale.y), Math.Abs(primitive.Scale.z));
 
             MeshCollider mesh = collider.AddComponent<MeshCollider>();
-            mesh.sharedMesh = AdminToys.PrimitiveObjectToy.PrimitiveTypeToMesh[primitive.PrimitiveType];
+            mesh.sharedMesh = PrimitiveObjectToy.PrimitiveTypeToMesh[primitive.PrimitiveType];
 
             if (mesh != null)
             {
                 primitive.ServerCollider = mesh;
                 if (!SchematicColliders.TryGetValue(primitive.Schematic, out var value))
-                {
-                    value = [];
-                    SchematicColliders.Add(primitive.Schematic, value);
-                }
+                    SchematicColliders.Add(primitive.Schematic, []);
 
                 value.Add(mesh);
                 SchematicColliders[primitive.Schematic] = value;
+                LogManager.Debug($"Created collider for primitive {primitive.Name} with type {primitive.PrimitiveType} at {collider.transform.position}.");
             }
             else
             {

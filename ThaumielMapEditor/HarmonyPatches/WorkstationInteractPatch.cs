@@ -5,12 +5,9 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System.Linq;
 using HarmonyLib;
 using InventorySystem.Items.Firearms.Attachments;
 using ThaumielMapEditor.API.Blocks.ServerObjects;
-using ThaumielMapEditor.API.Data;
-using ThaumielMapEditor.API.Helpers;
 
 namespace ThaumielMapEditor.HarmonyPatches
 {
@@ -21,29 +18,19 @@ namespace ThaumielMapEditor.HarmonyPatches
         public static bool Prefix(WorkstationController __instance, ReferenceHub ply, byte colliderId)
         {
             if (ply == null)
-            {
                 return true;
-            }
 
-            foreach (SchematicData schematic in Loader.SpawnedSchematics.Where(s => !s.GetServerObject<WorkstationObject>().IsEmpty()))
+            if (!WorkstationObject.WorkstationCache.TryGetValue(__instance, out var workstation))
+                return true;
+
+            if (!workstation.AllowInteractions)
+                return false;
+
+            if (workstation.AllowedRoles != null && workstation.AllowedRoles.Count > 0)
             {
-                foreach (WorkstationObject workstation in schematic.GetServerObject<WorkstationObject>())
+                if (!workstation.AllowedRoles.Contains(ply.roleManager.CurrentRole.RoleTypeId))
                 {
-                    if (workstation.Base == __instance)
-                    {
-                        if (!workstation.AllowInteractions)
-                        {
-                            return false;
-                        }
-
-                        if (workstation.AllowedRoles != null && workstation.AllowedRoles.Count > 0)
-                        {
-                            if (!workstation.AllowedRoles.Contains(ply.roleManager.CurrentRole.RoleTypeId))
-                            {
-                                return false;
-                            }
-                        }
-                    }
+                    return false;
                 }
             }
 
