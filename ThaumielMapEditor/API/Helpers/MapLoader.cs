@@ -13,7 +13,10 @@ using Random = UnityEngine.Random;
 
 namespace ThaumielMapEditor.API.Helpers
 {
-    public class MapLoader
+    [Obsolete($"{nameof(MapLoader)} has been renamed to {nameof(MapParser)}. Please update your code to use {nameof(MapParser)} instead. This will be removed in version 1.0.0")]
+    public class MapLoader : MapParser;
+
+    public class MapParser
     {
         /// <summary>
         /// Parses an input string and executes map load or unload operations based on the provided syntax.

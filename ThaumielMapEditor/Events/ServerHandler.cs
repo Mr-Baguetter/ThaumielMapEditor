@@ -117,7 +117,7 @@ namespace ThaumielMapEditor.Events
 
             foreach (string name in Main.Instance.Config!.WaitingForPlayers)
             {
-                MapLoader.ParseInput(name);
+                MapParser.ParseInput(name);
             }
         }
 
@@ -125,7 +125,7 @@ namespace ThaumielMapEditor.Events
         {
             foreach (string name in Main.Instance.Config!.RoundStarted)
             {
-                MapLoader.ParseInput(name);
+                MapParser.ParseInput(name);
             }
         }
 
@@ -133,7 +133,7 @@ namespace ThaumielMapEditor.Events
         {
             foreach (string name in Main.Instance.Config!.DecontaminationStarted)
             {
-                MapLoader.ParseInput(name);
+                MapParser.ParseInput(name);
             }
 
             foreach (PlayerSpawnPoint point in PlayerSpawnPoint.Instances.Where(p => p.HasFlagFast(DisableFlags.Decontamination)))
@@ -146,7 +146,7 @@ namespace ThaumielMapEditor.Events
         {
             foreach (string name in Main.Instance.Config!.WarheadStarted)
             {
-                MapLoader.ParseInput(name);
+                MapParser.ParseInput(name);
             }
         }
 
@@ -154,7 +154,7 @@ namespace ThaumielMapEditor.Events
         {
             foreach (string name in Main.Instance.Config!.WarheadDetonated)
             {
-                MapLoader.ParseInput(name);
+                MapParser.ParseInput(name);
             }
 
             foreach (PlayerSpawnPoint point in PlayerSpawnPoint.Instances.Where(p => p.HasFlagFast(DisableFlags.WarheadDetonated)))
