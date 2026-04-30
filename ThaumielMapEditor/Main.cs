@@ -43,7 +43,7 @@ namespace ThaumielMapEditor
         {
             Instance = this;
             
-            SchematicLoader.Init();
+            Loader.Init();
 
             PlayerHandler.Register();
             ServerHandler.Register();

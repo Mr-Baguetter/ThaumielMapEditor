@@ -20,13 +20,13 @@ namespace ThaumielMapEditor.API.Extensions
         /// Gets all the spawned maps in this <see cref="Room"/>.
         /// </summary>
         public static IEnumerable<MapData> GetMaps(this Room room) =>
-            SchematicLoader.SpawnedMaps.Where(m => m.Room != null && m.Room == room);
+            Loader.SpawnedMaps.Where(m => m.Room != null && m.Room == room);
 
         /// <summary>
         /// Gets all the spawned schematics in this <see cref="Room"/>.
         /// </summary>
         public static IEnumerable<SchematicData> GetSchematics(this Room room)
-            => SchematicLoader.SchematicsById.Values.Where(s => s.Room != null && s.Room == room);
+            => Loader.SchematicsById.Values.Where(s => s.Room != null && s.Room == room);
 
         /// <summary>
         /// Gets the closest <see cref="Room"/> to the <see cref="Vector3"/> <paramref name="pos"/>

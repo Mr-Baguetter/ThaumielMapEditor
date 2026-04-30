@@ -41,20 +41,20 @@ namespace ThaumielMapEditor.Commands.Admin
                 return false;
             }
 
-            if (!SchematicLoader.SchematicsById.TryGetValue(id, out var data))
+            if (!Loader.SchematicsById.TryGetValue(id, out var data))
             {
                 StringBuilder sb = new();
                 sb.AppendLine();
                 sb.AppendLine($"No schematic with id {arguments.At(0)} was found.");
                 sb.AppendLine($"Available schematics:");
-                foreach (KeyValuePair<uint, SchematicData> kvp in SchematicLoader.SchematicsById)
+                foreach (KeyValuePair<uint, SchematicData> kvp in Loader.SchematicsById)
                     sb.AppendLine($"- [{kvp.Key}]: {kvp.Value.FileName}");
 
                 response = sb.ToString();
                 return false;
             }
 
-            SchematicLoader.DestroySchematic(data);
+            Loader.DestroySchematic(data);
             response = $"Destroyed schematic {arguments.At(0)} for {count} players";
             return true;
         }

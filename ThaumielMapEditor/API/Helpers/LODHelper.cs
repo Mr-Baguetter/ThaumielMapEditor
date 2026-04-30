@@ -55,7 +55,7 @@ namespace ThaumielMapEditor.API.Helpers
                 lodZone.Init(schematic, data.Primitives, data.Index);
 
                 lodData.Add(data);
-                SchematicLoader.SchematicLODZones.Add(lodZone, schematic);
+                Loader.SchematicLODZones.Add(lodZone, schematic);
             }
 
             schematic.LODZones = lodData;

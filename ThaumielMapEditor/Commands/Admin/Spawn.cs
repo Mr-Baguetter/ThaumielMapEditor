@@ -38,7 +38,7 @@ namespace ThaumielMapEditor.Commands.Admin
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            if (!SchematicLoader.LoadedSchematics.TryGetValue(arguments.At(0), out SerializableSchematic schematic))
+            if (!Loader.LoadedSchematics.TryGetValue(arguments.At(0), out SerializableSchematic schematic))
             {
                 response = $"Schematic '{arguments.At(0)}' not found.";
                 return false;
@@ -83,7 +83,7 @@ namespace ThaumielMapEditor.Commands.Admin
                 position = hit.point;
             }
 
-            SchematicData data = SchematicLoader.SpawnSchematic(schematic, position);
+            SchematicData data = Loader.SpawnSchematic(schematic, position);
             StringBuilder sb = new();
             sb.AppendLine();
             sb.AppendLine($"Spawning schematic '{schematic.FileName}'...");

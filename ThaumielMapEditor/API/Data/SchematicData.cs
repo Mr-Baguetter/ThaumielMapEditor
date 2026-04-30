@@ -180,9 +180,9 @@ namespace ThaumielMapEditor.API.Data
         {
             SchematicHandler.OnSchematicDestroyed(new(this));
 
-            foreach (KeyValuePair<LODZone, SchematicData> kvp in SchematicLoader.SchematicLODZones.Where(s => s.Value == this).ToArray())
+            foreach (KeyValuePair<LODZone, SchematicData> kvp in Loader.SchematicLODZones.Where(s => s.Value == this).ToArray())
             {
-                SchematicLoader.SchematicLODZones.Remove(kvp.Key);
+                Loader.SchematicLODZones.Remove(kvp.Key);
             }
 
             foreach (ClientObject clientobj in SpawnedClientObjects.ToArray())

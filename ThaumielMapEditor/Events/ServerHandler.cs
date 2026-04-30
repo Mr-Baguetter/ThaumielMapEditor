@@ -76,7 +76,7 @@ namespace ThaumielMapEditor.Events
         // TODO Test.
         private static void OnRoomLightChanged(RoomLightChangedEventArgs ev)
         {
-            foreach (SchematicData schematic in SchematicLoader.SpawnedSchematics.Where(s => s.Room != null && s.Room == ev.Room))
+            foreach (SchematicData schematic in Loader.SpawnedSchematics.Where(s => s.Room != null && s.Room == ev.Room))
             {
                 if (schematic.GetClientObject<LightObject>().IsEmpty() && schematic.GetServerObject<LightObjectServer>().IsEmpty())
                     continue;
@@ -112,7 +112,7 @@ namespace ThaumielMapEditor.Events
         private static void OnWaitingForPlayers()
         {
             PrefabHelper.RegisterPrefabs();
-            SchematicLoader.Cleanup();
+            Loader.Cleanup();
             MECHelper.TryRunCoroutine(Updater.CheckForUpdatesCoroutine(false), "WaitingForPlayers - Update Check");
 
             foreach (string name in Main.Instance.Config!.WaitingForPlayers)

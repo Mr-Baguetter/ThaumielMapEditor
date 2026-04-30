@@ -17,12 +17,12 @@ namespace ThaumielMapEditor.Events
     {
         public static void Register()
         {
-            SchematicLoader.SchematicSpawned += OnSchematicSpawned;
+            Loader.SchematicSpawned += OnSchematicSpawned;
         }
 
         public static void Unregister()
         {
-            SchematicLoader.SchematicSpawned -= OnSchematicSpawned;
+            Loader.SchematicSpawned -= OnSchematicSpawned;
         }
 
         private static void OnSchematicSpawned(SchematicData schematic)

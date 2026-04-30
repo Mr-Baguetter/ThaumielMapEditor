@@ -37,7 +37,7 @@ namespace ThaumielMapEditor.Commands.Admin
             StringBuilder sb = new();
             sb.AppendLine();
             sb.AppendLine($"Available schematics:");
-            foreach (KeyValuePair<uint, SchematicData> kvp in SchematicLoader.SchematicsById)
+            foreach (KeyValuePair<uint, SchematicData> kvp in Loader.SchematicsById)
                 sb.AppendLine($"- [{kvp.Key}]: {kvp.Value.FileName}");
 
             response = sb.ToString();

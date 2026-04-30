@@ -51,13 +51,13 @@ namespace ThaumielMapEditor.Commands.Admin
 
             map.Room = player.Room;
             map.FileName = arguments.At(0);
-            foreach (SchematicData schematic in SchematicLoader.SpawnedSchematics)
+            foreach (SchematicData schematic in Loader.SpawnedSchematics)
             {
                 Vector3 pos = player.Room.LocalPosition(schematic.Position);
                 map.Schematics.Add(new() { LocalPosition = pos, SchematicName = schematic.FileName});
             }
 
-            SchematicLoader.SaveMap(map);
+            Loader.SaveMap(map);
             response = $"Saved map {arguments.At(0)}.";
             return true;
         }
