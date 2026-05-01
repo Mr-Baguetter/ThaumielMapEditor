@@ -112,7 +112,7 @@ namespace ThaumielMapEditor.API.Helpers
         /// </remarks>
         public static void LoadMap(string name)
         {
-            if (!Loader.LoadedMapsDic.TryGetValue(name, out var map))
+            if (!Loader.LoadedMaps.TryGetValue(name, out var map))
             {
                 LogManager.Warn($"Map name {name} is invalid!");
                 return;
