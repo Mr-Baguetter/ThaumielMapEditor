@@ -261,10 +261,7 @@ namespace ThaumielMapEditor.API.Helpers
 
         public static SerializableSchematic? GetSchematicByName(string name)
         {
-            SerializableSchematic? schematic = LoadedSchematics.FirstOrDefault(s => s.Key == name).Value;
-            if (schematic == null)
-                return null;
-
+            LoadedSchematics.TryGetValue(name, out var schematic);
             return schematic;
         }
 

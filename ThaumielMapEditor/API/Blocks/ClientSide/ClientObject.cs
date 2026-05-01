@@ -52,7 +52,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             internal set
             {
                 field = value;
-                SetParent(value);
+
+                if (Spawned)
+                    SetParent(value);
             }
         }
 

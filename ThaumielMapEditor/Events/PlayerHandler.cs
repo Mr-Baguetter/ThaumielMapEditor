@@ -35,7 +35,7 @@ namespace ThaumielMapEditor.Events
             PlayerEvents.Joined -= OnPlayerJoined;
             PlayerEvents.ChangedSpectator -= OnPlayerChangedSpectator;
             PlayerEvents.Spawned -= PlayerSpawnPoint.OnPlayerSpawned;
-            Scp079Events.ChangedCamera += OnScp079ChangedCamera;
+            Scp079Events.ChangedCamera -= OnScp079ChangedCamera;
             ReferenceHub.OnBeforePlayerDestroyed -= OnPlayerLeft;
         }
 
