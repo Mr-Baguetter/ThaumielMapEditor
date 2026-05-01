@@ -177,10 +177,23 @@ namespace ThaumielMapEditor.API.Helpers
 
                 try
                 {
-                    SerializableSchematic schematic = Deserializer.Deserialize<SerializableSchematic>(File.ReadAllText(path));
-                    schematic.FileName = name;
-                    LoadedSchematics[schematic.FileName] = schematic;
-                    LogManager.Debug($"Loaded schematic {name}");
+                    if (Main.Instance.Config.ReadFilesInBackground)
+                    {
+                        ThaumFileManager.ReadFileInBackground(path, (value) => 
+                        {
+                            SerializableSchematic schematic = Deserializer.Deserialize<SerializableSchematic>(value);
+                            schematic.FileName = name;
+                            LoadedSchematics[schematic.FileName] = schematic;
+                            LogManager.Debug($"Loaded schematic {name} on background thread");
+                        });
+                    }
+                    else
+                    {
+                        SerializableSchematic schematic = Deserializer.Deserialize<SerializableSchematic>(File.ReadAllText(path));
+                        schematic.FileName = name;
+                        LoadedSchematics[schematic.FileName] = schematic;
+                        LogManager.Debug($"Loaded schematic {name} on main thread");
+                    }
                 }
                 catch (YamlException yamlex)
                 {
@@ -209,10 +222,23 @@ namespace ThaumielMapEditor.API.Helpers
 
                 try
                 {
-                    SerializableMap map = Deserializer.Deserialize<SerializableMap>(File.ReadAllText(path));
-                    map.FileName = name;
-                    LoadedMaps.Add(map);
-                    LogManager.Debug($"Loaded map {name}");
+                    if (Main.Instance.Config.ReadFilesInBackground)
+                    {
+                        ThaumFileManager.ReadFileInBackground(path, (value) => 
+                        {
+                            SerializableMap map = Deserializer.Deserialize<SerializableMap>(value);
+                            map.FileName = name;
+                            LoadedMaps.Add(map);
+                            LogManager.Debug($"Loaded map {name} on background thread");
+                        });
+                    }
+                    else
+                    {
+                        SerializableMap map = Deserializer.Deserialize<SerializableMap>(File.ReadAllText(path));
+                        map.FileName = name;
+                        LoadedMaps.Add(map);
+                        LogManager.Debug($"Loaded map {name} on main thread");
+                    }
                 }
                 catch (YamlException yamlex)
                 {

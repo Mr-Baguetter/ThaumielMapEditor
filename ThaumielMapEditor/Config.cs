@@ -25,6 +25,9 @@ namespace ThaumielMapEditor
         public bool EnableCreditTags { get; set; } = true;
         public bool EnableServerTracking { get; set; } = true;
 
+        [Description("If set to true schematic and map files will be read on a background thread. This is for testing currently.")]
+        public bool ReadFilesInBackground { get; set; } = true;
+
         [Description("The delay for the DoorLink coroutine (In seconds) if 0 it will run every frame.")]
         public float DoorPollingDelay { get; set; } = 0.1f;
 
