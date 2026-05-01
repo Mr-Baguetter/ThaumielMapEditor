@@ -36,7 +36,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         /// <summary>
         /// Gets a value indicating whether this <see cref="ClientObject"/> has been spawned for any players.
         /// </summary>
-        public bool Spawned { get; internal set; } = false;
+        public bool Spawned => !SpawnedPlayers.IsEmpty();
 
         /// <summary>
         /// Gets the object id from the <see cref="SerializableObject"/> this <see cref="ClientObject"/> instance was generated from.
@@ -49,10 +49,12 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         public int ParentId
         {
             get;
-            internal set
+            set
             {
                 field = value;
-                SetParent(value);
+
+                if (Spawned)
+                    SetParent(value);
             }
         }
 
@@ -230,7 +232,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         /// <param name="parentId">The <see cref="NetworkBehaviour.netId"/> of the parent</param>
         public void SetParent(int parentId)
         {
-            foreach (Player player in Player.ReadyList)
+            foreach (Player player in SpawnedPlayers)
             {
                 player.SendFakeRPC(NetId, typeof(AdminToyBase), nameof(AdminToyBase.RpcChangeParent), 0, parentId);
 
@@ -253,6 +255,14 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         /// <returns>The value associated with the key, converted to <typeparamref name="T"/>.</returns>
         public T GetValue<T>(SerializableObject serializable, string key) =>
             serializable.Values.GetConvertValue<T>(key);
+
+        /// <summary>
+        /// Checks if this object is spawned for the specified <see cref="Player"/>.
+        /// </summary>
+        /// <param name="player">The <see cref="Player"/> to check</param>
+        /// <returns><see langword="true"/> if <see cref="SpawnedPlayers"/> contains the player else returns false.</returns>
+        public bool IsSpawnedForPlayer(Player player)
+            => SpawnedPlayers.Contains(player);
 
         /// <summary>
         /// Hides this object for the specified player.
@@ -316,6 +326,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         /// </summary>
         public void SyncToPlayers()
         {
+            if (!Spawned)
+                return;
+
             foreach (Player player in SpawnedPlayers)
             {
                 if (player.IsHost)
@@ -332,6 +345,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         /// <param name="player">The <see cref="Player"/> to be synced.</param>
         public void SyncToPlayer(Player player)
         {
+            if (!Spawned)
+                return;
+
             if (player.IsHost)
                 return;
 
@@ -345,6 +361,9 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         /// <param name="filter">The filter.</param>
         public void SyncToPlayer(Func<Player, bool> filter)
         {
+            if (!Spawned)
+                return;
+
             foreach (Player player in SpawnedPlayers)
             {
                 if (player.IsHost)

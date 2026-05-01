@@ -191,27 +191,20 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 return;
             }
 
-            GameObject doorPrefab = UnityEngine.Object.Instantiate(Base).gameObject;
-            NetworkServer.UnSpawn(doorPrefab);
+            DoorVariant doorPrefab = UnityEngine.Object.Instantiate(Base);
+            NetworkServer.UnSpawn(doorPrefab.gameObject);
             if (doorPrefab.TryGetComponent<WallableSmallNodeRoomConnector>(out var con) && DoorType == DoorType.Hcz)
                 con.Network_syncBitmask = 3;
 
             if (doorPrefab.TryGetComponent(out DoorRandomInitialStateExtension doorRandomInitialStateExtension))
                 UnityEngine.Object.Destroy(doorRandomInitialStateExtension);
 
-            Object = doorPrefab;
+            Object = doorPrefab.gameObject;
             NetId = Base.netId;
-            SetWorldTransform(schematic);
+            SetWorldTransform(schematic);            
             ApplyProperties(doorPrefab);
-            NetworkServer.Spawn(doorPrefab);
-            Timing.CallDelayed(Timing.WaitForOneFrame, () =>
-            {
-                IsOpen = !IsOpen;
-                Timing.CallDelayed(Timing.WaitForOneFrame, () =>
-                {
-                    IsOpen = !IsOpen;
-                });
-            });
+            NetworkServer.Spawn(Object);
+
             base.SpawnObject(schematic, serializable);
         }
 
@@ -224,27 +217,19 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
                 return;
             }
 
-            GameObject doorPrefab = UnityEngine.Object.Instantiate(Base).gameObject;
-            NetworkServer.UnSpawn(doorPrefab);
+            DoorVariant doorPrefab = UnityEngine.Object.Instantiate(Base);
+            NetworkServer.UnSpawn(doorPrefab.gameObject);
             if (doorPrefab.TryGetComponent<WallableSmallNodeRoomConnector>(out var con) && DoorType == DoorType.Hcz)
                 con.Network_syncBitmask = 3;
 
             if (doorPrefab.TryGetComponent(out DoorRandomInitialStateExtension doorRandomInitialStateExtension))
                 UnityEngine.Object.Destroy(doorRandomInitialStateExtension);
 
-            Object = doorPrefab;
+            Object = doorPrefab.gameObject;
             NetId = Base.netId;
             SetWorldTransform(schematic);
             ApplyProperties(doorPrefab);
-            NetworkServer.Spawn(doorPrefab);
-            Timing.CallDelayed(Timing.WaitForOneFrame, () =>
-            {
-                IsOpen = !IsOpen;
-                Timing.CallDelayed(Timing.WaitForOneFrame, () =>
-                {
-                    IsOpen = !IsOpen;
-                });
-            });
+            NetworkServer.Spawn(Object);
 
             ObjectHandler.OnServerObjectSpawned(new(this));
             SpawnedObjects.Add(this);
@@ -256,12 +241,9 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
         /// This includes health, lock state, open state, and permissions.
         /// Called internally during <see cref="SpawnObject(SchematicData, SerializableObject)"/>.
         /// </summary>
-        /// <param name="prefab">The door prefab <see cref="GameObject"/> to apply properties to.</param>
-        public void ApplyProperties(GameObject prefab)
+        /// <param name="door">The <see cref="DoorVariant"/> to apply properties to.</param>
+        public void ApplyProperties(DoorVariant door)
         {
-            if (!prefab.TryGetComponent<DoorVariant>(out var door))
-                return;
-
             if (door is BreakableDoor breakable)
             {
                 breakable.MaxHealth = MaxHealth;
@@ -271,6 +253,15 @@ namespace ThaumielMapEditor.API.Blocks.ServerObjects
             door.NetworkTargetState = IsOpen;
             door.ServerChangeLock(DoorLockReason.SpecialDoorFeature, IsLocked);
             door.RequiredPermissions = new(Permissions, RequireAllPermissions, Bypass2176);
+
+            Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+            {
+                IsOpen = !IsOpen;
+                Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+                {
+                    IsOpen = !IsOpen;
+                });
+            });
         }
 
         /// <summary>

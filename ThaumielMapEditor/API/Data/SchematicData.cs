@@ -159,7 +159,7 @@ namespace ThaumielMapEditor.API.Data
         /// <summary>
         /// Gets all of the <see cref="SpawnedServerObjects"/> that have a <see cref="NetworkIdentity"/> as a component.
         /// </summary>
-        public IReadOnlyList<NetworkIdentity> ServerNetworkIdentities => SpawnedServerObjects.Select(o => o.Object!.GetComponent<NetworkIdentity>()).Where(identity => identity != null).ToList();
+        public IReadOnlyList<NetworkIdentity> ServerNetworkIdentities => SpawnedServerObjects.Where(o => o.Object != null).Select(o => o.Object!.GetComponent<NetworkIdentity>()).ToList();
 
         /// <summary>
         /// Syncs the <see cref="ClientObject"/> of this <see cref="SchematicData"/> with the specified <see cref="Player"/>.
@@ -193,10 +193,13 @@ namespace ThaumielMapEditor.API.Data
 
             foreach (ServerObject serverobj in SpawnedServerObjects.ToArray())
             {
-                if (serverobj is DoorObject door && door.Object!.TryGetComponent<DoorLink>(out var link))
+                if (serverobj.Object == null)
+                    continue;
+
+                if (serverobj is DoorObject && serverobj.Object.TryGetComponent<DoorLink>(out var link))
                     link.Unregister();
 
-                if (serverobj.Object!.TryGetComponent<BlockyRuntime>(out var blocky))
+                if (serverobj.Object.TryGetComponent<BlockyRuntime>(out var blocky))
                     Executor?.Execute(ArgumentsParser.Load(blocky.Blocky!), null!, EventType.OnDestroyed);
 
                 serverobj.DestroyObject(this);

@@ -76,8 +76,15 @@ namespace ThaumielMapEditor.API.Blocks
                 if (field == value)
                     return;
 
-                Object?.transform.position = value;
                 field = value;
+                if (Object != null)
+                {
+                    NetworkServer.UnSpawn(Object);
+                    Object.transform.position = value;
+                    NetworkServer.Spawn(Object);
+                }
+
+                PositionSync?.Network_position = Position;
             }
         }
 
@@ -92,8 +99,13 @@ namespace ThaumielMapEditor.API.Blocks
                 if (field == value)
                     return;
 
-                Object?.transform.localScale = value;
                 field = value;
+                if (Object != null)
+                {
+                    NetworkServer.UnSpawn(Object);
+                    Object.transform.localScale = value;
+                    NetworkServer.Spawn(Object);
+                }
             }
         }
 
@@ -108,8 +120,15 @@ namespace ThaumielMapEditor.API.Blocks
                 if (field == value)
                     return;
 
-                Object?.transform.rotation = value;
                 field = value;
+                if (Object != null)
+                {
+                    NetworkServer.UnSpawn(Object);
+                    Object.transform.rotation = value;
+                    NetworkServer.Spawn(Object);
+                }
+
+                PositionSync?.Network_rotationY = (sbyte)Mathf.RoundToInt(Rotation.eulerAngles.y / 5.625f);
             }
         }
 

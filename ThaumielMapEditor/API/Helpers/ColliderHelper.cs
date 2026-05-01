@@ -223,7 +223,10 @@ namespace ThaumielMapEditor.API.Helpers
             {
                 primitive.ServerCollider = mesh;
                 if (!SchematicColliders.TryGetValue(primitive.Schematic, out var value))
+                {
+                    value = [];
                     SchematicColliders.Add(primitive.Schematic, []);
+                }
 
                 value.Add(mesh);
                 SchematicColliders[primitive.Schematic] = value;
