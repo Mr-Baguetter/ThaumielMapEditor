@@ -176,6 +176,7 @@ namespace ThaumielMapEditor.API.Helpers.Networking
             request.SetRequestHeader("Content-Type", "application/json");
 
             yield return Timing.WaitUntilDone(request.SendWebRequest());
+            request.Dispose();
         }
 
         private static IEnumerator<float> SendLogsCoroutine(Action<LogUploadResponse?> onComplete)
@@ -212,6 +213,7 @@ namespace ThaumielMapEditor.API.Helpers.Networking
             }
 
             onComplete?.Invoke(response);
+            request.Dispose();
         }
     }
 }

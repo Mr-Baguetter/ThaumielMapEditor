@@ -15,6 +15,16 @@ namespace ThaumielMapEditor.API.Helpers
     public class FileManager
     {
         /// <summary>
+        /// Invoked when <see cref="ReadFileInBackground"/> is called.
+        /// </summary>
+        /// <remarks>
+        /// Already dispatched by <see cref="MainThreadDispatcher"/>.
+        /// Arg1 = File path
+        /// Arg2 = File content (Can be empty if failed to read) 
+        /// </remarks>
+        public static event Action<string, string>? OnFileReadOnBackgroundThread;
+
+        /// <summary>
         /// Gets the Thaumiel directory
         /// </summary>
         /// <returns>Directory path to the Thaumiel directory</returns>
@@ -56,19 +66,29 @@ namespace ThaumielMapEditor.API.Helpers
         public static void ReadFileInBackground(string path, Action<string> onComplete)
         {
             if (!File.Exists(path))
+            {
+                onComplete?.Invoke(string.Empty);
                 return;
+            }
 
             Task.Run(() =>
             {
+                string content = string.Empty;
+
                 try
                 {
-                    string content = File.ReadAllText(path);
-                    MainThreadDispatcher.Dispatch(() => onComplete?.Invoke(content));
+                    content = File.ReadAllText(path);
                 }
                 catch (Exception ex)
                 {
-                    LogManager.Error($"Exception reading file: {ex}");
+                    LogManager.Error($"Exception while reading file on background thread: {ex}");
                 }
+
+                MainThreadDispatcher.Dispatch(() => 
+                {
+                    onComplete?.Invoke(content);
+                    OnFileReadOnBackgroundThread?.Invoke(path, content);
+                });
             });
         }
     }

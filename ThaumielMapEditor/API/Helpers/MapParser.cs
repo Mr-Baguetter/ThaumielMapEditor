@@ -112,8 +112,7 @@ namespace ThaumielMapEditor.API.Helpers
         /// </remarks>
         public static void LoadMap(string name)
         {
-            SerializableMap? map = Loader.LoadedMaps.FirstOrDefault(s => string.Equals(s.FileName, name, StringComparison.CurrentCultureIgnoreCase));
-            if (map == null)
+            if (!Loader.LoadedMapsDic.TryGetValue(name, out var map))
             {
                 LogManager.Warn($"Map name {name} is invalid!");
                 return;

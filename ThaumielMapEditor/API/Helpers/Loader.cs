@@ -32,7 +32,6 @@ using ThaumielMapEditor.API.Blocks;
 using HarmonyLib;
 using ThaumielMapEditor.API.Components;
 using ThaumielMapEditor.Events.EventArgs.Handlers;
-using ThaumielMapEditor.API.Serialization.Converters;
 using MapGeneration;
 
 namespace ThaumielMapEditor.API.Helpers
@@ -82,7 +81,7 @@ namespace ThaumielMapEditor.API.Helpers
         /// This list contains all the maps loaded by <see cref="LoadMaps"/>
         /// Use <see cref="SpawnedMaps"/> to get the spawned maps.
         /// </summary>
-        public static List<SerializableMap> LoadedMaps = [];
+        public static Dictionary<string, SerializableMap> LoadedMaps = new(StringComparer.OrdinalIgnoreCase);
 
         [Obsolete($"Unused, Use {nameof(SchematicData)}::ServerSideTransforms now")]
         public static Dictionary<int, Transform> ServerSideTransforms = []; 
@@ -103,7 +102,6 @@ namespace ThaumielMapEditor.API.Helpers
             .WithTypeConverter(new CustomColor32Converter())
             .WithTypeConverter(new CustomColorConverter())
             .WithTypeConverter(new CustomQuaternionConverter())
-            .WithTypeConverter(new FloatTypeConverter())
             .Build();
 
         /// <summary>
@@ -116,7 +114,6 @@ namespace ThaumielMapEditor.API.Helpers
             .WithTypeConverter(new CustomColor32Converter())
             .WithTypeConverter(new CustomColorConverter())
             .WithTypeConverter(new CustomQuaternionConverter())
-            .WithTypeConverter(new FloatTypeConverter())
             .Build();
 
         /// <summary>
@@ -228,7 +225,7 @@ namespace ThaumielMapEditor.API.Helpers
                         {
                             SerializableMap map = Deserializer.Deserialize<SerializableMap>(value);
                             map.FileName = name;
-                            LoadedMaps.Add(map);
+                            LoadedMaps.Add(map.FileName, map);
                             LogManager.Debug($"Loaded map {name} on background thread");
                         });
                     }
@@ -236,7 +233,7 @@ namespace ThaumielMapEditor.API.Helpers
                     {
                         SerializableMap map = Deserializer.Deserialize<SerializableMap>(File.ReadAllText(path));
                         map.FileName = name;
-                        LoadedMaps.Add(map);
+                        LoadedMaps.Add(map.FileName, map);
                         LogManager.Debug($"Loaded map {name} on main thread");
                     }
                 }

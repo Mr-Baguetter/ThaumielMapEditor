@@ -86,7 +86,6 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
 
             ObjectHandler.OnClientObjectSpawned(new(this, player));
             SpawnedPlayers.Add(player);
-            Spawned = true;
         }
     }
 }
