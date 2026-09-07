@@ -15,7 +15,7 @@ using UnityEngine;
 
 namespace ThaumielMapEditor.API.Helpers
 {
-    public class ColliderHelper
+    public static class ColliderHelper
     {
         /// <summary>
         /// 
