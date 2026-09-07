@@ -19,15 +19,15 @@ using UnityEngine;
 
 namespace ThaumielMapEditor.API.Blocks.ClientSide
 {
-    public class ClientObject
+    public abstract class ClientObject
     {
         internal SyncFlags SyncFlags { get; private set; } = SyncFlags.None;
-        
+
         /// <summary>
         /// True if this object has pending changes that need syncing.
         /// </summary>
         public bool IsDirty => SyncFlags != SyncFlags.None;
-        
+
         /// <summary>
         /// Marks specific properties as needing to be synced and registers for batch sync.
         /// </summary>
@@ -207,7 +207,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         /// <summary>
         /// Gets or sets the object type of the <see cref="ClientObject"/> instance.
         /// </summary>
-        public virtual ObjectType ObjectType { get; internal set; }
+        public abstract ObjectType ObjectType { get; }
 
         /// <summary>
         /// Gets or sets the asset id of the <see cref="ClientObject"/> instance.
@@ -218,7 +218,47 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         /// Spawns the <see cref="ClientObject"/> instance for the specified player.
         /// </summary>
         /// <param name="player">The player to spawn the <see cref="ClientObject"/> instance to.</param>
-        public virtual void SpawnForPlayer(Player player) { }
+        public virtual void SpawnForPlayer(Player player)
+        {
+            if (player.IsHost)
+                return;
+
+            using NetworkWriterPooled payloadWriter = NetworkWriterPool.Get();
+
+            payloadWriter.WriteByte(1);
+
+            int sizePos = payloadWriter.Position;
+            payloadWriter.WriteByte(0);
+            int dataStart = payloadWriter.Position;
+
+            WriteSyncObjects(payloadWriter);
+            WriteSyncVars(payloadWriter);
+
+            payloadWriter.WriteUInt(ParentNetId);
+
+            int dataEnd = payloadWriter.Position;
+            payloadWriter.Position = sizePos;
+            payloadWriter.WriteByte((byte)(dataEnd - dataStart));
+            payloadWriter.Position = dataEnd;
+
+            ArraySegment<byte> payload = payloadWriter.ToArraySegment();
+
+            player.Connection.Send(new SpawnMessage
+            {
+                netId = NetId,
+                isLocalPlayer = false,
+                isOwner = false,
+                sceneId = 0,
+                assetId = AssetId,
+                position = Position,
+                rotation = Rotation,
+                scale = Scale,
+                payload = payload
+            });
+
+            ObjectHandler.OnClientObjectSpawned(new(this, player));
+            SpawnedPlayers.Add(player);
+        }
 
         /// <summary>
         /// Destroys this <see cref="ClientObject"/> instance for the specified <see cref="Player"/>
@@ -539,7 +579,7 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
                 LogManager.Warn($"netId {identity.netId} is already in the spawned dictionary.");
                 return false;
             }
-            
+
             identity.isLocalPlayer = false;
             identity.isClient = true;
             identity.isServer = false;
@@ -550,6 +590,23 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             SendCustomSpawnMessage(identity, player);
 
             return true;
+        }
+
+        /// <summary>
+        /// Writes the sync variables to the specified <see cref="NetworkWriter"/>.
+        /// </summary>
+        /// <param name="payloadWriter">The <see cref="NetworkWriter"/> to write to.</param>
+        protected virtual void WriteSyncVars(NetworkWriter payloadWriter)
+        {
+            payloadWriter.WriteVector3(Position);
+            payloadWriter.WriteQuaternion(Rotation);
+            payloadWriter.WriteVector3(Scale);
+            payloadWriter.WriteByte(MovementSmoothing);
+            payloadWriter.WriteBool(IsStatic);
+        }
+        
+        protected virtual void WriteSyncObjects(NetworkWriterPooled payloadWriter)
+        {
         }
 
         private static void SendCustomSpawnMessage(NetworkIdentity identity, Player player)

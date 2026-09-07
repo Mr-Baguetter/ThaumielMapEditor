@@ -1572,16 +1572,50 @@ namespace ThaumielMapEditor.API.Helpers
                     return door.NetId;
 
                 case ObjectType.TextToy:
-                    TextToyObject textToy = DeserializeObject<TextToyObject>(serializable);
-                    textToy.Position = serializable.Position;
-                    textToy.Rotation = serializable.Rotation;
-                    textToy.Scale = serializable.Scale;
-                    textToy.IsStatic = serializable.IsStatic;
+                    if (serverside)
+                    {
+                        TextToyObject textToy = DeserializeObject<TextToyObject>(serializable);
+                        textToy.Position = serializable.Position;
+                        textToy.Rotation = serializable.Rotation;
+                        textToy.Scale = serializable.Scale;
+                        textToy.IsStatic = serializable.IsStatic;
 
-                    textToy.SpawnObject(schematicData, serializable);
-                    textToy.Name = serializable.Name;
-                    SetupCulling(serializable, textToy);
-                    return textToy.NetId;
+                        textToy.SpawnObject(schematicData, serializable);
+                        textToy.Name = serializable.Name;
+                        SetupCulling(serializable, textToy);
+                        return textToy.NetId;
+                    }
+                    else
+                    {
+                        if (PrefabHelper.TextToy?.netIdentity == null)
+                        {
+                            LogManager.Warn($"Skipping text toy '{serializable.Name}': TextToy prefab not registered.");
+                            return parentNetId;
+                        }
+
+                        TextObject textObject = DeserializeObject<TextObject>(serializable);
+                        textObject.ParentNetId = parentNetId;
+                        textObject.NetId = NetworkIdentity.GetNextNetworkId();
+                        textObject.AssetId = PrefabHelper.TextToy.netIdentity.assetId;
+                        textObject.Scale = serializable.Scale;
+                        textObject.IsStatic = serializable.IsStatic;
+                        textObject.Position = serializable.Position;
+                        textObject.Rotation = serializable.Rotation;
+                        textObject.MovementSmoothing = serializable.MovementSmoothing;
+                        textObject.Schematic = schematicData;
+                        textObject.ObjectId = serializable.ObjectId;
+                        textObject.ParentId = serializable.ParentId;
+
+                        schematicData.SpawnedClientObjects.Add(textObject);
+
+                        foreach (Player player in Player.ReadyList.ToArray())
+                        {
+                            textObject.SpawnForPlayer(player);
+                        }
+
+                        SetupCulling(serializable, textObject, schematicData);
+                        return textObject.NetId;
+                    }
 
                 case ObjectType.Workstation:
                     WorkstationObject workstation = DeserializeObject<WorkstationObject>(serializable);

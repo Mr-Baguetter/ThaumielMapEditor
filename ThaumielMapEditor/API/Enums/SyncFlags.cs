@@ -38,5 +38,9 @@ namespace ThaumielMapEditor.API.Enums
 
         // Capybaras
         Collisions = 1 << 18,
+        
+        // Text
+        DisplaySize = 1 << 19,
+        TextFormat = 1 << 20,
     }
 }
