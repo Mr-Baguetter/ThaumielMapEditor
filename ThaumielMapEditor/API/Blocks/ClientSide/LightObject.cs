@@ -5,14 +5,9 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using LabApi.Features.Wrappers;
 using Mirror;
 using ThaumielMapEditor.API.Data;
 using ThaumielMapEditor.API.Enums;
-using ThaumielMapEditor.API.Extensions;
-using ThaumielMapEditor.API.Helpers;
-using ThaumielMapEditor.API.Serialization;
-using ThaumielMapEditor.Events.EventArgs.Handlers;
 using UnityEngine;
 using YamlDotNet.Serialization;
 
@@ -180,25 +175,10 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
         /// <inheritdoc/>
         public override ObjectType ObjectType => ObjectType.Light;
 
-        /// <inheritdoc/>
-        public override void SpawnForPlayer(Player player)
+        /// <inheritdoc />
+        protected override void WriteSyncVars(NetworkWriter writer)
         {
-            if (player.IsHost)
-                return;
-
-            using NetworkWriterPooled writer = NetworkWriterPool.Get();
-
-            writer.WriteByte(1);
-
-            int sizePos = writer.Position;
-            writer.WriteByte(0);
-            int start = writer.Position;
-
-            writer.WriteVector3(Position);
-            writer.WriteQuaternion(Rotation);
-            writer.WriteVector3(Scale);
-            writer.WriteByte(MovementSmoothing);
-            writer.WriteBool(IsStatic);
+            base.WriteSyncVars(writer);
             writer.WriteFloat(Intensity);
             writer.WriteFloat(Range);
             writer.WriteColor(Color);
@@ -208,28 +188,6 @@ namespace ThaumielMapEditor.API.Blocks.ClientSide
             writer.WriteInt((int)Shape);
             writer.WriteFloat(SpotAngle);
             writer.WriteFloat(InnerSpotAngle);
-            writer.WriteUInt(ParentNetId);
-
-            int end = writer.Position;
-            writer.Position = sizePos;
-            writer.WriteByte((byte)(end - start));
-            writer.Position = end;
-
-            player.Connection.Send(new SpawnMessage
-            {
-                netId = NetId,
-                assetId = AssetId,
-                position = Position,
-                rotation = Rotation,
-                scale = Scale,
-                isLocalPlayer = false,
-                isOwner = false,
-                sceneId = 0,
-                payload = writer.ToArraySegment()
-            });
-
-            ObjectHandler.OnClientObjectSpawned(new(this, player));
-            SpawnedPlayers.Add(player);
         }
     }
 }

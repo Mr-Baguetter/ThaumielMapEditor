@@ -1333,7 +1333,7 @@ namespace ThaumielMapEditor.API.Helpers
 
         private static uint SpawnSerializableObject(SerializableObject serializable, SchematicData schematicData, uint parentNetId, LODZone[] lodZones, bool serverside = false)
         {
-            NetworkServer.spawned.TryGetValue(parentNetId, out var identity);
+            NetworkServer.spawned.TryGetValue(parentNetId, out NetworkIdentity? identity);
 
             switch (serializable.ObjectType)
             {
@@ -1341,10 +1341,7 @@ namespace ThaumielMapEditor.API.Helpers
                     if (serverside)
                     {
                         PrimitiveObjectServer serverprim = DeserializeObject<PrimitiveObjectServer>(serializable);
-                        serverprim.Position = serializable.Position;
-                        serverprim.Rotation = serializable.Rotation;
-                        serverprim.Scale = serializable.Scale;
-                        serverprim.IsStatic = serializable.IsStatic;
+                        SetServerObjectProperties(serverprim, serializable);
 
                         serverprim.SpawnObject(schematicData, serializable);
                         if (identity != null)
@@ -1410,10 +1407,7 @@ namespace ThaumielMapEditor.API.Helpers
                     if (serverside)
                     {
                         PrimitiveObjectServer serverprim = DeserializeObject<PrimitiveObjectServer>(serializable);
-                        serverprim.Position = serializable.Position;
-                        serverprim.Rotation = serializable.Rotation;
-                        serverprim.Scale = serializable.Scale;
-                        serverprim.IsStatic = serializable.IsStatic;
+                        SetupCulling(serializable, serverprim);
 
                         serverprim.SpawnObject(schematicData, serializable);
                         if (identity != null)
@@ -1456,10 +1450,8 @@ namespace ThaumielMapEditor.API.Helpers
                     if (serverside)
                     {
                         CapybaraObjectServer servercapy = DeserializeObject<CapybaraObjectServer>(serializable);
-                        servercapy.Position = serializable.Position;
-                        servercapy.Rotation = serializable.Rotation;
-                        servercapy.Scale = serializable.Scale;
-                        servercapy.IsStatic = serializable.IsStatic;
+
+                        SetServerObjectProperties(servercapy, serializable);
 
                         servercapy.SpawnObject(schematicData, serializable);
                         if (identity != null)
@@ -1502,10 +1494,8 @@ namespace ThaumielMapEditor.API.Helpers
                     if (serverside)
                     {
                         LightObjectServer serverlight = DeserializeObject<LightObjectServer>(serializable);
-                        serverlight.Position = serializable.Position;
-                        serverlight.Rotation = serializable.Rotation;
-                        serverlight.Scale = serializable.Scale;
-                        serverlight.IsStatic = serializable.IsStatic;
+
+                        SetServerObjectProperties(serverlight, serializable);
 
                         serverlight.SpawnObject(schematicData, serializable);
                         if (identity != null)
@@ -1549,10 +1539,8 @@ namespace ThaumielMapEditor.API.Helpers
 
                 case ObjectType.Clutter:
                     ClutterObject clutter = DeserializeObject<ClutterObject>(serializable);
-                    clutter.Position = serializable.Position;
-                    clutter.Rotation = serializable.Rotation;
-                    clutter.Scale = serializable.Scale;
-                    clutter.IsStatic = serializable.IsStatic;
+
+                    SetServerObjectProperties(clutter, serializable);
 
                     clutter.SpawnObject(schematicData, serializable);
                     clutter.Name = serializable.Name;
@@ -1561,10 +1549,8 @@ namespace ThaumielMapEditor.API.Helpers
 
                 case ObjectType.Door:
                     DoorObject door = DeserializeObject<DoorObject>(serializable);
-                    door.Position = serializable.Position;
-                    door.Rotation = serializable.Rotation;
-                    door.Scale = serializable.Scale;
-                    door.IsStatic = serializable.IsStatic;
+
+                    SetServerObjectProperties(door, serializable);
 
                     door.SpawnObject(schematicData, serializable);
                     door.Name = serializable.Name;
@@ -1572,23 +1558,53 @@ namespace ThaumielMapEditor.API.Helpers
                     return door.NetId;
 
                 case ObjectType.TextToy:
-                    TextToyObject textToy = DeserializeObject<TextToyObject>(serializable);
-                    textToy.Position = serializable.Position;
-                    textToy.Rotation = serializable.Rotation;
-                    textToy.Scale = serializable.Scale;
-                    textToy.IsStatic = serializable.IsStatic;
+                    if (serverside)
+                    {
+                        TextToyObject textToy = DeserializeObject<TextToyObject>(serializable);
 
-                    textToy.SpawnObject(schematicData, serializable);
-                    textToy.Name = serializable.Name;
-                    SetupCulling(serializable, textToy);
-                    return textToy.NetId;
+                        SetServerObjectProperties(textToy, serializable);
+
+                        textToy.SpawnObject(schematicData, serializable);
+                        textToy.Name = serializable.Name;
+                        SetupCulling(serializable, textToy);
+                        return textToy.NetId;
+                    }
+                    else
+                    {
+                        if (PrefabHelper.TextToy?.netIdentity == null)
+                        {
+                            LogManager.Warn($"Skipping text toy '{serializable.Name}': TextToy prefab not registered.");
+                            return parentNetId;
+                        }
+
+                        TextObject textObject = DeserializeObject<TextObject>(serializable);
+                        textObject.ParentNetId = parentNetId;
+                        textObject.NetId = NetworkIdentity.GetNextNetworkId();
+                        textObject.AssetId = PrefabHelper.TextToy.netIdentity.assetId;
+                        textObject.Scale = serializable.Scale;
+                        textObject.IsStatic = serializable.IsStatic;
+                        textObject.Position = serializable.Position;
+                        textObject.Rotation = serializable.Rotation;
+                        textObject.MovementSmoothing = serializable.MovementSmoothing;
+                        textObject.Schematic = schematicData;
+                        textObject.ObjectId = serializable.ObjectId;
+                        textObject.ParentId = serializable.ParentId;
+
+                        schematicData.SpawnedClientObjects.Add(textObject);
+
+                        foreach (Player player in Player.ReadyList.ToArray())
+                        {
+                            textObject.SpawnForPlayer(player);
+                        }
+
+                        SetupCulling(serializable, textObject, schematicData);
+                        return textObject.NetId;
+                    }
 
                 case ObjectType.Workstation:
                     WorkstationObject workstation = DeserializeObject<WorkstationObject>(serializable);
-                    workstation.Position = serializable.Position;
-                    workstation.Rotation = serializable.Rotation;
-                    workstation.Scale = serializable.Scale;
-                    workstation.IsStatic = serializable.IsStatic;
+
+                    SetServerObjectProperties(workstation, serializable);
 
                     workstation.SpawnObject(schematicData, serializable);
                     workstation.Name = serializable.Name;
@@ -1609,10 +1625,8 @@ namespace ThaumielMapEditor.API.Helpers
 
                 case ObjectType.Interactable:
                     InteractionObject interaction = DeserializeObject<InteractionObject>(serializable);
-                    interaction.Position = serializable.Position;
-                    interaction.Rotation = serializable.Rotation;
-                    interaction.Scale = serializable.Scale;
-                    interaction.IsStatic = serializable.IsStatic;
+
+                    SetServerObjectProperties(interaction, serializable);
 
                     interaction.SpawnObject(schematicData, serializable);
                     interaction.Name = serializable.Name;
@@ -1621,10 +1635,8 @@ namespace ThaumielMapEditor.API.Helpers
 
                 case ObjectType.Waypoint:
                     WaypointObject waypoint = DeserializeObject<WaypointObject>(serializable);
-                    waypoint.Position = serializable.Position;
-                    waypoint.Rotation = serializable.Rotation;
-                    waypoint.Scale = serializable.Scale;
-                    waypoint.IsStatic = serializable.IsStatic;
+
+                    SetServerObjectProperties(waypoint, serializable);
 
                     waypoint.SpawnObject(schematicData, serializable);
                     waypoint.Name = serializable.Name;
@@ -1633,10 +1645,8 @@ namespace ThaumielMapEditor.API.Helpers
 
                 case ObjectType.Locker:
                     LockerObject locker = DeserializeObject<LockerObject>(serializable);
-                    locker.Position = serializable.Position;
-                    locker.Rotation = serializable.Rotation;
-                    locker.Scale = serializable.Scale;
-                    locker.IsStatic = serializable.IsStatic;
+
+                    SetServerObjectProperties(locker, serializable);
 
                     locker.SpawnObject(schematicData, serializable);
                     locker.Name = serializable.Name;
@@ -1645,10 +1655,8 @@ namespace ThaumielMapEditor.API.Helpers
 
                 case ObjectType.Pickup:
                     PickupObject pickup = DeserializeObject<PickupObject>(serializable);
-                    pickup.Position = serializable.Position;
-                    pickup.Rotation = serializable.Rotation;
-                    pickup.Scale = serializable.Scale;
-                    pickup.IsStatic = serializable.IsStatic;
+
+                    SetServerObjectProperties(pickup, serializable);
 
                     pickup.SpawnObject(schematicData, serializable);
                     pickup.Name = serializable.Name;
@@ -1656,10 +1664,8 @@ namespace ThaumielMapEditor.API.Helpers
 
                 case ObjectType.Target:
                     TargetDummyObject target = DeserializeObject<TargetDummyObject>(serializable);
-                    target.Position = serializable.Position;
-                    target.Rotation = serializable.Rotation;
-                    target.Scale = serializable.Scale;
-                    target.IsStatic = serializable.IsStatic;
+
+                    SetServerObjectProperties(target, serializable);
 
                     target.SpawnObject(schematicData, serializable);
                     target.Name = serializable.Name;
@@ -1668,10 +1674,8 @@ namespace ThaumielMapEditor.API.Helpers
 
                 case ObjectType.Teleporter:
                     TeleporterObject teleporter = DeserializeObject<TeleporterObject>(serializable);
-                    teleporter.Position = serializable.Position;
-                    teleporter.Rotation = serializable.Rotation;
-                    teleporter.Scale = serializable.Scale;
-                    teleporter.IsStatic = serializable.IsStatic;
+
+                    SetServerObjectProperties(teleporter, serializable);
 
                     teleporter.SpawnObject(schematicData, serializable);
                     teleporter.Name = serializable.Name;
@@ -1679,10 +1683,8 @@ namespace ThaumielMapEditor.API.Helpers
 
                 case ObjectType.Speaker:
                     SpeakerObject speaker = DeserializeObject<SpeakerObject>(serializable);
-                    speaker.Position = serializable.Position;
-                    speaker.Rotation = serializable.Rotation;
-                    speaker.Scale = serializable.Scale;
-                    speaker.IsStatic = serializable.IsStatic;
+
+                    SetServerObjectProperties(speaker, serializable);
 
                     speaker.SpawnObject(schematicData, serializable);
                     speaker.Name = serializable.Name;
@@ -1690,10 +1692,8 @@ namespace ThaumielMapEditor.API.Helpers
 
                 case ObjectType.PlayerSpawnPoint:
                     PlayerSpawnPoint spawn = DeserializeObject<PlayerSpawnPoint>(serializable);
-                    spawn.Position = serializable.Position;
-                    spawn.Rotation = serializable.Rotation;
-                    spawn.Scale = serializable.Scale;
-                    spawn.IsStatic = serializable.IsStatic;
+
+                    SetServerObjectProperties(spawn, serializable);
 
                     spawn.SpawnObject(schematicData, serializable);
                     spawn.Name = serializable.Name;
@@ -1701,10 +1701,8 @@ namespace ThaumielMapEditor.API.Helpers
 
                 case ObjectType.RagdollSpawner:
                     RagdollSpawner ragdoll = DeserializeObject<RagdollSpawner>(serializable);
-                    ragdoll.Position = serializable.Position;
-                    ragdoll.Rotation = serializable.Rotation;
-                    ragdoll.Scale = serializable.Scale;
-                    ragdoll.IsStatic = serializable.IsStatic;
+
+                    SetServerObjectProperties(ragdoll, serializable);
 
                     ragdoll.SpawnObject(schematicData, serializable);
                     ragdoll.Name = serializable.Name;
@@ -1811,6 +1809,14 @@ namespace ThaumielMapEditor.API.Helpers
             }
             catch { }
             return map;
+        }
+
+        private static void SetServerObjectProperties(ServerObject obj, SerializableObject serializable)
+        {
+            obj.Position = serializable.Position;
+            obj.Rotation = serializable.Rotation;
+            obj.Scale = serializable.Scale;
+            obj.IsStatic = serializable.IsStatic;
         }
     }
 }
